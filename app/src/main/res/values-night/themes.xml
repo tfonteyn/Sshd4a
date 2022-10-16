@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<style name="Theme.App" parent="Base.Theme.App">
+    <item name="colorPrimary">@color/blue_grey_700</item>
+    <item name="colorSecondary">@color/green_500</item>
+
+    <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+
+    <item name="startButtonColor">@color/green_500</item>
+    <item name="stopButtonColor">@color/red_600</item>
+</style>
+</resources>

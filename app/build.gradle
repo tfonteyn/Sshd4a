@@ -1,0 +1,152 @@
+plugins {
+    id("com.android.application")
+}
+
+/*
+    $HOME/.gradle/gradle.properties:
+        Sshd4a.properties=$HOME/blah/blah/Sshd4a.properties
+
+    $HOME/blah/blah/Sshd4a.properties:
+        sign.storeFile=$HOME/blah/blah/keystore.jks
+        sign.storePassword=MyStorePassword
+        sign.keyAlias=MyKeyAlias
+        sign.keyPassword=MyKeyPassword
+ */
+final def props = new Properties()
+if (project.hasProperty("Sshd4a.properties")) {
+    final def file = new File(project.property("Sshd4a.properties"))
+    if (file.exists()) {
+        props.load(new FileInputStream(file))
+    }
+}
+
+android {
+    namespace "com.hardbacknutter.sshd"
+    compileSdk 33
+
+    // https://developer.android.com/studio/projects/configure-agp-ndk
+    ndkVersion '25.1.8937393'
+
+    externalNativeBuild {
+        cmake {
+            path file('CMakeLists.txt')
+            version '3.22.1'
+        }
+    }
+
+    signingConfigs {
+        release {
+            keyAlias props['sign.keyAlias']
+            keyPassword props['sign.keyPassword']
+            storeFile file(props['sign.storeFile'])
+            storePassword props['sign.storePassword']
+        }
+    }
+
+    defaultConfig {
+        applicationId "com.hardbacknutter.sshd"
+        versionCode 1
+        versionName "1.0.0"
+
+        // Android 11 as minimum... there are far to many issues/differences dealing
+        // with storage permissions if we try for Android 10 or lower
+        // See https://developer.android.com/training/data-storage
+        minSdkVersion 31
+        targetSdkVersion 33
+        signingConfig signingConfigs.release
+        externalNativeBuild {
+            cmake {
+                cFlags '-Wall -O'
+                cppFlags ''
+            }
+        }
+        buildConfigField("int", "NR_OF_LOG_LINES", "50")
+    }
+
+    buildTypes {
+        // don't use for real builds
+        abstractRelease {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
+                    'proguard-rules.pro'
+        }
+
+        // Builds a "fat" apk
+        release {
+            initWith abstractRelease
+            externalNativeBuild {
+                cmake {
+                    abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86_64'
+                }
+            }
+        }
+
+        armV8 {
+            initWith abstractRelease
+            externalNativeBuild {
+                cmake {
+                    abiFilters 'arm64-v8a'
+                }
+            }
+        }
+        armV7 {
+            initWith abstractRelease
+            externalNativeBuild {
+                cmake {
+                    abiFilters 'armeabi-v7a'
+                }
+            }
+        }
+
+        // Only x86_64 for the emulator.
+        debug {
+            debuggable true
+            versionNameSuffix "-debug"
+            applicationIdSuffix ".debug"
+            buildConfigField("int", "NR_OF_LOG_LINES", "500")
+            externalNativeBuild {
+                cmake {
+                    abiFilters /* 'armeabi-v7a', 'arm64-v8a', */ 'x86_64'
+                }
+            }
+        }
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    lint {
+        // allow command line builds to complete
+        abortOnError false
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+
+        coreLibraryDesugaringEnabled true
+    }
+
+    // PackagingOptions.jniLibs.useLegacyPackaging should be set to true
+    // because android:extractNativeLibs is set to "true" in AndroidManifest.xml.
+    packagingOptions {
+        jniLibs.useLegacyPackaging = true
+    }
+
+}
+
+dependencies {
+    // https://github.com/google/desugar_jdk_libs
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs_nio:2.0.0")
+
+    implementation("androidx.activity:activity:1.6.0")
+    implementation('androidx.fragment:fragment:1.6.0-alpha03')
+    implementation("androidx.appcompat:appcompat:1.7.0-alpha01")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.core:core:1.9.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
+    implementation("androidx.preference:preference:1.2.0")
+    implementation("com.google.android.material:material:1.8.0-alpha01")
+}

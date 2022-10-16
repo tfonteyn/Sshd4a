@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/start_action"
+        android:title="@string/btn_start"
+        app:actionLayout="@layout/toolbar_menu_buttons_start"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/settings"
+        android:icon="@drawable/ic_baseline_settings_24"
+        android:title="@string/lbl_settings"/>
+    <item
+        android:id="@+id/menu_import_keys"
+        android:title="@string/lbl_import_keys" />
+    <item
+        android:id="@+id/menu_reset_keys"
+        android:title="@string/lbl_reset_keys" />
+    <item
+        android:id="@+id/about"
+        android:title="@string/lbl_about" />
+</menu>

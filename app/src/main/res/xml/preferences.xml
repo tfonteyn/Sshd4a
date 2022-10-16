@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/pc_startup">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:disableDependentsState="true"
+            android:key="service.start.onboot"
+            android:title="@string/pt_onboot" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="service.start.onopen"
+            android:title="@string/pt_onopen" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:dependency="service.start.onboot"
+            android:key="service.start.foreground"
+            android:summaryOff="@string/ps_foreground_off"
+            android:summaryOn="@string/ps_foreground_on"
+            android:title="@string/pt_foreground" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pc_dropbear">
+        <EditTextPreference
+            android:defaultValue="2222"
+            android:key="sshd.port"
+            android:title="@string/pt_port" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="rsyncbuffer"
+            android:summary="@string/ps_supersu"
+            android:title="@string/pt_rsync_buffer" />
+        <EditTextPreference
+            android:key="dropbear.options"
+            android:title="@string/pt_cmdline_options" />
+        <EditTextPreference
+            android:key="sshd.env"
+            android:title="@string/pt_env" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pc_paths">
+        <EditTextPreference
+            android:key="sshd.home"
+            android:title="@string/pt_home" />
+        <EditTextPreference
+            android:defaultValue="/system/bin/sh"
+            android:key="sshd.shell"
+            android:title="@string/pt_shell" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pc_ui">
+    <ListPreference
+        android:defaultValue="0"
+        android:entries="@array/pe_ui_theme"
+        android:entryValues="@array/pv_ui_theme"
+        android:key="ui.theme"
+        android:title="@string/pt_ui_theme" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

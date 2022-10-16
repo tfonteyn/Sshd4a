@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <exclude
+        domain="file"
+        path="./dropbear/dropbear.pid" />
+    <exclude
+        domain="file"
+        path="./dropbear/dropbear.err" />
+    <exclude
+        domain="file"
+        path="./dropbear/dropbear.err.old" />
+
+</full-backup-content>

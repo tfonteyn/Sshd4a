@@ -1,0 +1,94 @@
+#!/usr/bin/env -S python3 -B
+
+# This script checks the *.c files for extraneous "extern" variables,
+# for vars that are defined but not used, and for inconsistent array
+# sizes.  Run it from inside the main rsync directory.
+
+import os, sys, re, argparse, glob
+
+VARS_RE = re.compile(r'^(?!(?:extern|enum)\s)([a-zA-Z]\S*\s+.*);', re.M)
+EXTERNS_RE = re.compile(r'^extern\s+(.*);', re.M)
+
+sizes = { }
+
+def main():
+    add_syscall_c = set('t_stub.c t_unsafe.c tls.c trimslash.c'.split())
+    add_util_c = set('t_stub.c t_unsafe.c'.split())
+
+    if not os.path.exists('syscall.c'):
+        if os.path.exists('var-checker'):
+            os.chdir('..')
+        else:
+            print("Couldn't find the source dir.")
+            sys.exit(1)
+
+    syscall_c = slurp_file('syscall.c', True)
+    util_c = slurp_file('util1.c', True)
+
+    for fn in sorted(glob.glob('*.c')):
+        txt = slurp_file(fn)
+
+        var_list = parse_vars(fn, VARS_RE.findall(txt))
+        extern_list = parse_vars(fn, EXTERNS_RE.findall(txt))
+        if not var_list and not extern_list:
+            continue
+
+        if fn in add_syscall_c:
+            txt += syscall_c
+        if fn in add_util_c:
+            txt += util_c
+
+        txt = re.sub(r'INFO_GTE', 'info_levels ', txt)
+        txt = re.sub(r'DEBUG_GTE', 'debug_levels ', txt)
+        txt = re.sub(r'SIGACTION\(', 'sigact (', txt)
+
+        find = '|'.join([ re.escape(x) for x in var_list + extern_list ])
+        var_re = re.compile(r'(?<!\sstruct )\b(%s)(?!\w)' % find)
+
+        found = { x: 0 for x in var_list + extern_list }
+        for var in var_re.findall(txt):
+            found[var] += 1
+
+        for var in sorted(var_list + extern_list):
+            if found[var] == 1:
+                vtype = 'var' if var in var_list else 'extern'
+                print(fn, f'has extraneous {vtype}: "{var}"')
+
+
+def slurp_file(fn, drop_externs=False):
+    with open(fn, 'r', encoding='utf-8') as fh:
+        txt = fh.read()
+    if drop_externs:
+        txt = EXTERNS_RE.sub('', txt)
+    return txt
+
+
+def parse_vars(fn, lines):
+    ret = [ ]
+    for line in lines:
+        line = re.sub(r'\s*\{.*\}', '', line)
+        line = re.sub(r'\s*\(.*\)', '', line)
+        for item in re.split(r'\s*,\s*', line):
+            item = re.sub(r'\s*=.*', '', item)
+            m = re.search(r'(?P<var>\w+)(?P<sz>\[.*?\])?$', item)
+            if not m:
+                print(f"Bogus match? ({item})")
+                continue
+            if m['sz']:
+                if m['var'] in sizes:
+                    if sizes[m['var']] != m['sz']:
+                        var = m['var']
+                        print(fn, f'has inconsistent size for "{var}":', m['sz'], 'vs', sizes[var])
+                else:
+                    sizes[m['var']] = m['sz']
+            ret.append(m['var'])
+    return ret
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Check the *.c files for extraneous extern vars.', add_help=False)
+    parser.add_argument("--help", "-h", action="help", help="Output this help message and exit.")
+    args = parser.parse_args()
+    main()
+
+# vim: sw=4 et ft=python

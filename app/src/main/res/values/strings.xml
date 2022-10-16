@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Sshd4a</string>
+    <string name="service_name">Sshd4a</string>
+    <string name="service_description">Provides an \'sshd\' server with shell access, rsync and scp/sftp services.</string>
+
+    <string name="msg_about">Version %1$s
+        \n
+        \ndropbear 2022.82
+        \nrsync 3.2.6
+        \nsftp-server from OpenSSH 9.1p1
+    </string>
+
+    <string name="msg_request_files_management">
+        This application needs special permission to access your files in order to be able to use \'rsync\'.
+        Without this permission the functionality of this app will be severely limited.\n
+        \n
+        After clicking \'OK\' you will be asked to enable this permission.\n
+        Scroll down in the list of applications and enable Sshd4a.
+    </string>
+
+    <string name="err_service_failed_to_start">The \'sshd\' service failed to start. Try again and check the log.</string>
+    <string name="err_key_import">Something went wrong while importing your keys.</string>
+    <string name="err_no_version">Unknown</string>
+    <string name="err_no_ip">No network interfaces found?</string>
+    <string name="err_port_number">The port must be between 1024 and 32267</string>
+
+    <string name="lbl_listening">\'sshd\' is listening on:</string>
+    <string name="msg_listening_on">\'sshd\' is listening on %1$s:%2$s</string>
+
+    <string name="btn_start">Start</string>
+    <string name="btn_stop">Stop</string>
+
+    <string name="lbl_settings">Settings</string>
+    <string name="lbl_import_keys">Import \'authorized_keys\'</string>
+    <string name="lbl_reset_keys">Delete \'authorized_keys\'</string>
+    <string name="msg_reset_keys">Delete the \'authorized_keys\' file?\nYou will only be able to login with single-use passwords.</string>
+    <string name="lbl_about">About</string>
+
+
+    <!-- Settings fragment -->
+    <string name="pc_startup">Startup</string>
+    <string name="pt_onboot">Start \'sshd\' when your device is booted.</string>
+    <string name="pt_onopen">Start \'sshd\' when this app is launched.</string>
+    <string name="pt_foreground">Foreground Service</string>
+    <string name="ps_foreground_on">\'sshd\' will keep running even when this app is in the background. A permanent/unobtrusive notification will be displayed.</string>
+    <string name="ps_foreground_off">\'sshd\' will only run while this app is in the foreground.</string>
+
+    <string name="pc_dropbear">Dropbear SSH</string>
+    <string name="pt_port">Port Number (\>1024)</string>
+    <string name="pt_rsync_buffer">SuperSU/rsync buffer.</string>
+    <string name="ps_supersu">Enable this option if you are using https://supersuroot.org/</string>
+    <string name="pt_cmdline_options">Extra Commandline options</string>
+    <string name="pt_env">Environment variables.\n(one \"name=value\" per line)</string>
+
+    <string name="pc_paths">SSH Login</string>
+    <string name="pt_home">Home Directory</string>
+    <string name="pt_shell">Login Shell</string>
+
+    <string name="pc_ui">User Interface</string>
+    <string name="pt_ui_theme">Theme</string>
+    <string name="pe_ui_theme_day_night">Follow device theme</string>
+    <string name="pe_ui_theme_dark">Dark</string>
+    <string name="pe_ui_theme_light">Light</string>
+</resources>

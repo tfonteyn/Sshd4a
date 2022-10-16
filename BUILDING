@@ -1,0 +1,197 @@
+BUILD INSTRUCTIONS:
+
+# Code drops for dropbear/portable-openssh/rsync:
+
+# download tarballs (*.tar.gz or *.tar.bz2) from
+
+    https://matt.ucc.asn.au/dropbear/dropbear.html
+    https://github.com/openssh/openssh-portable
+    https://rsync.samba.org/
+
+# ############################################################################
+
+# replace version numbers in the below strings after download:
+
+export DROPBEAR_VERSION="dropbear-2022.82"
+export OPENSSH_VERSION="openssh-portable-V_9_1_P1"
+export RSYNC_VERSION="rsync-3.2.6"
+
+# the root dir with the tarballs
+export SRC_ROOT=`pwd`
+
+7z x -so ${DROPBEAR_VERSION}* | tar xf -
+7z x -so ${OPENSSH_VERSION}* | tar xf -
+7z x -so ${RSYNC_VERSION}* | tar xf -
+
+# remove broken and/or unneeded rsync symlink
+rm ${RSYNC_VERSION}/md2man
+
+# content for ".gitattributes"
+export GATRR="* text eol=lf\n*.txt text\n*.png binary\n"
+
+# ############################################################################
+
+# rename the directories so we don't need to change the git remote names
+export DROPBEAR="upstream-dropbear"
+export OPENSSH="upstream-openssh"
+export RSYNC="upstream-rsync"
+
+# Prep dropbear
+cd ${SRC_ROOT}
+mkdir -p ${DROPBEAR}/app/src/main/cpp/
+mv ${DROPBEAR_VERSION} ${DROPBEAR}/app/src/main/cpp/dropbear
+cd ${DROPBEAR}
+echo -e "${GATRR}" >.gitattributes
+git init .
+# ignore warnings about txt files in "rsa-testvectors"
+git add * .gitattributes
+git commit -a -m "${DROPBEAR_VERSION}"
+
+# Prep openssh
+cd ${SRC_ROOT}
+mkdir -p ${OPENSSH}/app/src/main/cpp/
+mv ${OPENSSH_VERSION} ${OPENSSH}/app/src/main/cpp/openssh
+cd ${OPENSSH}
+echo -e "${GATRR}" >.gitattributes
+git init .
+git add * .gitattributes
+git commit -a -m "${OPENSSH_VERSION}"
+
+# Prep rsync
+cd ${SRC_ROOT}
+mkdir -p ${RSYNC}/app/src/main/cpp/
+mv ${RSYNC_VERSION} ${RSYNC}/app/src/main/cpp/rsync
+cd ${RSYNC}
+echo -e "${GATRR}" >.gitattributes
+git init .
+git add * .gitattributes
+git commit -a -m "${RSYNC_VERSION}"
+
+cd ${SRC_ROOT}
+
+# ############################################################################
+
+# creating "config.h" etc...
+
+# TOOLCHAIN is expected to point to your ndk environment toolchain.
+[ -n "${TOOLCHAIN}" ] || { echo "TOOLCHAIN must be set"; exit 1; }
+
+# Set this to your minSdkVersion.
+export API=26
+
+echo "Only choose one of these, depending on your device..."
+echo "1) aarch64-linux-android"
+echo "2) armv7a-linux-androideabi"
+echo "3) i686-linux-android"
+echo "4) x86_64-linux-android"
+echo -n "Select target: "
+read REPLY
+case $REPLY in
+    "1")
+        export TARGET=aarch64-linux-android
+        ;;
+    "2")
+        export TARGET=armv7a-linux-androideabi
+        ;;
+    "3")
+        export TARGET=i686-linux-android
+        ;;
+    "4")
+        export TARGET=x86_64-linux-android
+        ;;
+esac
+
+echo "TARGET=${TARGET}"
+echo "API=${API}"
+
+export AR=${TOOLCHAIN}/bin/llvm-ar
+export CC=${TOOLCHAIN}/bin/${TARGET}${API}-clang
+export AS=${CC}
+export CXX=${TOOLCHAIN}/bin/${TARGET}${API}-clang++
+export LD=${TOOLCHAIN}/bin/ld
+export RANLIB=${TOOLCHAIN}/bin/llvm-ranlib
+export STRIP=${TOOLCHAIN}/bin/llvm-strip
+
+# Configure dropbear
+cd ${SRC_ROOT}/${DROPBEAR}/app/src/main/cpp/dropbear
+./configure --host $TARGET --disable-syslog --disable-lastlog \
+            --disable-utmp --disable-wtmp \
+            --enable-bundled-libtom --enable-largefile
+
+# Configure openssh
+cd ${SRC_ROOT}/${OPENSSH}/app/src/main/cpp/openssh
+autoreconf
+./configure --host $TARGET --disable-lastlog --disable-utmp --disable-wtmp \
+            --enable-largefile --without-openssl
+
+# Configure rsync
+cd ${SRC_ROOT}/${RSYNC}/app/src/main/cpp/rsync
+./configure --host $TARGET --disable-openssl --disable-xxhash --disable-zstd --disable-lz4 \
+            --disable-md2man --disable-roll-simd --disable-md5-asm --disable-roll-asm \
+            --enable-largefile
+exit
+
+# ############################################################################
+
+dropbear configh.
+- aarch64 and x86_64 were identical
+- armv7: extra "#define _FILE_OFFSET_BITS 64"
+  which can be added to the 64 bit versions without any issue. Done.
+------------------------------------------------------------------------------
+
+openssh config.h
+- aarch64 and x86_64 were identical
+- armv7: extra "#define _FILE_OFFSET_BITS 64"
+  which can be added to the 64 bit versions without any issue. Done.
+- armv7 versus 64 using  #if defined(__aarch64__) || defined(__x86_64__ ) ...
+  #define SIZEOF_LONG_INT 8  <=>  4
+  #define SIZEOF_TIME_T   8  <=>  4
+- added manually:
+  // configure presumes openbsd only, but android needs it.
+  #define HAVE_ATTRIBUTE__SENTINEL__ 1
+  // configure fails to find it due to android using an "#include_next"
+  #define HAVE_MALLOC 1
+  // see "openbsd-compat/explicit_bzero.c" workaround
+  #define HAVE_BZERO 1
+------------------------------------------------------------------------------
+
+rsync config.h
+- armv7: extra "#define _FILE_OFFSET_BITS 64"
+  which can be added to the 64 bit versions without any issue. Done.
+- armv7 versus 64 using  #if defined(__aarch64__) || defined(__x86_64__ ) ...
+  #define HAVE_LONG_DOUBLE 1        <==> absent
+  #define HAVE_LONG_DOUBLE_WIDER 1  <==> absent
+  #define SIZEOF_CHARP  8           <==> 4
+  #define SIZEOF_LONG   8           <==> 4
+  #define SIZEOF_TIME_T 8           <==> 4
+------------------------------------------------------------------------------
+
+From within the "app/src/main/cpp" directory (!), run the following scripts.
+These scripts are very dumb, be careful.
+
+    - "prebuild-dropbear.sh"
+       This is only needed once after a dropbear code drop.
+
+    - "prebuild-rsync.sh"
+      This is only needed once after a rsync code drop.
+
+Upgrading dropbear/openssh/rsync:
+    All changes are (should be) marked with ANDROID_SSHD*
+    Merge and solve conflicts as usual.
+
+# ############################################################################
+
+Setup signing:
+
+    Edit your "~/.gradle/gradle.properties" and add a line:
+
+        Sshd4a.properties=/path/to/Sshd4a.properties
+
+    Edit/create the file "/path/to/Sshd4a.properties":
+
+        sign.storeFile=/path/to/myKeystore.jks
+        sign.storePassword=myPass
+        sign.keyAlias=myAlias
+        sign.keyPassword=myPass
+
+# ############################################################################
