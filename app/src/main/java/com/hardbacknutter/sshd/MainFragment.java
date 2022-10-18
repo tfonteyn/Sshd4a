@@ -158,8 +158,10 @@ public class MainFragment
 
     @Override
     public void onDestroy() {
-        //noinspection ConstantConditions
-        vm.stopService(getContext());
+        if (vm != null) {
+            //noinspection ConstantConditions
+            vm.stopService(getContext());
+        }
         super.onDestroy();
     }
 
