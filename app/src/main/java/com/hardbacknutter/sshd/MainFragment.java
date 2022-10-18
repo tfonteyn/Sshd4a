@@ -1,7 +1,6 @@
 package com.hardbacknutter.sshd;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -48,11 +47,6 @@ public class MainFragment
 
     private MainViewModel vm;
 
-    /**
-     * See <a href="https://developer.android.com/training/permissions/requesting">
-     * developer.android.com</a>
-     */
-    @SuppressLint("MissingPermission")
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(
                     new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -68,6 +62,7 @@ public class MainFragment
             vm.updateUI();
         }
     };
+
     private FragmentMainBinding vb;
     private ActivityResultLauncher<String> authKeysImportLauncher;
     private ToolbarMenuProvider toolbarMenuProvider;
@@ -99,12 +94,12 @@ public class MainFragment
         });
         vm.onUpdateUI().observe(getViewLifecycleOwner(), textAndColor ->
                 toolbarMenuProvider.updateStartButton(textAndColor));
+
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(
                 messageReceiver, new IntentFilter(SshdService.SERVICE_UI_REQUEST));
 
         authKeysImportLauncher = registerForActivityResult(
                 new ActivityResultContracts.GetContent(), this::onImportAuthKeys);
-
     }
 
     @Override

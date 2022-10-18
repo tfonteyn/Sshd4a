@@ -1,6 +1,5 @@
 package com.hardbacknutter.sshd;
 
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -43,6 +42,7 @@ public class MainViewModel
     private final MutableLiveData<Pair<String, Integer>> startStopButton = new MutableLiveData<>();
     private SharedPreferences pref;
 
+    /** text and colorInt */
     private Pair<String, Integer> startBtn;
     private Pair<String, Integer> stopBtn;
 
@@ -206,10 +206,10 @@ public class MainViewModel
     }
 
     public boolean isAskNotificationPermission() {
-        return pref.getBoolean(Prefs.UI_NOTIFICATION, true);
+        return pref.getBoolean(Prefs.UI_NOTIFICATION_ASK_PERMISSION, true);
     }
 
     public void setAskNotificationPermission(final boolean shouldAsk) {
-        pref.edit().putBoolean(Prefs.UI_NOTIFICATION, shouldAsk).apply();
+        pref.edit().putBoolean(Prefs.UI_NOTIFICATION_ASK_PERMISSION, shouldAsk).apply();
     }
 }

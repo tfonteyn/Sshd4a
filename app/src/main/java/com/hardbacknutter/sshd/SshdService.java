@@ -10,8 +10,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.Log;
 
 import androidx.annotation.GuardedBy;
@@ -60,7 +58,6 @@ import java.util.stream.Collectors;
  *     netsh advfirewall firewall delete rule name="ALLOW TCP PORT 2222"
  * </pre>
  *
- *
  * <a href="https://developer.android.com/about/versions/oreo/background#services">
  * Background Service Limitations</a>
  * <pre>
@@ -70,14 +67,14 @@ import java.util.stream.Collectors;
  *     and use services. At the end of that window, the app is considered to be idle.
  *     At this time, the system stops the app's background services
  * </pre>
- * ==> A manual start (i.e. user clicks the button or 'startOnOpn') should really
- * always use "foreground".
+ * ==> A manual start (i.e. user clicks the button or 'startOnOpn') should always use "foreground".
  */
 public class SshdService
         extends Service {
 
     public static final String SERVICE_UI_REQUEST = "ServiceUIRequest";
-    public static final String NOTIFICATION_CHANNEL_ID = "com.hardbacknutter.sshd.NOTIFICATION_CHANNEL";
+    public static final String NOTIFICATION_CHANNEL_ID =
+            "com.hardbacknutter.sshd.NOTIFICATION_CHANNEL";
     public static final int ONGOING_NOTIFICATION_ID = 1;
     public static final String DROPBEAR_PID = "dropbear.pid";
     public static final String DROPBEAR_ERR = "dropbear.err";
@@ -447,39 +444,6 @@ public class SshdService
         return START_STICKY;
     }
 
-//    private void initBindAddress() {
-//        final String port = pref.getString(Prefs.SSHD_PORT, Prefs.DEFAULT_PORT).strip();
-//        String address;
-//        final List<String> ipList = getHostAddresses();
-//        if (ipList.isEmpty()) {
-//            throw new IllegalStateException();
-//
-//        } else if (ipList.size() == 1) {
-//            // listen on (all) the single interfaces
-//            bindAddress = port;
-//
-//        } else {
-//            address = pref.getString(Prefs.SSHD_HOST, Prefs.DEFAULT_HOST);
-//            if (Prefs.DEFAULT_HOST.equals(address)) {
-//                // listen on all interfaces
-//                bindAddress = port;
-//
-//            } else if (ipList.contains(address)){
-//                // listen only on the user selected interface
-//                bindAddress = address + ":" + port;
-//
-//            } else {
-//                // The user selected interface is not valid.
-//                if (pref.getBoolean(Prefs.SSHD_ENFORCE_HOST, false)) {
-//                    throw new IllegalStateException(Prefs.SSHD_ENFORCE_HOST);
-//                } else {
-//                    // listen on all interfaces
-//                    bindAddress = port;
-//                }
-//            }
-//        }
-//    }
-
     public void onDestroy() {
         if (BuildConfig.DEBUG) {
             Log.d(TAG + "|onDestroy", "ENTER");
@@ -534,36 +498,5 @@ public class SshdService
     public enum Starter {
         User,
         OnBoot
-    }
-
-    public enum Status
-            implements Parcelable {
-        Started,
-        Failed,
-        Stopped;
-
-        public static final Creator<Status> CREATOR = new Creator<>() {
-            @Override
-            @NonNull
-            public Status createFromParcel(@NonNull final Parcel in) {
-                return values()[in.readInt()];
-            }
-
-            @Override
-            public Status[] newArray(final int size) {
-                return new Status[size];
-            }
-        };
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(@NonNull final Parcel dest,
-                                  final int flags) {
-            dest.writeInt(ordinal());
-        }
     }
 }

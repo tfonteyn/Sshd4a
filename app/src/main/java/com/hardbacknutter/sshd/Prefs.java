@@ -2,8 +2,8 @@ package com.hardbacknutter.sshd;
 
 public class Prefs {
 
-    public static final String RUN_ON_BOOT = "service.start.onboot";
-    public static final String RUN_ON_OPEN = "service.start.onopen";
+    public static final String RUN_ON_BOOT = "service.start.on_boot";
+    public static final String RUN_ON_OPEN = "service.start.on_open";
     public static final String RUN_IN_FOREGROUND = "service.start.foreground";
 
     public static final String SSHD_PORT = "sshd.port";
@@ -22,5 +22,5 @@ public class Prefs {
      */
     public static final String USE_SUPER_SU_BUFFERING = "rsyncbuffer";
     public static final String UI_THEME = "ui.theme";
-    public static final String UI_NOTIFICATION = "ui.notification.permission.ask";
+    public static final String UI_NOTIFICATION_ASK_PERMISSION = "ui.notification.ask_permission";
 }
