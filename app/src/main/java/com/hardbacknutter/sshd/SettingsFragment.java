@@ -60,11 +60,12 @@ public class SettingsFragment
             try {
                 final int mode = Integer.parseInt(String.valueOf(newValue));
                 NightMode.apply(mode);
-            } catch (@NonNull final NumberFormatException ignore) {
-                NightMode.apply(0);
-            }
+                return true;
 
-            return true;
+            } catch (@NonNull final NumberFormatException ignore) {
+                // ignore
+            }
+            return false;
         });
 
         pRunOnBoot = findPreference(Prefs.RUN_ON_BOOT);
