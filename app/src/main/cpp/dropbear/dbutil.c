@@ -377,7 +377,7 @@ void run_shell_command(const char* cmd, unsigned int maxfd, char* usershell) {
 	baseshell = basename(usershell);
 
 	if (cmd != NULL) {
-		cmd = android_exe_to_lib(cmd);
+		cmd = sshd4a_exe_to_lib(cmd);
 
 		argv[0] = baseshell;
 		argv[1] = "-c";
@@ -408,7 +408,7 @@ void run_shell_command(const char* cmd, unsigned int maxfd, char* usershell) {
 		m_close(i);
 	}
 
-	android_configure_environment();
+	sshd4a_set_env();
 
 	execv(usershell, argv);
 }

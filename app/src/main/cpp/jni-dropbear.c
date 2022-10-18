@@ -13,9 +13,9 @@
 extern int dropbear_main(int argc, char **argv);
 
 /* executable for a shell */
-const char *android_shell_exe = "";
+const char *sshd4a_shell_exe = "";
 /* the home-directory */
-const char *android_home_path = "";
+const char *sshd4a_home_path = "";
 
 /* executable lib location. */
 const char *lib_path = "";
@@ -27,14 +27,14 @@ const char *env_var_list = "";
 int use_super_su_buffering = JNI_FALSE;
 
 /* Construct the full path to the given configuration file. */
-char *android_conf_file(const char *fn) {
+char *sshd4a_conf_file(const char *fn) {
     char *ret = malloc(strlen(conf_path) + strlen(fn) + 1 + /* '\0' */ 1);
     sprintf(ret, "%s/%s", conf_path, fn);
     return ret;
 }
 
 /* Convert the name of the given executable to the full path with the fake libEXE.so name. */
-char *android_exe_to_lib(const char *cmd) {
+char *sshd4a_exe_to_lib(const char *cmd) {
     if (cmd && !strncmp(cmd, "scp ", 4)) {
         char *t = malloc(strlen(lib_path) + 11 + strlen(cmd) + /* '\0' */ 1);
         sprintf(t, "%s/libscp.so %s", lib_path, cmd + 4);
@@ -43,10 +43,10 @@ char *android_exe_to_lib(const char *cmd) {
     } else if (cmd && !strncmp(cmd, "rsync ", 6)) {
         char *t;
         if (use_super_su_buffering) {
-            t = malloc(strlen(lib_path) + 16 + strlen(cmd) + /* '\0' */ 1);
+            t = malloc(strlen(lib_path) + 16 + strlen(cmd) - 6 + /* '\0' */ 1);
             sprintf(t, "%s/libbuffersu.so %s", lib_path, cmd + 6);
         } else {
-            t = malloc(strlen(lib_path) + 13 + strlen(cmd) + /* '\0' */ 1);
+            t = malloc(strlen(lib_path) + 13 + strlen(cmd) - 6 + /* '\0' */ 1);
             sprintf(t, "%s/librsync.so %s", lib_path, cmd + 6);
         }
         return t;
@@ -61,7 +61,7 @@ char *android_exe_to_lib(const char *cmd) {
 }
 
 /* Add user specified name/value pairs to the environment. */
-void android_configure_environment(void) {
+void sshd4a_set_env() {
     const char *s = env_var_list;
     if (!s) {
         return;
@@ -104,19 +104,19 @@ void android_configure_environment(void) {
     }
 
     /* make available to buffersu. */
-    setenv("ANDROID_SSHD_LIBDIR", lib_path, /*overwrite=*/1);
+    setenv("SSHD4A_LIB_DIR", lib_path, /*overwrite=*/1);
     /* make available to rsync */
-    setenv("ANDROID_SSHD_CONFDIR", conf_path, /*overwrite=*/1);
+    setenv("SSHD4A_CONF_DIR", conf_path, /*overwrite=*/1);
 }
 
 /*
  * returns 1 if "authorized_keys" exists and is longer than
  * MIN_AUTHKEYS_LINE (10 bytes) as defined in "dropbear/svr-authpubkey.c"
  */
-int android_authorized_keys_exists() {
-    char *fn = android_conf_file("authorized_keys");
+int sshd4a_authorized_keys_exists() {
+    char *fn = sshd4a_conf_file("authorized_keys");
     FILE *f = fopen(fn, "r");
-    free(fn); /* match "malloc()" from android_conf_file */
+    free(fn); /* match "malloc()" from sshd4a_conf_file */
     if (!f) {
         return 0;
     }
@@ -153,6 +153,7 @@ static void null_atexit(void) {
 }
 
 /**
+ * Main entry point; start dropbear in-process.
  *
  * @param env
  * @param cl
@@ -168,7 +169,8 @@ static void null_atexit(void) {
  */
 JNIEXPORT jint JNICALL
 Java_com_hardbacknutter_sshd_SshdService_start_1sshd(
-        JNIEnv *env, jclass cl,
+        JNIEnv *env,
+        jclass cl,
         jstring j_lib_path,
         jobjectArray j_dropbear_args,
         jstring j_conf_path,
@@ -183,9 +185,9 @@ Java_com_hardbacknutter_sshd_SshdService_start_1sshd(
 
         lib_path = from_java_string(env, j_lib_path);
         conf_path = from_java_string(env, j_conf_path);
-        android_home_path = from_java_string(env, j_home_path);
+        sshd4a_home_path = from_java_string(env, j_home_path);
 
-        android_shell_exe = from_java_string(env, j_shell_exe);
+        sshd4a_shell_exe = from_java_string(env, j_shell_exe);
         env_var_list = from_java_string(env, j_env_var_list);
         use_super_su_buffering = j_use_super_su_buffering;
 
@@ -197,8 +199,8 @@ Java_com_hardbacknutter_sshd_SshdService_start_1sshd(
             argv[i] = from_java_string(env, j_value);
         }
 
-        const char *log_fn = android_conf_file("dropbear.err");
-        const char *log_fn_old = android_conf_file("dropbear.err.old");
+        const char *log_fn = sshd4a_conf_file("dropbear.err");
+        const char *log_fn_old = sshd4a_conf_file("dropbear.err.old");
         unlink(log_fn_old);
         rename(log_fn, log_fn_old);
         unlink(log_fn);
@@ -209,31 +211,38 @@ Java_com_hardbacknutter_sshd_SshdService_start_1sshd(
             dup2(log_fd, 2);
         }
         for (int i = 3; i < 255; i++) {
-            /* close all of the dozens of fds that android typically leaves open */
+            /* make sure only stdin/stdout/stderr are left open. */
             close(i);
         }
 
-        // Write something here...
-        // The monitoring java thread assumes the dropbear.err file always exists!
+        // Force the dropbear.err file into existence...
+        // The monitoring java thread assumes the file always exists!
         fprintf(stderr, "Starting dropbear\n");
 
         dropbear_main(argc, (char **) argv);
         /* not reachable */
         exit(0);
-    }
-    if (pid == -1) {
+
+    } else if (pid == -1) {
         fprintf(stderr, "Failed to start dropbear errno=%u\n", errno);
     }
+
     return pid;
 }
 
 JNIEXPORT void JNICALL
-Java_com_hardbacknutter_sshd_SshdService_kill(JNIEnv *env, jclass cl, jint pid) {
+Java_com_hardbacknutter_sshd_SshdService_kill(
+        JNIEnv *env,
+        jclass cl,
+        jint pid) {
     kill(pid, SIGKILL);
 }
 
 JNIEXPORT int JNICALL
-Java_com_hardbacknutter_sshd_SshdService_waitpid(JNIEnv *env, jclass cl, jint pid) {
+Java_com_hardbacknutter_sshd_SshdService_waitpid(
+        JNIEnv *env,
+        jclass cl,
+        jint pid) {
     int status;
     waitpid(pid, &status, 0);
     if (WIFEXITED(status)) {

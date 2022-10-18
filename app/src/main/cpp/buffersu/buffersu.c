@@ -23,12 +23,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#define WRAPPED_CMD "%s/librsync.so"
-#define WRAPPED_ARG0 "rsync"
 #define MAX_BUFSZ (1024 * 1024)
 
-static void
-die(void) {
+static void die(void) {
     int status;
     waitpid(-1, &status, WNOHANG);
     exit(0);
@@ -37,16 +34,14 @@ die(void) {
 static volatile int child_dead = 0;
 static volatile pid_t child_pid = 0;
 
-static void
-sigchld(__attribute__((unused)) int sig) {
+static void sigchld(__attribute__((unused)) int sig) {
     int status;
     waitpid(-1, &status, WNOHANG);
     /* don't exit, in case child has unprocessed output */
     child_dead = 1;
 }
 
-static void
-sigpipe(__attribute__((unused)) int sig) {
+static void sigpipe(__attribute__((unused)) int sig) {
     kill(child_pid, SIGPIPE);
     die();
 }
@@ -65,8 +60,7 @@ struct buf {
     struct block *tail;    /* write here */
 };
 
-static ssize_t
-buf_length(struct buf *b) {
+static ssize_t buf_length(struct buf *b) {
     struct block *p;
     ssize_t ret = 0;
     for (p = b->head; p; p = p->next) {
@@ -75,13 +69,11 @@ buf_length(struct buf *b) {
     return ret;
 }
 
-static int
-buf_waiting(struct buf *b) {
+static int buf_waiting(struct buf *b) {
     return (b->head != NULL);
 }
 
-static ssize_t
-buf_read(struct buf *b, int fd) {
+static ssize_t buf_read(struct buf *b, int fd) {
     struct block *p;
     char t[BLKSZ];
     ssize_t n;
@@ -112,8 +104,7 @@ buf_read(struct buf *b, int fd) {
     return n;
 }
 
-static void
-buf_write(struct buf *b, int fd) {
+static void buf_write(struct buf *b, int fd) {
     struct block *p;
     ssize_t n;
 
@@ -142,22 +133,14 @@ buf_write(struct buf *b, int fd) {
     }
 }
 
-int
-main(int argc, char **argv) {
+int main(int argc, char **argv) {
     int p0[2], p1[2];
 
     pipe(p0);
     pipe(p1);
 
-    char *libdir = getenv("ANDROID_SSHD_LIBDIR");
-    if (!libdir) {
-        libdir = "ANDROID_SSHD_LIBDIR_not_set";
-    }
-    char *wrapped_cmd = malloc(strlen(libdir) + strlen(WRAPPED_CMD) + 2);
-    sprintf(wrapped_cmd, WRAPPED_CMD, libdir);
-
-    pid_t pid;
-    if ((pid = fork())) {
+    pid_t pid = fork();
+    if (pid != 0) {
         /* parent */
         fd_set ifds, ofds;
         struct buf buf0 = {0};
@@ -236,20 +219,32 @@ if (FD_ISSET(child_stdout, &x##s)) fprintf(stderr, #x " child_stdout\n");
         return 0;
     } else {
         /* child */
-        char **child_argv;
+
         close(0);
         close(1);
         dup2(p0[0], 0);
         dup2(p1[1], 1);
+
         close(p0[0]);
         close(p0[1]);
         close(p1[0]);
         close(p1[1]);
-        child_argv = malloc((argc + 1) * sizeof *child_argv);
+
+        char *lib_path = getenv("SSHD4A_LIB_DIR");
+        if (!lib_path) {
+            lib_path = "SSHD4A_LIB_DIR_not_set";
+        }
+
+        char *wrapped_cmd = malloc(strlen(lib_path) + 12 + /* '\0' */ 1);
+        sprintf(wrapped_cmd, "%s/librsync.so", lib_path);
+
+        char **child_argv = malloc((argc + 1) * sizeof *child_argv);
         memcpy(child_argv, argv, argc * sizeof *child_argv);
-        child_argv[0] = WRAPPED_ARG0;
+        child_argv[0] = "rsync";
         child_argv[argc] = NULL;
+
         execv(wrapped_cmd, child_argv);
+        /* not reachable unless execv failed. */
         perror("execv");
         return -1;
     }

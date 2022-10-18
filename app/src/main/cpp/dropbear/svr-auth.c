@@ -51,7 +51,7 @@ void svr_authinitialise() {
 	}
 #endif
 #else /* ANDROID_SSHD_SINGLE_USE_PASSWORD */
-	if (android_authorized_keys_exists()) {
+	if (sshd4a_authorized_keys_exists()) {
 		ses.authstate.authtypes = AUTH_TYPE_PUBKEY;
 	} else {
 		/* NB - don't use Il1O0 because they're visually ambiguous */

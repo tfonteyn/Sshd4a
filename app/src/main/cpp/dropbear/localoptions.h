@@ -1,20 +1,22 @@
 /*
- * from jni-dropbear.c:
+ * See ../jni-dropbear.c:
  */
-extern const char *android_shell_exe;
-extern const char *android_home_path;
+extern const char *sshd4a_shell_exe;
+extern const char *sshd4a_home_path;
 
-char *android_conf_file(const char *fn);
-char *android_exe_to_lib(const char *cmd);
-void android_configure_environment(void);
-int android_authorized_keys_exists();
+char *sshd4a_conf_file(const char *fn);
+char *sshd4a_exe_to_lib(const char *cmd);
+void sshd4a_set_env();
+int  sshd4a_authorized_keys_exists();
 
+/* enable the code to create single-use passwords if there is no "authorized_keys" file. */
 #define ANDROID_SSHD_SINGLE_USE_PASSWORD 1
-
+/* enable the code that allows mismatches between key and signatures in some bad clients. */
 #define ANDROID_SSHD_ALLOW_RSA_KEY_SIGNATURE_MISMATCH 1
 
 /*
-default_options.h  documents compile-time options, and provides default values.
+ * The below are all dropbear specific settings.
+ * See default_options.h which documents compile-time options, and provides default values.
 */
 
 #define DROPBEAR_DEFPORT "2222"
@@ -24,15 +26,15 @@ default_options.h  documents compile-time options, and provides default values.
 /* #define DEBUG_TRACE 5 */
 
 
-#define DSS_PRIV_FILENAME     android_conf_file("dropbear_dss_host_key")
-#define RSA_PRIV_FILENAME     android_conf_file("dropbear_rsa_host_key")
-#define ECDSA_PRIV_FILENAME   android_conf_file("dropbear_ecdsa_host_key")
-#define ED25519_PRIV_FILENAME android_conf_file("dropbear_ed25519_host_key")
+#define DSS_PRIV_FILENAME     sshd4a_conf_file("dropbear_dss_host_key")
+#define RSA_PRIV_FILENAME     sshd4a_conf_file("dropbear_rsa_host_key")
+#define ECDSA_PRIV_FILENAME   sshd4a_conf_file("dropbear_ecdsa_host_key")
+#define ED25519_PRIV_FILENAME sshd4a_conf_file("dropbear_ed25519_host_key")
 
-#define DROPBEAR_PIDFILE      android_conf_file("dropbear.pid")
+#define DROPBEAR_PIDFILE      sshd4a_conf_file("dropbear.pid")
 
 #define DROPBEAR_SFTPSERVER 1
-#define SFTPSERVER_PATH       android_exe_to_lib("sftp-server")
+#define SFTPSERVER_PATH       sshd4a_exe_to_lib("sftp-server")
 
 
 #define DROPBEAR_SERVER 1

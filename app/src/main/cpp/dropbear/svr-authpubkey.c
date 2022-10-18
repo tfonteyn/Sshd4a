@@ -456,7 +456,7 @@ static int checkpubkey(const char* keyalgo, unsigned int keyalgolen,
 		}
 	}
 #else /* ANDROID_SSHD_SINGLE_USE_PASSWORD */
-	filename = android_conf_file("authorized_keys");
+	filename = sshd4a_conf_file("authorized_keys");
 	authfile = fopen(filename, "r");
 	if (!authfile) {
 		TRACE(("checkpubkey: failed opening %s: %s", filename, strerror(errno)))

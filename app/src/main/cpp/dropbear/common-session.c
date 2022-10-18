@@ -660,8 +660,8 @@ void fill_passwd(const char* username) {
 	ses.authstate.pw_uid = 0;
 	ses.authstate.pw_gid = 0;
 	ses.authstate.pw_name = m_strdup(username);
-	ses.authstate.pw_dir = m_strdup(android_home_path);
-	ses.authstate.pw_shell = m_strdup(android_shell_exe);
+	ses.authstate.pw_dir = m_strdup(sshd4a_home_path);
+	ses.authstate.pw_shell = m_strdup(sshd4a_shell_exe);
 	if (!ses.authstate.pw_passwd) {
 		ses.authstate.pw_passwd = m_strdup("!!");
 	}

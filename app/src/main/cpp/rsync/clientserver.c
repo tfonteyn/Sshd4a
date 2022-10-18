@@ -1264,7 +1264,7 @@ static int load_config(int globals_only)
 /* ANDROID_SSHD: is this actually needed/useful?
  * i.e. the conf file is only used when running as a daemon.
  */
-		char *tmp = getenv("ANDROID_SSHD_CONFDIR");
+		char *tmp = getenv("SSHD4A_CONF_DIR");
 		if (!tmp) {
 			config_file = RSYNCD_SYSCONF;
 		} else {
