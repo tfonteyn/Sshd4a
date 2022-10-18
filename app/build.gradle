@@ -72,17 +72,15 @@ android {
                     'proguard-rules.pro'
         }
 
-        // Builds a "fat" apk
-        release {
+        release_arm {
             initWith abstractRelease
             externalNativeBuild {
                 cmake {
-                    abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86_64'
+                    abiFilters 'armeabi-v7a', 'arm64-v8a'
                 }
             }
         }
-
-        armV8 {
+        release_armV8 {
             initWith abstractRelease
             externalNativeBuild {
                 cmake {
@@ -90,11 +88,19 @@ android {
                 }
             }
         }
-        armV7 {
+        release_armV7 {
             initWith abstractRelease
             externalNativeBuild {
                 cmake {
                     abiFilters 'armeabi-v7a'
+                }
+            }
+        }
+        release_x86_64 {
+            initWith abstractRelease
+            externalNativeBuild {
+                cmake {
+                    abiFilters 'x86_64'
                 }
             }
         }
