@@ -95,9 +95,6 @@ public class MainFragment
         vm.onUpdateUI().observe(getViewLifecycleOwner(), textAndColor ->
                 toolbarMenuProvider.updateStartButton(textAndColor));
 
-        LocalBroadcastManager.getInstance(getContext()).registerReceiver(
-                messageReceiver, new IntentFilter(SshdService.SERVICE_UI_REQUEST));
-
         authKeysImportLauncher = registerForActivityResult(
                 new ActivityResultContracts.GetContent(), this::onImportAuthKeys);
     }
@@ -133,16 +130,18 @@ public class MainFragment
             }
         }
 
+        //noinspection ConstantConditions
+        LocalBroadcastManager.getInstance(getContext()).registerReceiver(
+                messageReceiver, new IntentFilter(SshdService.SERVICE_UI_REQUEST));
+
         populateNetworkAddressList();
 
         final boolean isRunning = SshdService.isRunning();
 
         if (vm.isRunOnOpen() && !isRunning) {
-            //noinspection ConstantConditions
             vm.startService(getContext());
 
         } else if (isRunning) {
-            //noinspection ConstantConditions
             vm.startUpdateThread(getContext());
         }
 
@@ -152,6 +151,8 @@ public class MainFragment
     @Override
     public void onPause() {
         vm.cancelUpdateThread();
+        //noinspection ConstantConditions
+        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(messageReceiver);
         super.onPause();
     }
 
