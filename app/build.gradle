@@ -1,5 +1,6 @@
 plugins {
     id("com.android.application")
+    id("org.jetbrains.kotlin.android")
 }
 
 /*
@@ -22,6 +23,7 @@ if (project.hasProperty("Sshd4a.properties")) {
 
 android {
     namespace "com.hardbacknutter.sshd"
+
     compileSdk 33
 
     // https://developer.android.com/studio/projects/configure-agp-ndk
@@ -45,21 +47,26 @@ android {
 
     defaultConfig {
         applicationId "com.hardbacknutter.sshd"
-        versionCode 1
-        versionName "1.0.0"
+        versionCode 2
+        versionName "1.0.1"
 
         // Android 11 as minimum... there are far to many issues/differences dealing
         // with storage permissions if we try for Android 10 or lower
         // See https://developer.android.com/training/data-storage
-        minSdkVersion 30
-        targetSdkVersion 33
-        signingConfig signingConfigs.release
+        minSdk 30
+        targetSdk 33
+
         externalNativeBuild {
             cmake {
                 cFlags '-Wall -O'
                 cppFlags ''
             }
         }
+
+        signingConfig signingConfigs.release
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
         buildConfigField("int", "NR_OF_LOG_LINES", "50")
     }
 
@@ -72,7 +79,7 @@ android {
                     'proguard-rules.pro'
         }
 
-        release_arm {
+        release {
             initWith abstractRelease
             externalNativeBuild {
                 cmake {
@@ -80,22 +87,8 @@ android {
                 }
             }
         }
-        release_armV8 {
-            initWith abstractRelease
-            externalNativeBuild {
-                cmake {
-                    abiFilters 'arm64-v8a'
-                }
-            }
-        }
-        release_armV7 {
-            initWith abstractRelease
-            externalNativeBuild {
-                cmake {
-                    abiFilters 'armeabi-v7a'
-                }
-            }
-        }
+
+        // Only x86_64 for the emulator.
         release_x86_64 {
             initWith abstractRelease
             externalNativeBuild {
@@ -119,15 +112,6 @@ android {
         }
     }
 
-    buildFeatures {
-        viewBinding true
-    }
-
-    lint {
-        // allow command line builds to complete
-        abortOnError false
-    }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
@@ -135,12 +119,38 @@ android {
         coreLibraryDesugaringEnabled true
     }
 
-    // PackagingOptions.jniLibs.useLegacyPackaging should be set to true
-    // because android:extractNativeLibs is set to "true" in AndroidManifest.xml.
+    kotlinOptions {
+        jvmTarget = 11
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+            // Can be enabled to make Log.x work. OR, use Logger.x
+            returnDefaultValues = false
+            all {
+                reports {
+                    junitXml.enabled = true
+                    html.enabled = false
+                }
+            }
+        }
+    }
+
     packagingOptions {
+        // Set to true because android:extractNativeLibs is set to "true"
+        // in AndroidManifest.xml.
         jniLibs.useLegacyPackaging = true
     }
 
+    lint {
+        // allow command line builds to complete
+        abortOnError false
+    }
 }
 
 dependencies {
