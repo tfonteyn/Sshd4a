@@ -19,7 +19,7 @@ public class BootReceiver
             || Intent.ACTION_BOOT_COMPLETED.equals(action)) {
             final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
             if (pref.getBoolean(Prefs.RUN_ON_BOOT, false)) {
-                SshdService.startService(SshdService.Starter.OnBoot, context);
+                SshdService.startService(SshdService.Started.OnBoot, context);
             }
         }
     }

@@ -45,7 +45,7 @@ public class SettingsFragment
         //noinspection ConstantConditions
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
-        String homePath = prefs.getString(Prefs.HOME, null);
+        final String homePath = prefs.getString(Prefs.HOME, null);
         if (homePath == null || !new File(homePath).exists()) {
             prefs.edit().putString(Prefs.HOME, context.getFilesDir().getPath()).apply();
         }
@@ -135,6 +135,7 @@ public class SettingsFragment
                 if (pRunOnBoot.isChecked() && !pRunInForeground.isChecked()) {
                     pRunInForeground.setChecked(true);
                 }
+                break;
             }
             case Prefs.SSHD_PORT: {
                 final int port = getPort(sharedPreferences);
@@ -143,7 +144,11 @@ public class SettingsFragment
                     //noinspection ConstantConditions
                     Snackbar.make(getView(), R.string.err_port_number, Snackbar.LENGTH_LONG).show();
                 }
+                break;
             }
+            default:
+                break;
+
         }
     }
 

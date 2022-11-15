@@ -258,7 +258,7 @@ public class MainFragment
             startButton.setOnClickListener(v -> onMenuItemSelected(menuItem));
         }
 
-        public void updateStartButton(@NonNull final Pair<String, Integer> textAndColor) {
+        void updateStartButton(@NonNull final Pair<String, Integer> textAndColor) {
             startButton.setText(textAndColor.first);
             startButton.setTextColor(textAndColor.second);
         }

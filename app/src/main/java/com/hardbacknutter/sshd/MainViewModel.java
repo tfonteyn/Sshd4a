@@ -33,9 +33,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MainViewModel
         extends ViewModel {
 
-    public static final String AUTHORIZED_KEYS = "authorized_keys";
-    public static final int THREAD_SLEEP_MILLIS = 2000;
-    public static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
+    private static final String AUTHORIZED_KEYS = "authorized_keys";
+    private static final int THREAD_SLEEP_MILLIS = 2000;
+    private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
     private static final String TAG = "MainViewModel";
     private final AtomicBoolean cancelRequested = new AtomicBoolean();
     private final MutableLiveData<String> logData = new MutableLiveData<>();
@@ -47,11 +47,11 @@ public class MainViewModel
     private Pair<String, Integer> stopBtn;
 
     @NonNull
-    public MutableLiveData<String> onLogUpdate() {
+    MutableLiveData<String> onLogUpdate() {
         return logData;
     }
 
-    public MutableLiveData<Pair<String, Integer>> onUpdateUI() {
+    MutableLiveData<Pair<String, Integer>> onUpdateUI() {
         return startStopButton;
     }
 
@@ -92,7 +92,7 @@ public class MainViewModel
         ComponentName componentName = null;
         try {
             componentName = SshdService
-                    .startService(SshdService.Starter.User, context);
+                    .startService(SshdService.Started.ByUser, context);
 
             startUpdateThread(context);
 
@@ -137,7 +137,7 @@ public class MainViewModel
                 try {
                     //noinspection BusyWait
                     Thread.sleep(THREAD_SLEEP_MILLIS);
-                } catch (InterruptedException e) {
+                } catch (@NonNull final InterruptedException e) {
                     break;
                 }
             }
@@ -205,11 +205,12 @@ public class MainViewModel
         new File(SshdService.getDropbearDirectory(context), AUTHORIZED_KEYS).delete();
     }
 
-    public boolean isAskNotificationPermission() {
+    boolean isAskNotificationPermission() {
         return pref.getBoolean(Prefs.UI_NOTIFICATION_ASK_PERMISSION, true);
     }
 
-    public void setAskNotificationPermission(final boolean shouldAsk) {
+    void setAskNotificationPermission(
+            @SuppressWarnings("SameParameterValue") final boolean shouldAsk) {
         pref.edit().putBoolean(Prefs.UI_NOTIFICATION_ASK_PERMISSION, shouldAsk).apply();
     }
 }

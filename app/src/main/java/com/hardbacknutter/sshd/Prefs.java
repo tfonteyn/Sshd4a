@@ -1,26 +1,28 @@
 package com.hardbacknutter.sshd;
 
-public class Prefs {
+public final class Prefs {
 
-    public static final String RUN_ON_BOOT = "service.start.on_boot";
-    public static final String RUN_ON_OPEN = "service.start.on_open";
-    public static final String RUN_IN_FOREGROUND = "service.start.foreground";
+    static final String RUN_ON_BOOT = "service.start.on_boot";
+    static final String RUN_ON_OPEN = "service.start.on_open";
+    static final String RUN_IN_FOREGROUND = "service.start.foreground";
 
-    public static final String SSHD_PORT = "sshd.port";
-    public static final String DEFAULT_PORT = "2222";
+    static final String SSHD_PORT = "sshd.port";
+    static final String DEFAULT_PORT = "2222";
 
-
-    public static final String HOME = "sshd.home";
-    public static final String ENV_VARS = "sshd.env";
+    static final String HOME = "sshd.home";
+    static final String ENV_VARS = "sshd.env";
     public static final String SHELL = "sshd.shell";
-    public static final String DEFAULT_SHELL = "/system/bin/sh";
+    static final String DEFAULT_SHELL = "/system/bin/sh";
 
-    public static final String DROPBEAR_CMDLINE_OPTIONS = "dropbear.options";
+    static final String DROPBEAR_CMDLINE_OPTIONS = "dropbear.options";
 
     /**
      * <a href="https://supersuroot.org/">https://supersuroot.org/</a>
      */
-    public static final String USE_SUPER_SU_BUFFERING = "rsyncbuffer";
-    public static final String UI_THEME = "ui.theme";
-    public static final String UI_NOTIFICATION_ASK_PERMISSION = "ui.notification.ask_permission";
+    static final String USE_SUPER_SU_BUFFERING = "rsyncbuffer";
+    static final String UI_THEME = "ui.theme";
+    static final String UI_NOTIFICATION_ASK_PERMISSION = "ui.notification.ask_permission";
+
+    private Prefs() {
+    }
 }

@@ -72,13 +72,13 @@ import java.util.stream.Collectors;
 public class SshdService
         extends Service {
 
-    public static final String SERVICE_UI_REQUEST = "ServiceUIRequest";
-    public static final String NOTIFICATION_CHANNEL_ID =
+    static final String SERVICE_UI_REQUEST = "ServiceUIRequest";
+    private static final String NOTIFICATION_CHANNEL_ID =
             "com.hardbacknutter.sshd.NOTIFICATION_CHANNEL";
-    public static final int ONGOING_NOTIFICATION_ID = 1;
-    public static final String DROPBEAR_PID = "dropbear.pid";
-    public static final String DROPBEAR_ERR = "dropbear.err";
-    public static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
+    private static final int ONGOING_NOTIFICATION_ID = 1;
+    private static final String DROPBEAR_PID = "dropbear.pid";
+    static final String DROPBEAR_ERR = "dropbear.err";
+    private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
 
     private static final String TAG = "SshdService";
     private static final Object lock = new Object();
@@ -90,6 +90,7 @@ public class SshdService
             "\\S*\"([^\"]*)\"\\S*|(\\S+)");
     /* If restarting sshd twice within 10 seconds, give up. */
     private static final int MIN_DURATION_MS = 10_000;
+    private static final String[] Z_STRING = new String[0];
     /**
      * There is only ever one sshd (dropbear) process active.
      * As the service instance is controlled by the OS,
@@ -119,7 +120,7 @@ public class SshdService
     }
 
     /**
-     * @param starter identifier for the caller
+     * @param started identifier for the caller
      * @param context Current context
      *
      * @return the ComponentName, or {@code null} if it failed to start but did not throw.
@@ -130,12 +131,12 @@ public class SshdService
      *                               BackgroundServiceStartNotAllowedException
      */
     @Nullable
-    static ComponentName startService(@NonNull final Starter starter,
+    static ComponentName startService(@NonNull final Started started,
                                       @NonNull final Context context)
             throws IllegalStateException {
 
-        switch (starter) {
-            case User: {
+        switch (started) {
+            case ByUser: {
                 final boolean runInForeground = PreferenceManager
                         .getDefaultSharedPreferences(context)
                         .getBoolean(Prefs.RUN_IN_FOREGROUND, true);
@@ -215,8 +216,8 @@ public class SshdService
     }
 
     @NonNull
-    static String getHomePath(@NonNull final Context context,
-                              @NonNull final SharedPreferences pref) {
+    private static String getHomePath(@NonNull final Context context,
+                                      @NonNull final SharedPreferences pref) {
         String homePath = pref.getString(Prefs.HOME, null);
         if (homePath == null || !new File(homePath).exists()) {
             homePath = context.getFilesDir().getPath();
@@ -279,7 +280,7 @@ public class SshdService
         while (matcher.find()) {
             argList.add(matcher.group());
         }
-        final String[] args = argList.toArray(new String[0]);
+        final String[] args = argList.toArray(Z_STRING);
 
         final String confPath = getDropbearDirectory(this).getPath();
         final String homePath = getHomePath(this, pref);
@@ -367,7 +368,7 @@ public class SshdService
 
     private void stopSshd() {
         synchronized (lock) {
-            int pid = sshdPid;
+            final int pid = sshdPid;
             sshdPid = 0;
             if (pid > 0) {
                 if (BuildConfig.DEBUG) {
@@ -397,7 +398,7 @@ public class SshdService
     }
 
     @Nullable
-    public IBinder onBind(Intent intent) {
+    public IBinder onBind(@Nullable final Intent intent) {
         return null;
     }
 
@@ -460,7 +461,7 @@ public class SshdService
      * Apps targeting API Build.VERSION_CODES.P or later must request the permission
      * "android.Manifest.permission.FOREGROUND_SERVICE" in order to use this API.
      */
-    private Notification createNotification(@NonNull final String text) {
+    private Notification createNotification(@NonNull final CharSequence text) {
         if (!channelCreated) {
             final NotificationManager notificationManager =
                     (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -495,8 +496,8 @@ public class SshdService
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
-    public enum Starter {
-        User,
+    public enum Started {
+        ByUser,
         OnBoot
     }
 }

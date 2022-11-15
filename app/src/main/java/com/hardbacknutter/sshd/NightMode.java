@@ -61,9 +61,10 @@ public final class NightMode {
         AppCompatDelegate.setDefaultNightMode(NIGHT_MODES[MathUtils.clamp(mode, 0, 2)]);
     }
 
-    public static int getIntListPref(@NonNull final Context context,
-                                     @NonNull final String key,
-                                     final int defValue) {
+    @SuppressWarnings("SameParameterValue")
+    private static int getIntListPref(@NonNull final Context context,
+                                      @NonNull final String key,
+                                      final int defValue) {
         final String value = PreferenceManager.getDefaultSharedPreferences(context)
                                               .getString(key, null);
         if (value == null || value.isEmpty()) {
