@@ -47,8 +47,8 @@ android {
 
     defaultConfig {
         applicationId "com.hardbacknutter.sshd"
-        versionCode 2
-        versionName "1.0.1"
+        versionCode 3
+        versionName "1.0.2"
 
         // Android 11 as minimum... there are far to many issues/differences dealing
         // with storage permissions if we try for Android 10 or lower

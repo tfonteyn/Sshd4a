@@ -2,8 +2,8 @@ package com.hardbacknutter.sshd;
 
 public final class Prefs {
 
-    static final String RUN_ON_BOOT = "service.start.on_boot";
-    static final String RUN_ON_OPEN = "service.start.on_open";
+    static final String RUN_ON_BOOT = "service.start.onboot";
+    static final String RUN_ON_OPEN = "service.start.onopen";
     static final String RUN_IN_FOREGROUND = "service.start.foreground";
 
     static final String SSHD_PORT = "sshd.port";
