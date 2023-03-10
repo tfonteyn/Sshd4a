@@ -156,16 +156,16 @@ android {
 
 dependencies {
     // https://github.com/google/desugar_jdk_libs
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs_nio:2.0.0")
+    coreLibraryDesugaring('com.android.tools:desugar_jdk_libs_nio:2.0.2')
 
     implementation("androidx.activity:activity-ktx:1.6.1")
-    implementation('androidx.fragment:fragment:1.6.0-alpha04')
-    implementation("androidx.appcompat:appcompat:1.7.0-alpha01")
+    implementation('androidx.fragment:fragment:1.6.0-alpha07')
+    implementation('androidx.appcompat:appcompat:1.7.0-alpha02')
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.5.1")
+    implementation('androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.0')
+    implementation('androidx.lifecycle:lifecycle-livedata-ktx:2.6.0')
     implementation("androidx.preference:preference:1.2.0")
     implementation("androidx.transition:transition:1.4.1")
-    implementation('com.google.android.material:material:1.9.0-alpha01')
+    implementation('com.google.android.material:material:1.9.0-alpha02')
 }
