@@ -22,9 +22,8 @@ if (project.hasProperty("Sshd4a.properties")) {
 }
 
 android {
-    namespace "com.hardbacknutter.sshd"
-
-    compileSdk 33
+    namespace = "com.hardbacknutter.sshd"
+    compileSdk = 33
 
     // https://developer.android.com/studio/projects/configure-agp-ndk
     ndkVersion '25.1.8937393'
@@ -38,23 +37,23 @@ android {
 
     signingConfigs {
         release {
-            keyAlias props['sign.keyAlias']
-            keyPassword props['sign.keyPassword']
-            storeFile file(props['sign.storeFile'])
-            storePassword props['sign.storePassword']
+            storeFile file(props["sign.storeFile"])
+            storePassword props["sign.storePassword"]
+            keyAlias props["sign.keyAlias"]
+            keyPassword props["sign.keyPassword"]
         }
     }
 
     defaultConfig {
-        applicationId "com.hardbacknutter.sshd"
-        versionCode 3
-        versionName "1.0.2"
+        applicationId = "com.hardbacknutter.sshd"
+        versionCode = 3
+        versionName = "1.0.2"
 
         // Android 11 as minimum... there are far to many issues/differences dealing
         // with storage permissions if we try for Android 10 or lower
         // See https://developer.android.com/training/data-storage
-        minSdk 30
-        targetSdk 33
+        minSdk = 30
+        targetSdk = 33
 
         externalNativeBuild {
             cmake {
@@ -63,9 +62,9 @@ android {
             }
         }
 
-        signingConfig signingConfigs.release
+        signingConfig(signingConfigs.release)
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("int", "NR_OF_LOG_LINES", "50")
     }
@@ -73,50 +72,50 @@ android {
     buildTypes {
         // don't use for real builds
         abstractRelease {
-            minifyEnabled true
-            shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
-                    'proguard-rules.pro'
+            minifyEnabled = true
+            shrinkResources = true
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"),
+                    "proguard-rules.pro"
         }
 
         release {
-            initWith abstractRelease
+            initWith(abstractRelease)
             externalNativeBuild {
                 cmake {
-                    abiFilters 'armeabi-v7a', 'arm64-v8a'
+                    abiFilters("armeabi-v7a", "arm64-v8a")
                 }
             }
         }
 
         // Only x86_64 for the emulator.
         release_x86_64 {
-            initWith abstractRelease
+            initWith(abstractRelease)
             externalNativeBuild {
                 cmake {
-                    abiFilters 'x86_64'
+                    abiFilters("x86_64")
                 }
             }
         }
 
         // Only x86_64 for the emulator.
         debug {
-            debuggable true
-            versionNameSuffix "-debug"
-            applicationIdSuffix ".debug"
+            debuggable = true
+            versionNameSuffix = "-debug"
+            applicationIdSuffix = ".debug"
             buildConfigField("int", "NR_OF_LOG_LINES", "500")
             externalNativeBuild {
                 cmake {
-                    abiFilters /* 'armeabi-v7a', 'arm64-v8a', */ 'x86_64'
+                    abiFilters( /* "armeabi-v7a", "arm64-v8a", */ "x86_64")
                 }
             }
         }
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
 
-        coreLibraryDesugaringEnabled true
+        coreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -150,22 +149,22 @@ android {
 
     lint {
         // allow command line builds to complete
-        abortOnError false
+        abortOnError = false
     }
 }
 
 dependencies {
     // https://github.com/google/desugar_jdk_libs
-    coreLibraryDesugaring('com.android.tools:desugar_jdk_libs_nio:2.0.3')
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs_nio:2.0.3")
 
-    implementation('androidx.activity:activity-ktx:1.7.2')
-    implementation('androidx.fragment:fragment:1.6.0')
-    implementation('androidx.appcompat:appcompat:1.7.0-alpha02')
+    implementation("androidx.activity:activity-ktx:1.7.2")
+    implementation("androidx.fragment:fragment:1.6.1")
+    implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.core:core-ktx:1.10.1")
-    implementation('androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1')
-    implementation('androidx.lifecycle:lifecycle-livedata-ktx:2.6.1')
-    implementation("androidx.preference:preference:1.2.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
+    implementation("androidx.preference:preference:1.2.1")
     implementation("androidx.transition:transition:1.4.1")
-    implementation('com.google.android.material:material:1.9.0')
+    implementation("com.google.android.material:material:1.9.0")
 }
