@@ -142,8 +142,9 @@ android {
     }
 
     packagingOptions {
-        // Set to true because android:extractNativeLibs is set to "true"
-        // in AndroidManifest.xml.
+        // This is extremely important.
+        // We need the libs available to the C execv() call,
+        // which means they MUST be extracted from the apk file.
         jniLibs.useLegacyPackaging = true
     }
 
