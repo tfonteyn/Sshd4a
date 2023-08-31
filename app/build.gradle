@@ -23,7 +23,7 @@ if (project.hasProperty("Sshd4a.properties")) {
 
 android {
     namespace = "com.hardbacknutter.sshd"
-    compileSdk = 33
+    compileSdk = 34
 
     // https://developer.android.com/studio/projects/configure-agp-ndk
     ndkVersion '25.1.8937393'
@@ -53,7 +53,7 @@ android {
         // with storage permissions if we try for Android 10 or lower
         // See https://developer.android.com/training/data-storage
         minSdk = 30
-        targetSdk = 33
+        targetSdk = 34
 
         externalNativeBuild {
             cmake {
@@ -134,8 +134,8 @@ android {
             returnDefaultValues = false
             all {
                 reports {
-                    junitXml.enabled = true
-                    html.enabled = false
+                    junitXml.getRequired().set(true)
+                    html.getRequired().set(false)
                 }
             }
         }
