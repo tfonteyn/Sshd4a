@@ -23,10 +23,10 @@ if (project.hasProperty("Sshd4a.properties")) {
 
 android {
     namespace = "com.hardbacknutter.sshd"
-    compileSdk = 34
+    compileSdk = rootProject.ext.compileSdkVersion
 
     // https://developer.android.com/studio/projects/configure-agp-ndk
-    ndkVersion '25.1.8937393'
+    ndkVersion '26.1.10909125'
 
     externalNativeBuild {
         cmake {
@@ -45,15 +45,12 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.hardbacknutter.sshd"
-        versionCode = 3
-        versionName = "1.0.2"
+        applicationId = rootProject.ext.applicationId
+        versionCode = rootProject.ext.applicationVersionCode
+        versionName = rootProject.ext.applicationVersionName
 
-        // Android 11 as minimum... there are far to many issues/differences dealing
-        // with storage permissions if we try for Android 10 or lower
-        // See https://developer.android.com/training/data-storage
-        minSdk = 30
-        targetSdk = 34
+        minSdk = rootProject.ext.minSdkVersion
+        targetSdk = rootProject.ext.targetSdkVersion
 
         externalNativeBuild {
             cmake {
@@ -151,6 +148,13 @@ android {
     lint {
         // allow command line builds to complete
         abortOnError = false
+    }
+
+    applicationVariants.all {
+        final variant ->
+            variant.outputs.all {
+                outputFileName = "${rootProject.name}-${rootProject.ext.applicationVersionName}-${variant.name}.apk"
+            }
     }
 }
 

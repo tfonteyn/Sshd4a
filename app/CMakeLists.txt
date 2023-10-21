@@ -683,6 +683,7 @@ set(SRC_DROPBEAR_SCP
         )
 
 set(SRC_SFTP_SERVER
+        src/main/cpp/openssh/openbsd-compat/bsd-closefrom.c
         src/main/cpp/openssh/openbsd-compat/bsd-misc.c
         src/main/cpp/openssh/openbsd-compat/explicit_bzero.c
         src/main/cpp/openssh/openbsd-compat/fmt_scaled.c
@@ -692,11 +693,16 @@ set(SRC_SFTP_SERVER
         src/main/cpp/openssh/openbsd-compat/reallocarray.c
         src/main/cpp/openssh/openbsd-compat/recallocarray.c
         src/main/cpp/openssh/openbsd-compat/strmode.c
+        src/main/cpp/openssh/openbsd-compat/strtonum.c
+        src/main/cpp/openssh/openbsd-compat/timingsafe_bcmp.c
         src/main/cpp/openssh/openbsd-compat/vis.c
+        src/main/cpp/openssh/addr.c
+        src/main/cpp/openssh/addrmatch.c
         src/main/cpp/openssh/atomicio.c
         src/main/cpp/openssh/entropy.c
         src/main/cpp/openssh/fatal.c
         src/main/cpp/openssh/log.c
+        src/main/cpp/openssh/platform-misc.c
         src/main/cpp/openssh/platform-pledge.c
         src/main/cpp/openssh/platform-tracing.c
         src/main/cpp/openssh/match.c

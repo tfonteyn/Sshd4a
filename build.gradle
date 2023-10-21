@@ -7,3 +7,16 @@ plugins {
 tasks.register("clean", Delete) {
     delete(rootProject.layout.buildDirectory)
 }
+
+ext {
+    applicationId = "com.hardbacknutter.sshd"
+    applicationVersionCode = 4
+    applicationVersionName = "1.0.3"
+
+    // Android 11 as minimum... there are far to many issues/differences dealing
+    // with storage permissions if we try for Android 10 or lower
+    // See https://developer.android.com/training/data-storage
+    minSdkVersion = 30
+    targetSdkVersion = 34
+    compileSdkVersion = 34
+}
