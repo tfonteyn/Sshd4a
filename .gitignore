@@ -5,9 +5,12 @@
 .gradle
 /.idea/assetWizardSettings.xml
 /.idea/caches
+/.idea/checkstyle-idea.xml
 /.idea/codeStyles/Project.xml
 /.idea/codeStyles/codeStyleConfig.xml
 /.idea/deploymentTargetDropDown.xml
+/.idea/deploymentTargetSelector.xml
+/.idea/inspectionProfiles/Project_Default.xml
 /.idea/libraries
 /.idea/modules.xml
 /.idea/navEditor.xml
@@ -16,5 +19,3 @@
 /captures
 /local.properties
 local.properties
-/.idea/inspectionProfiles/Project_Default.xml
-/.idea/checkstyle-idea.xml
