@@ -128,7 +128,10 @@ public class SettingsFragment
 
     @Override
     public void onSharedPreferenceChanged(@NonNull final SharedPreferences sharedPreferences,
-                                          @NonNull final String key) {
+                                          @Nullable final String key) {
+        if (key == null) {
+            return;
+        }
         switch (key) {
             case Prefs.RUN_ON_BOOT:
             case Prefs.RUN_IN_FOREGROUND: {
