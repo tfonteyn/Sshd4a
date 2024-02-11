@@ -1,0 +1,4 @@
+* text eol=lf
+*.txt text
+*.png binary
+
