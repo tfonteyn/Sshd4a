@@ -18,7 +18,7 @@ public class MainActivity
 
         final Toolbar toolbar = findViewById(R.id.toolbar);
         if (toolbar != null) {
-            toolbar.setNavigationOnClickListener(v -> onBackPressed());
+            toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
         }
 
         final FragmentManager fm = getSupportFragmentManager();
