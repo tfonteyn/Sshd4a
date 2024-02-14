@@ -1,5 +1,6 @@
 Makefile
 buildpkg.sh
+config.h
 config.h.in
 config.h.in~
 config.log
