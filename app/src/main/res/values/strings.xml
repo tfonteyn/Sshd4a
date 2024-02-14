@@ -8,7 +8,7 @@
         \n
         \ndropbear 2022.82
         \nrsync 3.2.6
-        \nsftp-server from OpenSSH 9.1p1
+        \nsftp-server from OpenSSH 9.6p1
     </string>
 
     <string name="msg_request_files_management">
