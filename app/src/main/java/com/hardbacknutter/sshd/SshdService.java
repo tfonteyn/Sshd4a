@@ -39,19 +39,24 @@ import java.util.stream.Collectors;
  * <a href="https://developer.android.com/guide/components/services.html#Lifecycle">
  * https://developer.android.com/guide/components/services.html#Lifecycle</a>
  * <p>
+ * <p>
+ * Windows OS port forwarding from the external listenaddress to the localhost:
+ * Use "ipconfig" on the windows box to get your current address.
+ * <pre>
+ *     netsh interface portproxy add v4tov4 listenaddress=<host-ip> listenport=2222 connectaddress=127.0.0.1 connectport=2222
+ * </pre>
+ * <p>
+ * Open the firewall:
+ * <pre>
+ *     netsh advfirewall firewall add rule name="ALLOW TCP PORT 2222" dir=in action=allow protocol=TCP localport=2222
+ * </pre>
+ * <p>
  * To access the emulator from a shell on the emulator hosting machine, run:
  * <pre>
  *    adb forward tcp:2222 tcp:2222
  *    ssh -p 2222 localhost
  * </pre>
- * Windows OS port forwarding from the external address to the localhost:
- * <pre>
- *     netsh interface portproxy add v4tov4 listenaddress=<host-ip> listenport=2222 connectaddress=127.0.0.1 connectport=2222
- * </pre>
- * Open the firewall:
- * <pre>
- *     netsh advfirewall firewall add rule name="ALLOW TCP PORT 2222" dir=in action=allow protocol=TCP localport=2222
- * </pre>
+ * <p>
  * Close the firewall:
  * <pre>
  *     netsh advfirewall firewall delete rule name="ALLOW TCP PORT 2222"
@@ -150,6 +155,7 @@ public class SshdService
         return null;
     }
 
+    @Nullable
     private static ComponentName startService(@NonNull final Context context,
                                               final boolean runInForeground)
             throws IllegalStateException {
