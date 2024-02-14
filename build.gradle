@@ -10,8 +10,8 @@ tasks.register("clean", Delete) {
 
 ext {
     applicationId = "com.hardbacknutter.sshd"
-    applicationVersionCode = 4
-    applicationVersionName = "1.1.0"
+    applicationVersionCode = 5
+    applicationVersionName = "1.1.1"
 
     // Android 11 as minimum... there are far to many issues/differences dealing
     // with storage permissions if we try for Android 10 or lower
