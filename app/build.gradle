@@ -21,12 +21,16 @@ if (project.hasProperty("Sshd4a.properties")) {
     }
 }
 
+kotlin {
+    jvmToolchain rootProject.ext.toolChain
+}
+
 android {
     namespace = "com.hardbacknutter.sshd"
     compileSdk = rootProject.ext.compileSdkVersion
 
     // https://developer.android.com/studio/projects/configure-agp-ndk
-    ndkVersion '26.1.10909125'
+    ndkVersion '26.2.11394342'
 
     externalNativeBuild {
         cmake {
@@ -45,9 +49,9 @@ android {
     }
 
     defaultConfig {
-        applicationId = rootProject.ext.applicationId
-        versionCode = rootProject.ext.applicationVersionCode
-        versionName = rootProject.ext.applicationVersionName
+        applicationId = "com.hardbacknutter.sshd"
+        versionCode = 5
+        versionName = "1.1.1"
 
         minSdk = rootProject.ext.minSdkVersion
         targetSdk = rootProject.ext.targetSdkVersion
@@ -110,13 +114,13 @@ android {
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_17
 
         coreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
-        jvmTarget = 11
+        jvmTarget = rootProject.ext.toolChain
     }
 
     buildFeatures {
@@ -153,7 +157,7 @@ android {
     applicationVariants.all {
         final variant ->
             variant.outputs.all {
-                outputFileName = "${rootProject.name}-${rootProject.ext.applicationVersionName}-${variant.name}.apk"
+                outputFileName = "${rootProject.name}-${defaultConfig.versionName}-${variant.name}.apk"
             }
     }
 }

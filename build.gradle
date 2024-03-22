@@ -1,7 +1,7 @@
 plugins {
-    id("com.android.application") version '8.3.0-rc02' apply false
-    id("com.android.library") version '8.3.0-rc02' apply false
-    id("org.jetbrains.kotlin.android") version "1.9.22" apply false
+    id("com.android.application") version '8.3.1' apply false
+    id("com.android.library") version '8.3.1' apply false
+    id("org.jetbrains.kotlin.android") version "1.9.23" apply false
 }
 
 tasks.register("clean", Delete) {
@@ -9,13 +9,10 @@ tasks.register("clean", Delete) {
 }
 
 ext {
-    applicationId = "com.hardbacknutter.sshd"
-    applicationVersionCode = 5
-    applicationVersionName = "1.1.1"
-
     // Android 11 as minimum... there are far to many issues/differences dealing
     // with storage permissions if we try for Android 10 or lower
     // See https://developer.android.com/training/data-storage
+    toolChain = 17
     minSdkVersion = 30
     targetSdkVersion = 34
     compileSdkVersion = 34
