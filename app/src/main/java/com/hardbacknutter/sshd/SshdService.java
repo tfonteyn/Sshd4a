@@ -53,7 +53,11 @@ import java.util.stream.Collectors;
  * <p>
  * To access the emulator from a shell on the emulator hosting machine, run:
  * <pre>
+ *    # optional / might be needed!
+ *    adb root
+ *    # enable the forward
  *    adb forward tcp:2222 tcp:2222
+ *    # you can now connect to the sshd server on the emulator with:
  *    ssh -p 2222 localhost
  * </pre>
  * <p>
