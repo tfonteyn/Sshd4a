@@ -89,6 +89,7 @@ public class MainFragment
         //noinspection ConstantConditions
         vm.init(getContext());
         vm.onLogUpdate().observe(getViewLifecycleOwner(), output -> {
+            // We always replace the WHOLE content. TODO: receive and append updates only
             vb.log.setText(output);
             vb.logScroller.post(() -> vb.logScroller.fullScroll(ScrollView.FOCUS_DOWN));
         });
@@ -254,6 +255,7 @@ public class MainFragment
             menuInflater.inflate(R.menu.main_menu, menu);
 
             final MenuItem menuItem = menu.findItem(R.id.start_action);
+            //noinspection DataFlowIssue
             startButton = menuItem.getActionView().findViewById(R.id.btn_start);
             startButton.setOnClickListener(v -> onMenuItemSelected(menuItem));
         }
@@ -271,6 +273,7 @@ public class MainFragment
                     //noinspection ConstantConditions
                     vm.stopService(getContext());
                 } else {
+                    vb.log.setText("");
                     //noinspection ConstantConditions
                     if (!vm.startService(getContext())) {
                         //noinspection ConstantConditions
