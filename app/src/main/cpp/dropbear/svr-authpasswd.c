@@ -177,7 +177,7 @@ void svr_auth_password(int valid_user) {
 	}
 #ifdef ANDROID_SSHD_SINGLE_USE_PASSWORD
     free(testcrypt);
-#endif
+#endif /* ANDROID_SSHD_SINGLE_USE_PASSWORD */
 }
 
 #endif

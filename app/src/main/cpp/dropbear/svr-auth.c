@@ -189,7 +189,7 @@ void recv_msg_userauth_request() {
 	if (
 #ifdef ANDROID_SSHD_SINGLE_USE_PASSWORD
             (ses.authstate.authtypes & AUTH_TYPE_PUBKEY) &&
-#endif
+#endif /* ANDROID_SSHD_SINGLE_USE_PASSWORD */
         methodlen == AUTH_METHOD_PUBKEY_LEN &&
 			strncmp(methodname, AUTH_METHOD_PUBKEY,
 				AUTH_METHOD_PUBKEY_LEN) == 0) {
