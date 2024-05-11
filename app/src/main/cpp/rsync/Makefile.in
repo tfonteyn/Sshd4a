@@ -1,0 +1,369 @@
+# The Makefile for rsync (configure creates it from Makefile.in).
+
+prefix=@prefix@
+datarootdir=@datarootdir@
+exec_prefix=@exec_prefix@
+bindir=@bindir@
+libdir=@libdir@/rsync
+mandir=@mandir@
+with_rrsync=@with_rrsync@
+
+LIBS=@LIBS@
+CC=@CC@
+AWK=@AWK@
+CFLAGS=@CFLAGS@
+CPPFLAGS=@CPPFLAGS@
+CXX=@CXX@
+CXXFLAGS=@CXXFLAGS@
+EXEEXT=@EXEEXT@
+LDFLAGS=@LDFLAGS@
+LIBOBJDIR=lib/
+
+INSTALLCMD=@INSTALL@
+INSTALLMAN=@INSTALL@
+
+srcdir=@srcdir@
+MKDIR_P=@MKDIR_P@
+VPATH=$(srcdir)
+SHELL=/bin/sh
+
+.SUFFIXES:
+.SUFFIXES: .c .o
+
+ROLL_SIMD_x86_64=simd-checksum-x86_64.o
+ROLL_ASM_x86_64=simd-checksum-avx2.o
+MD5_ASM_x86_64=lib/md5-asm-x86_64.o
+
+GENFILES=configure.sh aclocal.m4 config.h.in rsync.1 rsync.1.html \
+	 rsync-ssl.1 rsync-ssl.1.html rsyncd.conf.5 rsyncd.conf.5.html \
+	 @GEN_RRSYNC@
+HEADERS=byteorder.h config.h errcode.h proto.h rsync.h ifuncs.h itypes.h inums.h \
+	lib/pool_alloc.h lib/mdigest.h lib/md-defines.h
+LIBOBJ=lib/wildmatch.o lib/compat.o lib/snprintf.o lib/mdfour.o lib/md5.o \
+	lib/permstring.o lib/pool_alloc.o lib/sysacls.o lib/sysxattrs.o @LIBOBJS@
+zlib_OBJS=zlib/deflate.o zlib/inffast.o zlib/inflate.o zlib/inftrees.o \
+	zlib/trees.o zlib/zutil.o zlib/adler32.o zlib/compress.o zlib/crc32.o
+OBJS1=flist.o rsync.o generator.o receiver.o cleanup.o sender.o exclude.o \
+	util1.o util2.o main.o checksum.o match.o syscall.o log.o backup.o delete.o
+OBJS2=options.o io.o compat.o hlink.o token.o uidlist.o socket.o hashtable.o \
+	usage.o fileio.o batch.o clientname.o chmod.o acls.o xattrs.o
+OBJS3=progress.o pipe.o @MD5_ASM@ @ROLL_SIMD@ @ROLL_ASM@
+DAEMON_OBJ = params.o loadparm.o clientserver.o access.o connection.o authenticate.o
+popt_OBJS=popt/findme.o  popt/popt.o  popt/poptconfig.o \
+	popt/popthelp.o popt/poptparse.o
+OBJS=$(OBJS1) $(OBJS2) $(OBJS3) $(DAEMON_OBJ) $(LIBOBJ) @BUILD_ZLIB@ @BUILD_POPT@
+
+TLS_OBJ = tls.o syscall.o util2.o t_stub.o lib/compat.o lib/snprintf.o lib/permstring.o lib/sysxattrs.o @BUILD_POPT@
+
+# Programs we must have to run the test cases
+CHECK_PROGS = rsync$(EXEEXT) tls$(EXEEXT) getgroups$(EXEEXT) getfsdev$(EXEEXT) \
+	testrun$(EXEEXT) trimslash$(EXEEXT) t_unsafe$(EXEEXT) wildtest$(EXEEXT)
+
+CHECK_SYMLINKS = testsuite/chown-fake.test testsuite/devices-fake.test testsuite/xattrs-hlink.test
+
+# Objects for CHECK_PROGS to clean
+CHECK_OBJS=tls.o testrun.o getgroups.o getfsdev.o t_stub.o t_unsafe.o trimslash.o wildtest.o
+
+# note that the -I. is needed to handle config.h when using VPATH
+.c.o:
+@OBJ_SAVE@
+	$(CC) -I. -I$(srcdir) $(CFLAGS) $(CPPFLAGS) -c $< @CC_SHOBJ_FLAG@
+@OBJ_RESTORE@
+
+# NOTE: consider running "packaging/smart-make" instead of "make" to auto-handle
+# any changes to configure.sh and the main Makefile prior to a "make all".
+all: Makefile rsync$(EXEEXT) stunnel-rsyncd.conf @MAKE_RRSYNC@ @MAKE_MAN@
+.PHONY: all
+
+.PHONY: install
+install: all
+	-$(MKDIR_P) $(DESTDIR)$(bindir)
+	$(INSTALLCMD) $(INSTALL_STRIP) -m 755 rsync$(EXEEXT) $(DESTDIR)$(bindir)
+	$(INSTALLCMD) -m 755 $(srcdir)/rsync-ssl $(DESTDIR)$(bindir)
+	-$(MKDIR_P) $(DESTDIR)$(mandir)/man1
+	-$(MKDIR_P) $(DESTDIR)$(mandir)/man5
+	if test -f rsync.1; then $(INSTALLMAN) -m 644 rsync.1 $(DESTDIR)$(mandir)/man1; fi
+	if test -f rsync-ssl.1; then $(INSTALLMAN) -m 644 rsync-ssl.1 $(DESTDIR)$(mandir)/man1; fi
+	if test -f rsyncd.conf.5; then $(INSTALLMAN) -m 644 rsyncd.conf.5 $(DESTDIR)$(mandir)/man5; fi
+	if test "$(with_rrsync)" = yes; then \
+	    $(INSTALLCMD) -m 755 rrsync $(DESTDIR)$(bindir); \
+	    if test -f rrsync.1; then $(INSTALLMAN) -m 644 rrsync.1 $(DESTDIR)$(mandir)/man1; fi; \
+	fi
+
+install-ssl-daemon: stunnel-rsyncd.conf
+	-$(MKDIR_P) $(DESTDIR)/etc/stunnel
+	$(INSTALLCMD) -m 644 stunnel-rsyncd.conf $(DESTDIR)/etc/stunnel/rsyncd.conf
+	@if ! ls /etc/rsync-ssl/certs/server.* >/dev/null 2>/dev/null; then \
+	    echo "Note that you'll need to install the certificate used by /etc/stunnel/rsyncd.conf"; \
+	fi
+
+install-all: install install-ssl-daemon
+
+install-strip:
+	$(MAKE) INSTALL_STRIP='-s' install
+
+rsync$(EXEEXT): $(OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+
+rrsync: support/rrsync
+	cp -p $(srcdir)/support/rrsync rrsync
+
+$(OBJS): $(HEADERS)
+$(CHECK_OBJS): $(HEADERS)
+tls.o xattrs.o: lib/sysxattrs.h
+usage.o: version.h latest-year.h help-rsync.h help-rsyncd.h git-version.h default-cvsignore.h
+loadparm.o: default-dont-compress.h daemon-parm.h
+
+flist.o: rounding.h
+
+default-cvsignore.h default-dont-compress.h: rsync.1.md define-from-md.awk
+	$(AWK) -f $(srcdir)/define-from-md.awk -v hfile=$@ $(srcdir)/rsync.1.md
+
+help-rsync.h help-rsyncd.h: rsync.1.md help-from-md.awk
+	$(AWK) -f $(srcdir)/help-from-md.awk -v hfile=$@ $(srcdir)/rsync.1.md
+
+daemon-parm.h: daemon-parm.txt daemon-parm.awk
+	$(AWK) -f $(srcdir)/daemon-parm.awk $(srcdir)/daemon-parm.txt
+
+rounding.h: rounding.c rsync.h proto.h
+	@for r in 0 1 3; do \
+	    if $(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o rounding -DEXTRA_ROUNDING=$$r -I. $(srcdir)/rounding.c >rounding.out 2>&1; then \
+		echo "#define EXTRA_ROUNDING $$r" >rounding.h; \
+		if test -f "$$HOME/build_farm/build_test.fns"; then \
+		    echo "EXTRA_ROUNDING is $$r" >&2; \
+		fi; \
+		break; \
+	    fi; \
+	done
+	@rm -f rounding
+	@if test -f rounding.h; then : ; else \
+	    cat rounding.out 1>&2; \
+	    echo "Failed to create rounding.h!" 1>&2; \
+	    exit 1; \
+	fi
+	@rm -f rounding.out
+
+git-version.h: ALWAYS_RUN
+	$(srcdir)/mkgitver
+
+.PHONY: ALWAYS_RUN
+ALWAYS_RUN:
+
+simd-checksum-x86_64.o: simd-checksum-x86_64.cpp
+	@$(srcdir)/cmd-or-msg disable-roll-simd $(CXX) -I. $(CXXFLAGS) $(CPPFLAGS) -c -o $@ $(srcdir)/simd-checksum-x86_64.cpp
+
+simd-checksum-avx2.o: simd-checksum-avx2.S
+	@$(srcdir)/cmd-or-msg disable-roll-asm $(CC) $(CFLAGS) -I. @NOEXECSTACK@ -c -o $@ $(srcdir)/simd-checksum-avx2.S
+
+lib/md5-asm-x86_64.o: lib/md5-asm-x86_64.S lib/md-defines.h
+	@$(srcdir)/cmd-or-msg disable-md5-asm $(CC) -I. @NOEXECSTACK@ -c -o $@ $(srcdir)/lib/md5-asm-x86_64.S
+
+tls$(EXEEXT): $(TLS_OBJ)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(TLS_OBJ) $(LIBS)
+
+testrun$(EXEEXT): testrun.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ testrun.o
+
+getgroups$(EXEEXT): getgroups.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ getgroups.o $(LIBS)
+
+getfsdev$(EXEEXT): getfsdev.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ getfsdev.o $(LIBS)
+
+TRIMSLASH_OBJ = trimslash.o syscall.o util2.o t_stub.o lib/compat.o lib/snprintf.o
+trimslash$(EXEEXT): $(TRIMSLASH_OBJ)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(TRIMSLASH_OBJ) $(LIBS)
+
+T_UNSAFE_OBJ = t_unsafe.o syscall.o util1.o util2.o t_stub.o lib/compat.o lib/snprintf.o lib/wildmatch.o
+t_unsafe$(EXEEXT): $(T_UNSAFE_OBJ)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(T_UNSAFE_OBJ) $(LIBS)
+
+.PHONY: conf
+conf: configure.sh config.h.in
+
+.PHONY: gen
+gen: conf proto.h man git-version.h
+
+.PHONY: gensend
+gensend: gen
+	if ! diff git-version.h $(srcdir)/gists/rsync-git-version.h >/dev/null; then \
+	    ./rsync -ai git-version.h $(srcdir)/gists/rsync-git-version.h && \
+	    (cd $(srcdir)/gists && git commit --allow-empty-message -m '' rsync-git-version.h && git push) ; \
+	fi
+	rsync -aic $(GENFILES) git-version.h $${SAMBA_HOST-samba.org}:/home/ftp/pub/rsync/generated-files/ || true
+
+aclocal.m4: $(srcdir)/m4/*.m4
+	aclocal -I $(srcdir)/m4
+
+configure.sh config.h.in: configure.ac aclocal.m4
+	@if test -f configure.sh; then cp -p configure.sh configure.sh.old; else touch configure.sh.old; fi
+	@if test -f config.h.in; then cp -p config.h.in config.h.in.old; else touch config.h.in.old; fi
+	autoconf -o configure.sh
+	autoheader && touch config.h.in
+	@if diff configure.sh configure.sh.old >/dev/null 2>&1; then \
+	    echo "configure.sh is unchanged."; \
+	    rm configure.sh.old; \
+	else \
+	    echo "configure.sh has CHANGED."; \
+	fi
+	@if diff config.h.in config.h.in.old >/dev/null 2>&1; then \
+	    echo "config.h.in is unchanged."; \
+	    rm config.h.in.old; \
+	else \
+	    echo "config.h.in has CHANGED."; \
+	fi
+	@if test -f configure.sh.old || test -f config.h.in.old; then \
+	    if test "$(MAKECMDGOALS)" = reconfigure; then \
+		echo 'Continuing with "make reconfigure".'; \
+	    else \
+		echo 'You may need to run:'; \
+		echo '  make reconfigure'; \
+		exit 1; \
+	    fi \
+	fi
+
+.PHONY: reconfigure
+reconfigure: configure.sh
+	./config.status --recheck
+	./config.status
+
+.PHONY: restatus
+restatus:
+	./config.status
+
+Makefile: Makefile.in config.status configure.sh config.h.in
+	@if test -f Makefile; then cp -p Makefile Makefile.old; else touch Makefile.old; fi
+	@./config.status
+	@if diff Makefile Makefile.old >/dev/null 2>&1; then \
+	    echo "Makefile is unchanged."; \
+	    rm Makefile.old; \
+	else \
+	    if test "$(MAKECMDGOALS)" = reconfigure; then \
+		echo 'Continuing with "make reconfigure".'; \
+	    else \
+		echo "Makefile updated -- rerun your make command."; \
+		exit 1; \
+	    fi \
+	fi
+
+stunnel-rsyncd.conf: $(srcdir)/stunnel-rsyncd.conf.in Makefile
+	sed 's;\@bindir\@;$(bindir);g' <$(srcdir)/stunnel-rsyncd.conf.in >stunnel-rsyncd.conf
+
+.PHONY: proto
+proto: proto.h-tstamp
+
+proto.h: proto.h-tstamp
+	@if test -f proto.h; then :; else cp -p $(srcdir)/proto.h .; fi
+
+proto.h-tstamp: $(srcdir)/*.c $(srcdir)/lib/compat.c daemon-parm.h
+	$(AWK) -f $(srcdir)/mkproto.awk $(srcdir)/*.c $(srcdir)/lib/compat.c daemon-parm.h
+
+.PHONY: man
+man: rsync.1 rsync-ssl.1 rsyncd.conf.5 @MAKE_RRSYNC_1@
+
+rsync.1: rsync.1.md md-convert version.h Makefile
+	@$(srcdir)/maybe-make-man rsync.1.md
+
+rsync-ssl.1: rsync-ssl.1.md md-convert version.h Makefile
+	@$(srcdir)/maybe-make-man rsync-ssl.1.md
+
+rsyncd.conf.5: rsyncd.conf.5.md md-convert version.h Makefile
+	@$(srcdir)/maybe-make-man rsyncd.conf.5.md
+
+rrsync.1: support/rrsync.1.md md-convert Makefile
+	@$(srcdir)/maybe-make-man support/rrsync.1.md
+
+.PHONY: clean
+clean: cleantests
+	rm -f *~ $(OBJS) $(CHECK_PROGS) $(CHECK_OBJS) $(CHECK_SYMLINKS) @MAKE_RRSYNC@ \
+		git-version.h rounding rounding.h *.old rsync*.1 rsync*.5 @MAKE_RRSYNC_1@ \
+		*.html daemon-parm.h help-*.h default-*.h proto.h proto.h-tstamp
+
+.PHONY: cleantests
+cleantests:
+	rm -rf ./testtmp*
+
+# We try to delete built files from both the source and build
+# directories, just in case somebody previously configured things in
+# the source directory.
+.PHONY: distclean
+distclean: clean
+	for dir in $(srcdir) . ; do \
+	    (cd "$$dir" && rm -rf Makefile config.h config.status stunnel-rsyncd.conf \
+	     lib/dummy popt/dummy zlib/dummy config.cache config.log shconfig \
+	     $(GENFILES) autom4te.cache) ; \
+	done
+
+# this target is really just for my use. It only works on a limited
+# range of machines and is used to produce a list of potentially
+# dead (ie. unused) functions in the code. (tridge)
+.PHONY: finddead
+finddead:
+	nm *.o */*.o |grep 'U ' | awk '{print $$2}' | sort -u > nmused.txt
+	nm *.o */*.o |grep 'T ' | awk '{print $$3}' | sort -u > nmfns.txt
+	comm -13 nmused.txt nmfns.txt
+	@rm nmused.txt nmfns.txt
+
+# 'check' is the GNU name, 'test' is the name for everybody else :-)
+.PHONY: test
+test: check
+
+# There seems to be no standard way to specify some variables as
+# exported from a Makefile apart from listing them like this.
+
+# This depends on building rsync; if we need any helper programs it
+# should depend on them too.
+
+# We try to run the scripts with POSIX mode on, in the hope that will
+# catch Bash-isms earlier even if we're running on GNU.  Of course, we
+# might lose in the future where POSIX diverges from old sh.
+
+.PHONY: check
+check: all $(CHECK_PROGS) $(CHECK_SYMLINKS)
+	rsync_bin=`pwd`/rsync$(EXEEXT) $(srcdir)/runtests.sh
+
+.PHONY: check29
+check29: all $(CHECK_PROGS) $(CHECK_SYMLINKS)
+	rsync_bin=`pwd`/rsync$(EXEEXT) $(srcdir)/runtests.sh --protocol=29
+
+.PHONY: check30
+check30: all $(CHECK_PROGS) $(CHECK_SYMLINKS)
+	rsync_bin=`pwd`/rsync$(EXEEXT) $(srcdir)/runtests.sh --protocol=30
+
+wildtest.o: wildtest.c t_stub.o lib/wildmatch.c rsync.h config.h
+wildtest$(EXEEXT): wildtest.o lib/compat.o lib/snprintf.o @BUILD_POPT@
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ wildtest.o lib/compat.o lib/snprintf.o @BUILD_POPT@ $(LIBS)
+
+testsuite/chown-fake.test:
+	ln -s chown.test $(srcdir)/testsuite/chown-fake.test
+
+testsuite/devices-fake.test:
+	ln -s devices.test $(srcdir)/testsuite/devices-fake.test
+
+testsuite/xattrs-hlink.test:
+	ln -s xattrs.test $(srcdir)/testsuite/xattrs-hlink.test
+
+# This does *not* depend on building or installing: you can use it to
+# check a version installed from a binary or some other source tree,
+# if you want.
+
+.PHONY: installcheck
+installcheck: $(CHECK_PROGS) $(CHECK_SYMLINKS)
+	POSIXLY_CORRECT=1 TOOLDIR=`pwd` rsync_bin="$(bindir)/rsync$(EXEEXT)" srcdir="$(srcdir)" $(srcdir)/runtests.sh
+
+# TODO: Add 'dist' target; need to know which files will be included
+
+# Run the SPLINT (Secure Programming Lint) tool.  <www.splint.org>
+.PHONY: splint
+splint:
+	splint +unixlib +gnuextensions -weak rsync.c
+
+.PHONY: doxygen
+doxygen:
+	cd $(srcdir) && rm dox/html/* && doxygen
+
+# for maintainers only
+.PHONY: doxygen-upload
+doxygen-upload:
+	rsync -avzv $(srcdir)/dox/html/ --delete \
+	$${SAMBA_HOST-samba.org}:/home/httpd/html/rsync/doxygen/head/
