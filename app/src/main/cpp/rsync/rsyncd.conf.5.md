@@ -74,25 +74,7 @@ reread the `rsyncd.conf` file. The file is re-read on each client connection.
 ## GLOBAL PARAMETERS
 
 The first parameters in the file (before a [module] header) are the global
-parameters.  Rsync also allows for the use of a "[global]" module name to
-indicate the start of one or more global-parameter sections (the name must be
-lower case).
-
-You may also include any module parameters in the global part of the config
-file in which case the supplied value will override the default for that
-parameter.
-
-You may use references to environment variables in the values of parameters.
-String parameters will have %VAR% references expanded as late as possible (when
-the string is first used in the program), allowing for the use of variables
-that rsync sets at connection time, such as RSYNC_USER_NAME.  Non-string
-parameters (such as true/false settings) are expanded when read from the config
-file.  If a variable does not exist in the environment, or if a sequence of
-characters is not a valid reference (such as an un-paired percent sign), the
-raw characters are passed through unchanged.  This helps with backward
-compatibility and safety (e.g. expanding a non-existent %VAR% to an empty
-string in a path could result in a very unsafe path).  The safest way to insert
-a literal % into a value is to use %%.
+parameters:
 
 [comment]: # (An OL starting at 0 is converted into a DL by the parser.)
 
@@ -138,6 +120,22 @@ a literal % into a value is to use %%.
     You can override the default backlog value when the daemon listens for
     connections.  It defaults to 5.
 
+You may also include any [MODULE PARAMETERS](#) in the global part of the
+config file, in which case the supplied value will override the default for
+that parameter.
+
+You may use references to environment variables in the values of parameters.
+String parameters will have %VAR% references expanded as late as possible (when
+the string is first used in the program), allowing for the use of variables
+that rsync sets at connection time, such as RSYNC_USER_NAME.  Non-string
+parameters (such as true/false settings) are expanded when read from the config
+file.  If a variable does not exist in the environment, or if a sequence of
+characters is not a valid reference (such as an un-paired percent sign), the
+raw characters are passed through unchanged.  This helps with backward
+compatibility and safety (e.g. expanding a non-existent %VAR% to an empty
+string in a path could result in a very unsafe path).  The safest way to insert
+a literal % into a value is to use %%.
+
 ## MODULE PARAMETERS
 
 After the global parameters you should define a number of modules, each module
@@ -146,11 +144,17 @@ a module name in square brackets [module] followed by the parameters for that
 module.  The module name cannot contain a slash or a closing square bracket.
 If the name contains whitespace, each internal sequence of whitespace will be
 changed into a single space, while leading or trailing whitespace will be
-discarded.  Also, the name cannot be "global" as that exact name indicates that
-global parameters follow (see above).
+discarded.
 
-As with GLOBAL PARAMETERS, you may use references to environment variables in
-the values of parameters.  See the GLOBAL PARAMETERS section for more details.
+There is also a special module name of "[global]" that does not define a module
+but instead switches back to the global settings context where default
+parameters can be specified.  Because each defined module gets its full set of
+parameters as a combination of the default values that are set at that position
+in the config file plus its own parameter list, the use of a "[global]" section
+can help to maintain shared config values for multiple modules.
+
+As with [GLOBAL PARAMETERS](#), you may use references to environment variables
+in the values of parameters.  See that section for details.
 
 0.  `comment`
 
@@ -163,6 +167,16 @@ the values of parameters.  See the GLOBAL PARAMETERS section for more details.
     This parameter specifies the directory in the daemon's filesystem to make
     available in this module.  You must specify this parameter for each module
     in `rsyncd.conf`.
+
+    If the value contains a "/./" element then the path will be divided at that
+    point into a chroot dir and an inner-chroot subdir.  If [`use chroot`](#)
+    is set to false, though, the extraneous dot dir is just cleaned out of the
+    path.  An example of this idiom is:
+
+    >     path = /var/rsync/./module1
+
+    This will (when chrooting) chroot to "/var/rsync" and set the inside-chroot
+    path to "/module1".
 
     You may base the path's value off of an environment variable by surrounding
     the variable name with percent signs.  You can even reference a variable
@@ -187,29 +201,47 @@ the values of parameters.  See the GLOBAL PARAMETERS section for more details.
     path, and of complicating the preservation of users and groups by name (see
     below).
 
-    As an additional safety feature, you can specify a dot-dir in the module's
-    "[path](#)" to indicate the point where the chroot should occur.  This allows
-    rsync to run in a chroot with a non-"/" path for the top of the transfer
-    hierarchy.  Doing this guards against unintended library loading (since
-    those absolute paths will not be inside the transfer hierarchy unless you
-    have used an unwise pathname), and lets you setup libraries for the chroot
-    that are outside of the transfer.  For example, specifying
-    "/var/rsync/./module1" will chroot to the "/var/rsync" directory and set
-    the inside-chroot path to "/module1".  If you had omitted the dot-dir, the
-    chroot would have used the whole path, and the inside-chroot path would
-    have been "/".
+    If `use chroot` is not set, it defaults to trying to enable a chroot but
+    allows the daemon to continue (after logging a warning) if it fails. The
+    one exception to this is when a module's [`path`](#) has a "/./" chroot
+    divider in it -- this causes an unset value to be treated as true for that
+    module.
 
-    When both "use chroot" and "[daemon chroot](#)" are false, OR the inside-chroot
-    path of "use chroot" is not "/", rsync will: (1) munge symlinks by default
-    for security reasons (see "[munge symlinks](#)" for a way to turn this off, but
-    only if you trust your users), (2) substitute leading slashes in absolute
-    paths with the module's path (so that options such as `--backup-dir`,
-    `--compare-dest`, etc. interpret an absolute path as rooted in the module's
-    "[path](#)" dir), and (3) trim ".." path elements from args if rsync believes
-    they would escape the module hierarchy.  The default for "use chroot" is
-    true, and is the safer choice (especially if the module is not read-only).
+    Prior to rsync 3.2.7, the default value was "true".  The new "unset"
+    default makes it easier to setup an rsync daemon as a non-root user or to
+    run a daemon on a system where chroot fails.  Explicitly setting the value
+    to "true" in rsyncd.conf will always require the chroot to succeed.
 
-    When this parameter is enabled *and* the "[name converter](#)" parameter is
+    It is also possible to specify a dot-dir in the module's "[path](#)" to
+    indicate that you want to chdir to the earlier part of the path and then
+    serve files from inside the latter part of the path (with sanitizing and
+    default symlink munging).  This can be useful if you need some library dirs
+    inside the chroot (typically for uid & gid lookups) but don't want to put
+    the lib dir into the top of the served path (even though they can be hidden
+    with an [`exclude`](#) directive).  However, a better choice for a modern
+    rsync setup is to use a [`name converter`](#)" and try to avoid inner lib
+    dirs altogether.  See also the [`daemon chroot`](#) parameter, which causes
+    rsync to chroot into its own chroot area before doing any path-related
+    chrooting.
+
+    If the daemon is serving the "/" dir (either directly or due to being
+    chrooted to the module's path), rsync does not do any path sanitizing or
+    (default) munging.
+
+    When it has to limit access to a particular subdir (either due to chroot
+    being disabled or having an inside-chroot path set), rsync will munge
+    symlinks (by default) and sanitize paths.  Those that dislike munged
+    symlinks (and really, really trust their users to not break out of the
+    subdir) can disable the symlink munging via the "[munge symlinks](#)"
+    parameter.
+
+    When rsync is sanitizing paths, it trims ".." path elements from args that
+    it believes would escape the module hierarchy. It also substitutes leading
+    slashes in absolute paths with the module's path (so that options such as
+    `--backup-dir` & `--compare-dest` interpret an absolute path as rooted in
+    the module's "[path](#)" dir).
+
+    When a chroot is in effect *and* the "[name converter](#)" parameter is
     *not* set, the "[numeric ids](#)" parameter will default to being enabled
     (disabling name lookups).  This means that if you manually setup
     name-lookup libraries in your chroot (instead of using a name converter)
@@ -991,7 +1023,7 @@ the values of parameters.  See the GLOBAL PARAMETERS section for more details.
     _not_ displayed if the script returns success.  The other programs cannot
     send any text to the user.  All output except for the `pre-xfer exec`
     stdout goes to the corresponding daemon's stdout/stderr, which is typically
-    discarded.  See the `--no-detatch` option for a way to see the daemon's
+    discarded.  See the `--no-detach` option for a way to see the daemon's
     output, which can assist with debugging.
 
     Note that the `early exec` command runs before any part of the transfer

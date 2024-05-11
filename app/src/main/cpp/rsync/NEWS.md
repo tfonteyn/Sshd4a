@@ -1,3 +1,168 @@
+# NEWS for rsync 3.3.0 (6 Apr 2024)
+
+## Changes in this version:
+
+### BUG FIXES:
+
+- Fixed a bug with `--sparse --inplace` where a trailing gap in the source
+  file would not clear out the trailing data in the destination file.
+
+- Fixed an buffer overflow in the checksum2 code if SHA1 is being used for
+  the checksum2 algorithm.
+
+- Fixed an issue when rsync is compiled using `_FORTIFY_SOURCE` so that the
+  extra tests don't complain about a strlcpy() limit value (which was too
+  large, even though it wasn't possible for the larger value to cause an
+  overflow).
+
+- Add a backtick to the list of characters that the filename quoting needs to
+  escape using backslashes.
+
+- Fixed a string-comparison issue in the internal handling of `--progress` (a
+  locale such as tr_TR.utf-8 needed the internal triggering of `--info` options
+  to use upper-case flag names to ensure that they match).
+
+- Make sure that a local transfer marks the sender side as trusted.
+
+- Change the argv handling to work with a newer popt library -- one that likes
+  to free more data than it used to.
+
+- Rsync now calls `OpenSSL_add_all_algorithms()` when compiled against an older
+  openssl library.
+
+- Fixed a problem in the daemon auth for older protocols (29 and before) if the
+  openssl library is being used to compute MD4 checksums.
+
+- Fixed `rsync -VV` on Cygwin -- it needed a flush of stdout.
+
+- Fixed an old stats bug that counted devices as symlinks.
+
+### ENHANCEMENTS:
+
+- Enhanced rrsync with the `-no-overwrite` option that allows you to ensure
+  that existing files on your restricted but writable directory can't be
+  modified.
+
+- Enhanced the manpages to mark links with .UR & .UE. If your nroff doesn't
+  support these idioms, touch the file `.md2man-force` in the source directory
+  so that `md-convert` gets called with the `--force-link-text` option, and
+  that should ensure that your manpages are still readable even with the
+  ignored markup.
+
+- Some manpage improvements on the handling of [global] modules.
+
+- Changed the mapfrom & mapto perl scripts (in the support dir) into a single
+  python script named idmap.  Converted a couple more perl scripts into python.
+
+- Changed the mnt-excl perl script (in the support dir) into a python script.
+
+### DEVELOPER RELATED:
+
+ - Updated config.guess (timestamp 2023-01-01) and config.sub (timestamp
+   2023-01-21).
+
+------------------------------------------------------------------------------
+
+# NEWS for rsync 3.2.7 (20 Oct 2022)
+
+## Changes in this version:
+
+### BUG FIXES:
+
+- Fixed the client-side validating of the remote sender's filtering behavior.
+
+- More fixes for the "unrequested file-list name" name, including a copy of
+  "/" with `--relative` enabled and a copy with a lot of related paths with
+  `--relative` enabled (often derived from a `--files-from` list).
+
+- When rsync gets an unpack error on an ACL, mention the filename.
+
+- Avoid over-setting sanitize_paths when a daemon is serving "/" (even if
+  "use chroot" is false).
+
+### ENHANCEMENTS:
+
+- Added negotiated daemon-auth support that allows a stronger checksum digest
+  to be used to validate a user's login to the daemon.  Added SHA512, SHA256,
+  and SHA1 digests to MD5 & MD4.  These new digests are at the highest priority
+  in the new daemon-auth negotiation list.
+
+- Added support for the SHA1 digest in file checksums.  While this tends to be
+  overkill, it is available if someone really needs it.  This overly-long
+  checksum is at the lowest priority in the normal checksum negotiation list.
+  See [`--checksum-choice`](rsync.1#opt) (`--cc`) and the `RSYNC_CHECKSUM_LIST`
+  environment var for how to customize this.
+
+- Improved the xattr hash table to use a 64-bit key without slowing down the
+  key's computation.  This should make extra sure that a hash collision doesn't
+  happen.
+
+- If the `--version` option is repeated (e.g. `-VV`) then the information is
+  output in a (still readable) JSON format.  Client side only.
+
+- The script `support/json-rsync-version` is available to get the JSON style
+  version output from any rsync.  The script accepts either text on stdin
+  **or** an arg that specifies an rsync executable to run with a doubled
+  `--version` option.  If the text we get isn't already in JSON format, it is
+  converted. Newer rsync versions will provide more complete json info than
+  older rsync versions. Various tweaks are made to keep the flag names
+  consistent across versions.
+
+- The [`use chroot`](rsyncd.conf.5#) daemon parameter now defaults to "unset"
+  so that rsync can use chroot when it works and a sanitized copy when chroot
+  is not supported (e.g., for a non-root daemon).  Explicitly setting the
+  parameter to true or false (on or off) behaves the same way as before.
+
+- The `--fuzzy` option was optimized a bit to try to cut down on the amount of
+  computations when considering a big pool of files. The simple heuristic from
+  Kenneth Finnegan resulted in about a 2x speedup.
+
+- If rsync is forced to use protocol 29 or before (perhaps due to talking to an
+  rsync before 3.0.0), the modify time of a file is limited to 4-bytes.  Rsync
+  now interprets this value as an unsigned integer so that a current year past
+  2038 can continue to be represented. This does mean that years prior to 1970
+  cannot be represented in an older protocol, but this trade-off seems like the
+  right choice given that (1) 2038 is very rapidly approaching, and (2) newer
+  protocols support a much wider range of old and new dates.
+
+- The rsync client now treats an empty destination arg as an error, just like
+  it does for an empty source arg. This doesn't affect a `host:` arg (which is
+  treated the same as `host:.`) since the arg is not completely empty.  The use
+  of [`--old-args`](rsync.1#opt) (including via `RSYNC_OLD_ARGS`) allows the
+  prior behavior of treating an empty destination arg as a ".".
+
+### PACKAGING RELATED:
+
+- The checksum code now uses openssl's EVP methods, which gets rid of various
+  deprecation warnings and makes it easy to support more digest methods.  On
+  newer systems, the MD4 digest is marked as legacy in the openssl code, which
+  makes openssl refuse to support it via EVP.  You can choose to ignore this
+  and allow rsync's MD4 code to be used for older rsync connections (when
+  talking to an rsync prior to 3.0.0) or you can choose to configure rsync to
+  tell openssl to enable legacy algorithms (see below).
+
+- A simple openssl config file is supplied that can be installed for rsync to
+  use.  If you install packaging/openssl-rsync.cnf to a public spot (such as
+  `/etc/ssl/openssl-rsync.cnf`) and then run configure with the option
+  `--with-openssl-conf=/path/name.cnf`, this will cause rsync to export the
+  configured path in the OPENSSL_CONF environment variable (when the variable
+  is not already set).  This will enable openssl's MD4 code for rsync to use.
+
+- The packager may wish to include an explicit "use chroot = true" in the top
+  section of their supplied /etc/rsyncd.conf file if the daemon is being
+  installed to run as the root user (though rsync should behave the same even
+  with the value unset, a little extra paranoia doesn't hurt).
+
+- I've noticed that some packagers haven't installed support/nameconvert for
+  users to use in their chrooted rsync configs.  Even if it is not installed
+  as an executable script (to avoid a python3 dependency) it would be good to
+  install it with the other rsync-related support scripts.
+
+- It would be good to add support/json-rsync-version to the list of installed
+  support scripts.
+
+------------------------------------------------------------------------------
+
 # NEWS for rsync 3.2.6 (9 Sep 2022)
 
 ## Changes in this version:
@@ -117,9 +282,10 @@
  - A new form of arg protection was added that works similarly to the older
    `--protect-args` ([`-s`](rsync.1#opt)) option but in a way that avoids
    breaking things like rrsync (the restricted rsync script): rsync now uses
-   backslash escaping for sending "shell-active" characters to the remote
-   shell. This includes spaces, so fetching a remote file via a simple quoted
-   filename value now works by default without any extra quoting:
+   backslash escaping for sending "shell-active" characters to the remote shell
+   (such as `$(){}<>#&` and others). This includes spaces, so fetching a remote
+   file via a quoted filename value now works by default without any extra
+   quoting:
 
    ```shell
        rsync -aiv host:'a simple file.pdf' .
@@ -127,10 +293,14 @@
 
    Wildcards are not escaped in filename args, but they are escaped in options
    like the [`--suffix`](rsync.1#opt) and [`--usermap`](rsync.1#opt) values.
-   If your rsync script depends on the old arg-splitting behavior, either run
-   it with the [`--old-args`](rsync.1#opt) option or `export RSYNC_OLD_ARGS=1`
-   in the script's environment.  See also the [ADVANCED USAGE](rsync.1#)
-   section of rsync's manpage for how to use a more modern arg style.
+
+   If a script depends on the old arg behavior (perhaps because it quotes or
+   protects the args already, or perhaps because it expects arg splitting),
+   there are two easy ways to get things going with a modern rsync: either
+   `export RSYNC_OLD_ARGS=1` in the script's environment (perhaps in the script
+   itself) or add the option [`--old-args`](rsync.1#opt) to the rsync commands
+   that are run.  See also the [ADVANCED USAGE](rsync.1#) section of rsync's
+   manpage for how to use a more modern arg style.
 
  - A long-standing bug was preventing rsync from figuring out the current
    locale's decimal point character, which made rsync always output numbers
@@ -4592,6 +4762,8 @@
 
 | RELEASE DATE | VER.   | DATE OF COMMIT\* | PROTOCOL    |
 |--------------|--------|------------------|-------------|
+| 06 Apr 2024  | 3.3.0  |                  | 31          |
+| 20 Oct 2022  | 3.2.7  |                  | 31          |
 | 09 Sep 2022  | 3.2.6  |                  | 31          |
 | 14 Aug 2022  | 3.2.5  |                  | 31          |
 | 15 Apr 2022  | 3.2.4  |                  | 31          |

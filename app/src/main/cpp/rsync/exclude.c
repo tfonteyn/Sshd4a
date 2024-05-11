@@ -4,7 +4,7 @@
  * Copyright (C) 1996-2001 Andrew Tridgell <tridge@samba.org>
  * Copyright (C) 1996 Paul Mackerras
  * Copyright (C) 2002 Martin Pool
- * Copyright (C) 2003-2022 Wayne Davison
+ * Copyright (C) 2003-2024 Wayne Davison
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,6 +77,10 @@ static BOOL parent_dirscan = False;
 static filter_rule **mergelist_parents;
 static int mergelist_cnt = 0;
 static int mergelist_size = 0;
+
+#define LOCAL_RULE   1
+#define REMOTE_RULE  2
+static uchar cur_elide_value = REMOTE_RULE;
 
 /* Each filter_list_struct describes a singly-linked list by keeping track
  * of both the head and tail pointers.  The list is slightly unusual in that
@@ -220,6 +224,7 @@ static void add_rule(filter_rule_list *listp, const char *pat, unsigned int pat_
 				slash_cnt++;
 		}
 	}
+	rule->elide = 0;
 	strlcpy(rule->pattern + pre_len, pat, pat_len + 1);
 	pat_len += pre_len;
 	if (suf_len) {
@@ -488,10 +493,11 @@ void add_implied_include(const char *arg, int skip_daemon_module)
 			if (saw_live_open_brkt)
 				maybe_add_literal_brackets_rule(rule, arg_len);
 			if (relative_paths && slash_cnt) {
-				filter_rule const *ent;
-				int found = 0;
-				slash_cnt = 1;
-				for (p = new_pat + 1; (p = strchr(p, '/')) != NULL; p++) {
+				int sub_slash_cnt = slash_cnt;
+				while ((p = strrchr(new_pat, '/')) != NULL && p != new_pat) {
+					filter_rule const *ent;
+					filter_rule *R_rule;
+					int found = 0;
 					*p = '\0';
 					for (ent = implied_filter_list.head; ent; ent = ent->next) {
 						if (ent != rule && strcmp(ent->pattern, new_pat) == 0) {
@@ -499,25 +505,29 @@ void add_implied_include(const char *arg, int skip_daemon_module)
 							break;
 						}
 					}
-					if (!found) {
-						filter_rule *R_rule = new0(filter_rule);
-						R_rule->rflags = FILTRULE_INCLUDE | FILTRULE_DIRECTORY;
-						/* Check if our sub-path has wildcards or escaped backslashes */
-						if (saw_wild && strpbrk(rule->pattern, "*[?\\"))
-							R_rule->rflags |= FILTRULE_WILD;
-						R_rule->pattern = strdup(new_pat);
-						R_rule->u.slash_cnt = slash_cnt;
-						R_rule->next = implied_filter_list.head;
-						implied_filter_list.head = R_rule;
-						if (DEBUG_GTE(FILTER, 3)) {
-							rprintf(FINFO, "[%s] add_implied_include(%s/)\n",
-								who_am_i(), R_rule->pattern);
-						}
-						if (saw_live_open_brkt)
-							maybe_add_literal_brackets_rule(R_rule, -1);
+					if (found) {
+						*p = '/';
+						break; /* We added all parent dirs already */
 					}
+					R_rule = new0(filter_rule);
+					R_rule->rflags = FILTRULE_INCLUDE | FILTRULE_DIRECTORY;
+					/* Check if our sub-path has wildcards or escaped backslashes */
+					if (saw_wild && strpbrk(new_pat, "*[?\\"))
+						R_rule->rflags |= FILTRULE_WILD;
+					R_rule->pattern = strdup(new_pat);
+					R_rule->u.slash_cnt = --sub_slash_cnt;
+					R_rule->next = implied_filter_list.head;
+					implied_filter_list.head = R_rule;
+					if (DEBUG_GTE(FILTER, 3)) {
+						rprintf(FINFO, "[%s] add_implied_include(%s/)\n",
+							who_am_i(), R_rule->pattern);
+					}
+					if (saw_live_open_brkt)
+						maybe_add_literal_brackets_rule(R_rule, -1);
+				}
+				for (p = new_pat; sub_slash_cnt < slash_cnt; sub_slash_cnt++) {
+					p += strlen(p);
 					*p = '/';
-					slash_cnt++;
 				}
 			}
 		}
@@ -545,15 +555,12 @@ void add_implied_include(const char *arg, int skip_daemon_module)
 				p += arg_len;
 			}
 		}
-		if (p[-1] != '/') {
-			*p++ = '/';
-			slash_cnt++;
-		}
+		*p++ = '/';
 		*p++ = '*';
 		if (recurse)
 			*p++ = '*';
 		*p = '\0';
-		rule->u.slash_cnt = slash_cnt;
+		rule->u.slash_cnt = slash_cnt + 1;
 		rule->next = implied_filter_list.head;
 		implied_filter_list.head = rule;
 		if (DEBUG_GTE(FILTER, 3))
@@ -713,7 +720,8 @@ static BOOL setup_merge_file(int mergelist_num, filter_rule *ex,
 	parent_dirscan = True;
 	while (*y) {
 		char save[MAXPATHLEN];
-		strlcpy(save, y, MAXPATHLEN);
+		/* copylen is strlen(y) which is < MAXPATHLEN. +1 for \0 */
+		size_t copylen = strlcpy(save, y, MAXPATHLEN) + 1;
 		*y = '\0';
 		dirbuf_len = y - dirbuf;
 		strlcpy(x, ex->pattern, MAXPATHLEN - (x - buf));
@@ -727,7 +735,7 @@ static BOOL setup_merge_file(int mergelist_num, filter_rule *ex,
 			lp->head = NULL;
 		}
 		lp->tail = NULL;
-		strlcpy(y, save, MAXPATHLEN);
+		strlcpy(y, save, copylen);
 		while ((*x++ = *y++) != '/') {}
 	}
 	parent_dirscan = False;
@@ -900,7 +908,7 @@ static int rule_matches(const char *fname, filter_rule *ex, int name_flags)
 	const char *strings[16]; /* more than enough */
 	const char *name = fname + (*fname == '/');
 
-	if (!*name)
+	if (!*name || ex->elide == cur_elide_value)
 		return 0;
 
 	if (!(name_flags & NAME_IS_XATTR) ^ !(ex->rflags & FILTRULE_XATTR))
@@ -1014,6 +1022,15 @@ int name_is_excluded(const char *fname, int name_flags, int filter_level)
 		return 1;
 
 	return 0;
+}
+
+int check_server_filter(filter_rule_list *listp, enum logcode code, const char *name, int name_flags)
+{
+	int ret;
+	cur_elide_value = LOCAL_RULE;
+	ret = check_filter(listp, code, name, name_flags);
+	cur_elide_value = REMOTE_RULE;
+	return ret;
 }
 
 /* Return -1 if file "name" is defined to be excluded by the specified
@@ -1571,7 +1588,7 @@ char *get_rule_prefix(filter_rule *rule, const char *pat, int for_xfer,
 
 static void send_rules(int f_out, filter_rule_list *flp)
 {
-	filter_rule *ent, *prev = NULL;
+	filter_rule *ent;
 
 	for (ent = flp->head; ent; ent = ent->next) {
 		unsigned int len, plen, dlen;
@@ -1586,21 +1603,15 @@ static void send_rules(int f_out, filter_rule_list *flp)
 		 * merge files as an optimization (since they can only have
 		 * include/exclude rules). */
 		if (ent->rflags & FILTRULE_SENDER_SIDE)
-			elide = am_sender ? 1 : -1;
+			elide = am_sender ? LOCAL_RULE : REMOTE_RULE;
 		if (ent->rflags & FILTRULE_RECEIVER_SIDE)
-			elide = elide ? 0 : am_sender ? -1 : 1;
+			elide = elide ? 0 : am_sender ? REMOTE_RULE : LOCAL_RULE;
 		else if (delete_excluded && !elide
 		 && (!(ent->rflags & FILTRULE_PERDIR_MERGE)
 		  || ent->rflags & FILTRULE_NO_PREFIXES))
-			elide = am_sender ? 1 : -1;
-		if (elide < 0) {
-			if (prev)
-				prev->next = ent->next;
-			else
-				flp->head = ent->next;
-		} else
-			prev = ent;
-		if (elide > 0)
+			elide = am_sender ? LOCAL_RULE : REMOTE_RULE;
+		ent->elide = elide;
+		if (elide == LOCAL_RULE)
 			continue;
 		if (ent->rflags & FILTRULE_CVS_IGNORE
 		    && !(ent->rflags & FILTRULE_MERGE_FILE)) {
@@ -1628,7 +1639,6 @@ static void send_rules(int f_out, filter_rule_list *flp)
 		if (dlen)
 			write_byte(f_out, '/');
 	}
-	flp->tail = prev;
 }
 
 /* This is only called by the client. */

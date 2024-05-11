@@ -105,6 +105,8 @@ def main():
         if not re.match(r'^del', ans, flags=re.I):
             die("Aborted")
         cmd_chk(['git', 'tag', '-d', v_ver])
+        if os.path.isdir('patches/.git'):
+            cmd_chk(f"cd patches && git tag -d '{v_ver}'")
 
     version = re.sub(r'[-.]*pre[-.]*', 'pre', version)
     if 'pre' in version and not curversion.endswith('dev'):
@@ -254,7 +256,7 @@ About to:
 """)
     ans = input("<Press Enter OR 'y' to continue> ")
 
-    s = cmd_run(['git', 'commit', '-a', '-m', f'Preparing for release of {version}'])
+    s = cmd_run(['git', 'commit', '-a', '-m', f'Preparing for release of {version} [buildall]'])
     if s.returncode:
         die('Aborting')
 

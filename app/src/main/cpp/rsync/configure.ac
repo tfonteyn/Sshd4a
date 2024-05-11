@@ -4,7 +4,6 @@ AC_INIT([rsync],[ ],[https://rsync.samba.org/bug-tracking.html])
 
 AC_C_BIGENDIAN
 AC_HEADER_DIRENT
-AC_HEADER_TIME
 AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS(sys/fcntl.h sys/select.h fcntl.h sys/time.h sys/unistd.h \
     unistd.h utime.h compat.h sys/param.h ctype.h sys/wait.h sys/stat.h \
@@ -20,7 +19,7 @@ AC_HEADER_MAJOR_FIXED
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([byteorder.h])
-AC_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS([config.h])
 AC_PREREQ([2.69])
 
 PACKAGE_VERSION=`sed -n 's/.*RSYNC_VERSION.*"\(.*\)".*/\1/p' <$srcdir/version.h`
@@ -61,7 +60,6 @@ AC_PROG_AWK
 AC_PROG_EGREP
 AC_PROG_INSTALL
 AC_PROG_MKDIR_P
-AC_PROG_CC_STDC
 AC_SUBST(SHELL)
 AC_PATH_PROG([PERL], [perl])
 AC_PATH_PROG([PYTHON3], [python3])
@@ -135,6 +133,16 @@ CFLAGS="$CFLAGS -DHAVE_CONFIG_H"
 if test x"$GCC" = x"yes"; then
 	CFLAGS="$CFLAGS -Wall -W"
 fi
+
+AC_ARG_WITH(openssl-conf,
+	AS_HELP_STRING([--with-openssl-conf=PATH],[set default OPENSSL_CONF path for rsync]))
+case "$with_openssl_conf" in
+    *[^-/a-zA-Z0-9.,=@+_]*) AC_MSG_ERROR([Invalid path given to --with-openssl-conf]) ;;
+    /*) CFLAGS="$CFLAGS -DSET_OPENSSL_CONF=$with_openssl_conf" ;;
+    no|'') ;;
+    yes) AC_MSG_ERROR([No path given to --with-openssl-conf]) ;;
+    *) AC_MSG_ERROR([Non absolute path given to --with-openssl-conf]) ;;
+esac
 
 AC_ARG_WITH(rrsync,
         AS_HELP_STRING([--with-rrsync],[also install the rrsync script and its manpage]))
@@ -380,7 +388,7 @@ AS_HELP_STRING([--disable-ipv6],[disable to omit ipv6 support]),
 	;;
   esac ],
 
-  AC_TRY_RUN([ /* AF_INET6 availability check */
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[ /* AF_INET6 availability check */
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -391,11 +399,11 @@ main()
    else
      exit(0);
 }
-],
-  AC_MSG_RESULT(yes)
-  AC_DEFINE(INET6, 1, [true if you have IPv6]),
-  AC_MSG_RESULT(no),
-  AC_MSG_RESULT(no)
+]])],
+  [AC_MSG_RESULT(yes)
+  AC_DEFINE(INET6, 1, true if you have IPv6)],
+  [AC_MSG_RESULT(no)],
+  [AC_MSG_RESULT(no)]
 ))
 
 dnl Do you want to disable use of locale functions
@@ -424,10 +432,10 @@ AH_TEMPLATE([USE_OPENSSL],
 if test x"$enable_openssl" != x"no"; then
     if test x"$ac_cv_header_openssl_md4_h" = x"yes" && test x"$ac_cv_header_openssl_md5_h" = x"yes"; then
       AC_MSG_RESULT(yes)
-      AC_SEARCH_LIBS(MD5_Init, crypto,
+      AC_SEARCH_LIBS(EVP_MD_CTX_copy, crypto,
           [AC_DEFINE(USE_OPENSSL)
 	   enable_openssl=yes],
-          [err_msg="$err_msg$nl- Failed to find MD5_Init function in openssl crypto lib.";
+          [err_msg="$err_msg$nl- Failed to find EVP_MD_CTX_copy function in openssl crypto lib.";
 	   no_lib="$no_lib openssl"])
     else
         AC_MSG_RESULT(no)
@@ -518,7 +526,7 @@ fi
 
 AC_MSG_CHECKING([whether to enable zstd compression])
 AC_ARG_ENABLE([zstd],
-        AC_HELP_STRING([--disable-zstd], [disable to omit zstd compression]))
+        AS_HELP_STRING([--disable-zstd], [disable to omit zstd compression]))
 AH_TEMPLATE([SUPPORT_ZSTD],
 [Undefine if you do not want zstd compression.  By default this is defined.])
 if test x"$enable_zstd" != x"no"; then
@@ -539,7 +547,7 @@ fi
 
 AC_MSG_CHECKING([whether to enable LZ4 compression])
 AC_ARG_ENABLE([lz4],
-        AC_HELP_STRING([--disable-lz4], [disable to omit LZ4 compression]))
+        AS_HELP_STRING([--disable-lz4], [disable to omit LZ4 compression]))
 AH_TEMPLATE([SUPPORT_LZ4],
 [Undefine if you do not want LZ4 compression.  By default this is defined.])
 if test x"$enable_lz4" != x"no"; then

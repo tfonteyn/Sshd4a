@@ -152,7 +152,43 @@ rsync daemon by leaving off the module name:
 
 >     rsync somehost.mydomain.com::
 
-See the following section for more details.
+## COPYING TO A DIFFERENT NAME
+
+When you want to copy a directory to a different name, use a trailing slash on
+the source directory to put the contents of the directory into any destination
+directory you like:
+
+>     rsync -ai foo/ bar/
+
+Rsync also has the ability to customize a destination file's name when copying
+a single item.  The rules for this are:
+
+- The transfer list must consist of a single item (either a file or an empty
+  directory)
+- The final element of the destination path must not exist as a directory
+- The destination path must not have been specified with a trailing slash
+
+Under those circumstances, rsync will set the name of the destination's single
+item to the last element of the destination path.  Keep in mind that it is best
+to only use this idiom when copying a file and use the above trailing-slash
+idiom when copying a directory.
+
+The following example copies the `foo.c` file as `bar.c` in the `save` dir
+(assuming that `bar.c` isn't a directory):
+
+>     rsync -ai src/foo.c save/bar.c
+
+The single-item copy rule might accidentally bite you if you unknowingly copy a
+single item and specify a destination dir that doesn't exist (without using a
+trailing slash).  For example, if `src/*.c` matches one file and `save/dir`
+doesn't exist, this will confuse you by naming the destination file `save/dir`:
+
+>     rsync -ai src/*.c save/dir
+
+To prevent such an accident, either make sure the destination dir exists or
+specify the destination path with a trailing slash:
+
+>     rsync -ai src/*.c save/dir/
 
 ## SORTED TRANSFER ORDER
 
@@ -209,7 +245,7 @@ to be copied to different destination directories using more than one copy.
 
 While a copy of a case-ignoring filesystem to a case-ignoring filesystem can
 work out fairly well, if no `--delete-during` or `--delete-before` option is
-active, rsync can potentially update an existing file on the receiveing side
+active, rsync can potentially update an existing file on the receiving side
 without noticing that the upper-/lower-case of the filename should be changed
 to match the sender.
 
@@ -400,7 +436,7 @@ has its own detailed description later in this manpage.
 --append-verify          --append w/old data in file checksum
 --dirs, -d               transfer directories without recursing
 --old-dirs, --old-d      works like --dirs when talking to old rsync
---mkpath                 create the destination's path component
+--mkpath                 create destination's missing path components
 --links, -l              copy symlinks as symlinks
 --copy-links, -L         transform symlink into referent file/dir
 --copy-unsafe-links      only "unsafe" symlinks are transformed
@@ -580,11 +616,14 @@ expand it.
 
 0.  `--version`, `-V`
 
-    Print the rsync version plus other info and exit.
+    Print the rsync version plus other info and exit.  When repeated, the
+    information is output is a JSON format that is still fairly readable
+    (client side only).
 
-    The output includes the default list of checksum algorithms, the default
-    list of compression algorithms, a list of compiled-in capabilities, a link
-    to the rsync web site, and some license/copyright info.
+    The output includes a list of compiled-in capabilities, a list of
+    optimizations, the default list of checksum algorithms, the default list of
+    compression algorithms, the default list of daemon auth digests, a link to
+    the rsync web site, and a few other items.
 
 0.  `--verbose`, `-v`
 
@@ -856,7 +895,7 @@ expand it.
     that until a bunch of recursive copying has finished).  However, these
     early directories don't yet have their completed mode, mtime, or ownership
     set -- they have more restrictive rights until the subdirectory's copying
-    actually begins.  This early-creation idiom can be avoiding by using the
+    actually begins.  This early-creation idiom can be avoided by using the
     [`--omit-dir-times`](#opt) option.
 
     Incremental recursion can be disabled using the
@@ -1110,23 +1149,28 @@ expand it.
 
 0.  `--mkpath`
 
-    Create a missing path component of the destination arg.  This allows rsync
-    to create multiple levels of missing destination dirs and to create a path
-    in which to put a single renamed file.  Keep in mind that you'll need to
-    supply a trailing slash if you want the entire destination path to be
-    treated as a directory when copying a single arg (making rsync behave the
-    same way that it would if the path component of the destination had already
-    existed).
+    Create all missing path components of the destination path.
 
-    For example, the following creates a copy of file foo as bar in the sub/dir
-    directory, creating dirs "sub" and "sub/dir" if either do not yet exist:
+    By default, rsync allows only the final component of the destination path
+    to not exist, which is an attempt to help you to validate your destination
+    path.  With this option, rsync creates all the missing destination-path
+    components, just as if `mkdir -p $DEST_PATH` had been run on the receiving
+    side.
 
-    >     rsync -ai --mkpath foo sub/dir/bar
+    When specifying a destination path, including a trailing slash ensures that
+    the whole path is treated as directory names to be created, even when the
+    file list has a single item. See the [COPYING TO A DIFFERENT NAME](#)
+    section for full details on how rsync decides if a final destination-path
+    component should be created as a directory or not.
 
-    If you instead ran the following, it would have created file foo in the
-    sub/dir/bar directory:
+    If you would like the newly-created destination dirs to match the dirs on
+    the sending side, you should be using [`--relative`](#opt) (`-R`) instead
+    of `--mkpath`.  For instance, the following two commands result in the same
+    destination tree, but only the second command ensures that the
+    "some/extra/path" components match the dirs on the sending side:
 
-    >     rsync -ai --mkpath foo sub/dir/bar/
+    >     rsync -ai --mkpath host:some/extra/path/*.c some/extra/path/
+    >     rsync -aiR host:some/extra/path/*.c ./
 
 0.  `--links`, `-l`
 
@@ -1557,6 +1601,15 @@ expand it.
     will make the update fairly efficient if the files haven't actually
     changed, you're much better off using `-t`).
 
+    A modern rsync that is using transfer protocol 30 or 31 conveys a modify
+    time using up to 8-bytes. If rsync is forced to speak an older protocol
+    (perhaps due to the remote rsync being older than 3.0.0) a modify time is
+    conveyed using 4-bytes. Prior to 3.2.7, these shorter values could convey
+    a date range of 13-Dec-1901 to 19-Jan-2038.  Beginning with 3.2.7, these
+    4-byte values now convey a date range of 1-Jan-1970 to 7-Feb-2106.  If you
+    have files dated older than 1970, make sure your rsync executables are
+    upgraded so that the full range of dates can be conveyed.
+
 0.  `--atimes`, `-U`
 
     This tells rsync to set the access (use) times of the destination files to
@@ -1583,7 +1636,9 @@ expand it.
 0.  `--crtimes`, `-N,`
 
     This tells rsync to set the create times (newness) of the destination
-    files to the same value as the source files.
+    files to the same value as the source files. Your OS & filesystem must
+    support the setting of arbitrary creation (birth) times for this option
+    to be supported.
 
 0.  `--omit-dir-times`, `-O`
 
@@ -1727,6 +1782,7 @@ expand it.
     - `xxh64` (aka `xxhash`)
     - `md5`
     - `md4`
+    - `sha1`
     - `none`
 
     Run `rsync --version` to see the default checksum list compiled into your
@@ -2050,7 +2106,8 @@ expand it.
     See the [`--max-size`](#opt) option for a description of how SIZE can be
     specified.  The default suffix if none is given is bytes.
 
-    Beginning in 3.2.3, a value of 0 specifies no limit.
+    Beginning in 3.2.7, a value of 0 is an easy way to specify SIZE_MAX (the
+    largest limit possible).
 
     You can set a default value using the environment variable
     [`RSYNC_MAX_ALLOC`](#) using the same SIZE values as supported by this
@@ -2384,6 +2441,8 @@ expand it.
 
     This option tells rsync to stop trying to protect the arg values on the
     remote side from unintended word-splitting or other misinterpretation.
+    It also allows the client to treat an empty arg as a "." instead of
+    generating an error.
 
     The default in a modern rsync is for "shell-active" characters (including
     spaces) to be backslash-escaped in the args that are sent to the remote
@@ -3524,13 +3583,17 @@ expand it.
 
     >     rsync -av --list-only foo* dest/
 
-    Starting with rsync 3.1.0, the sizes output by `--list-only` are affected
-    by the [`--human-readable`](#opt) option.  By default they will contain
-    digit separators, but higher levels of readability will output the sizes
-    with unit suffixes.  Note also that the column width for the size output
-    has increased from 11 to 14 characters for all human-readable levels.  Use
-    `--no-h` if you want just digits in the sizes, and the old column width of
-    11 characters.
+    This option always uses an output format that looks similar to this:
+
+    >     drwxrwxr-x          4,096 2022/09/30 12:53:11 support
+    >     -rw-rw-r--             80 2005/01/11 10:37:37 support/Makefile
+
+    The only option that affects this output style is (as of 3.1.0) the
+    [`--human-readable`](#opt) (`-h`) option.  The default is to output sizes
+    as byte counts with digit separators (in a 14-character-width column).
+    Specifying at least one `-h` option makes the sizes output with unit
+    suffixes.  If you want old-style bytecount sizes without digit separators
+    (and an 11-character-width column) use `--no-h`.
 
     Compatibility note: when requesting a remote listing of files from an rsync
     that is version 2.6.3 or older, you may encounter an error if you ask for a

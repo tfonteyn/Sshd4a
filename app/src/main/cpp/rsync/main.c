@@ -89,6 +89,8 @@ extern int backup_dir_len;
 extern int basis_dir_cnt;
 extern int default_af_hint;
 extern int stdout_format_has_i;
+extern int trust_sender_filter;
+extern int trust_sender_args;
 extern struct stats stats;
 extern char *stdout_format;
 extern char *logfile_format;
@@ -660,6 +662,16 @@ static pid_t do_cmd(char *cmd, char *machine, char *user, char **remote_argv, in
 	return pid;
 }
 
+/* Older versions turn an empty string as a reference to the current directory.
+ * We now treat this as an error unless --old-args was used. */
+static char *dot_dir_or_error()
+{
+	if (old_style_args || am_server)
+		return ".";
+	rprintf(FERROR, "Empty destination arg specified (use \".\" or see --old-args).\n");
+	exit_cleanup(RERR_SYNTAX);
+}
+
 /* The receiving side operates in one of two modes:
  *
  * 1. it receives any number of files into a destination directory,
@@ -687,9 +699,8 @@ static char *get_local_name(struct file_list *flist, char *dest_path)
 	if (!dest_path || list_only)
 		return NULL;
 
-	/* Treat an empty string as a copy into the current directory. */
 	if (!*dest_path)
-		dest_path = ".";
+		dest_path = dot_dir_or_error();
 
 	if (daemon_filter_list.head) {
 		char *slash = strrchr(dest_path, '/');
@@ -1372,15 +1383,6 @@ int client_run(int f_in, int f_out, pid_t pid, int argc, char *argv[])
 	return MAX(exit_code, exit_code2);
 }
 
-static void dup_argv(char *argv[])
-{
-	int i;
-
-	for (i = 0; argv[i]; i++)
-		argv[i] = strdup(argv[i]);
-}
-
-
 /* Start a client for either type of remote connection.  Work out
  * whether the arguments request a remote shell or rsyncd connection,
  * and call the appropriate connection function, then run_client.
@@ -1395,10 +1397,6 @@ static int start_client(int argc, char *argv[])
 	int f_in, f_out;
 	int ret;
 	pid_t pid;
-
-	/* Don't clobber argv[] so that ps(1) can still show the right
-	 * command line. */
-	dup_argv(argv);
 
 	if (!read_batch) { /* for read_batch, NO source is specified */
 		char *path = check_for_hostspec(argv[0], &shell_machine, &rsync_port);
@@ -1432,6 +1430,8 @@ static int start_client(int argc, char *argv[])
 
 			if (argc > 1) {
 				p = argv[--argc];
+				if (!*p)
+					p = dot_dir_or_error();
 				remote_argv = argv + argc;
 			} else {
 				static char *dotarg[1] = { "." };
@@ -1473,8 +1473,10 @@ static int start_client(int argc, char *argv[])
 	}
 
 	/* A local transfer doesn't unbackslash anything, so leave the args alone. */
-	if (local_server)
+	if (local_server) {
 		old_style_args = 2;
+		trust_sender_args = trust_sender_filter = 1;
+	}
 
 	if (!rsync_port && remote_argc && !**remote_argv) /* Turn an empty arg into a dot dir. */
 		*remote_argv = ".";
@@ -1742,6 +1744,17 @@ int main(int argc,char *argv[])
 	am_root = our_uid == ROOT_UID;
 
 	unset_env_var("DISPLAY");
+
+#if defined USE_OPENSSL && defined SET_OPENSSL_CONF
+#define TO_STR2(x) #x
+#define TO_STR(x) TO_STR2(x)
+	/* ./configure --with-openssl-conf=/etc/ssl/openssl-rsync.cnf
+	 * defines SET_OPENSSL_CONF as that unquoted pathname. */
+	if (!getenv("OPENSSL_CONF")) /* Don't override it if it's already set. */
+		set_env_str("OPENSSL_CONF", TO_STR(SET_OPENSSL_CONF));
+#undef TO_STR
+#undef TO_STR2
+#endif
 
 	memset(&stats, 0, sizeof(stats));
 
