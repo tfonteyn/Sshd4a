@@ -32,6 +32,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.preference.PreferenceManager;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
@@ -174,6 +175,12 @@ public class MainFragment
             vb.ip.setText(R.string.err_no_ip);
         } else {
             vb.ip.setText(String.join("\n", ipList));
+            //noinspection ConstantConditions
+            final String port = PreferenceManager
+                    .getDefaultSharedPreferences(getContext())
+                    .getString(Prefs.SSHD_PORT, Prefs.DEFAULT_PORT)
+                    .strip();
+            vb.port.setText(port);
         }
     }
 

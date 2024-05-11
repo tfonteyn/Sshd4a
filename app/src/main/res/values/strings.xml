@@ -26,6 +26,7 @@
     <string name="err_port_number">The port must be between 1024 and 32267</string>
 
     <string name="lbl_interface">Interface:</string>
+    <string name="lbl_port">Port:</string>
     <string name="msg_listening_on">\'sshd\' is listening on %1$s:%2$s</string>
 
     <string name="btn_start">Start</string>
