@@ -819,6 +819,11 @@ target_include_directories(dropbear PRIVATE
 add_library(jni-dropbear SHARED src/main/cpp/jni-dropbear.c)
 target_link_options(jni-dropbear PRIVATE -lz)
 target_link_libraries(jni-dropbear tommath tomcrypt dropbear)
+target_include_directories(jni-dropbear PRIVATE
+        src/main/cpp/dropbear
+        src/main/cpp/dropbear/libtomcrypt/src/headers
+        src/main/cpp/dropbear/libtommath
+)
 
 # build scp executable
 add_executable(libscp.so ${SRC_DROPBEAR_SCP})

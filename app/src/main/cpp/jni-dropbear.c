@@ -9,8 +9,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <errno.h>
-
-extern int dropbear_main(int argc, char **argv);
+#include <syslog.h>
+#include "dbrandom.h"
+#include "dbutil.h"
 
 /* executable for a shell */
 const char *sshd4a_shell_exe = "";
@@ -219,7 +220,7 @@ Java_com_hardbacknutter_sshd_SshdService_start_1sshd(
         // The monitoring java thread assumes the file always exists!
         fprintf(stderr, "Starting dropbear\n");
 
-        dropbear_main(argc, (char **) argv);
+        dropbear_main(argc, (char **) argv, NULL);
         /* not reachable */
         exit(0);
 
