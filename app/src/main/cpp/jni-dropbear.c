@@ -133,7 +133,7 @@ int sshd4a_authorized_keys_exists() {
     return 1;
 }
 
-int ssh4d_enable_master_password() {
+int sshd4a_enable_master_password() {
     /* not implemented; the user should just remove the master-user/pass settings in the UI. */
     return 1;
 }
@@ -169,11 +169,11 @@ int sshd4a_user_password(char **user, char **password) {
     return ret_value;
 }
 
-int ssh4d_enable_single_use_password() {
+int sshd4a_enable_single_use_password() {
     return enable_single_use_passwords;
 }
 
-void ssh4d_generate_single_use_password(char **gen_pass) {
+void sshd4a_generate_single_use_password(char **gen_pass) {
     /* Don't use Il1O0 because they're visually ambiguous */
     static const char tab64[64] =
             "abcdefghijk!mnopqrstuvwxyzABCDEFGH@JKLMN#PQRSTUVWXYZ$%23456789^&";

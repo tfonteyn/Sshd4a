@@ -8,10 +8,10 @@ char *sshd4a_conf_file(const char *fn);
 char *sshd4a_exe_to_lib(const char *cmd);
 void sshd4a_set_env();
 int  sshd4a_authorized_keys_exists();
-void ssh4d_generate_single_use_password(char **gen_pass);
-int ssh4d_enable_master_password();
-int ssh4d_enable_single_use_password();
-int sshd4a_user_password(char **user, char **password);
+void sshd4a_generate_single_use_password(char **gen_pass);
+int  sshd4a_enable_master_password();
+int  sshd4a_enable_single_use_password();
+int  sshd4a_user_password(char **user, char **password);
 
 /* enable the code to create single-use passwords if there is no "authorized_keys" file. */
 #define ANDROID_SSHD_SINGLE_USE_PASSWORD 1
