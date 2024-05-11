@@ -11,7 +11,7 @@ public final class Prefs {
 
     static final String HOME = "sshd.home";
     static final String ENV_VARS = "sshd.env";
-    public static final String SHELL = "sshd.shell";
+    static final String SHELL = "sshd.shell";
     static final String DEFAULT_SHELL = "/system/bin/sh";
 
     static final String DROPBEAR_CMDLINE_OPTIONS = "dropbear.options";

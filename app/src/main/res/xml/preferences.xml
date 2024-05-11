@@ -46,6 +46,13 @@
         <!-- Not saved to preferences. Handled in code. -->
         <EditTextPreference
             android:defaultValue=""
+            android:key="sshd.master.username"
+            android:persistent="false"
+            android:title="@string/pt_master_username" />
+        <!-- Not saved to preferences. Handled in code. -->
+        <EditTextPreference
+            android:defaultValue=""
+            android:dependency="sshd.master.username"
             android:key="sshd.master.password"
             android:persistent="false"
             android:title="@string/pt_master_password" />

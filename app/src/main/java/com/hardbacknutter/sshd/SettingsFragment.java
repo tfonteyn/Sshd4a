@@ -28,11 +28,13 @@ public class SettingsFragment
         implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     public static final String TAG = "SettingsFragment";
+    private static final String PK_SSHD_MASTER_USERNAME = "sshd.master.username";
     private static final String PK_SSHD_MASTER_PASSWORD = "sshd.master.password";
     private SwitchPreference pRunOnBoot;
     private SwitchPreference pRunInForeground;
     private EditTextPreference pPort;
-    private EditTextPreference pPassword;
+    private EditTextPreference pMasterUsername;
+    private EditTextPreference pMasterPassword;
     private MainViewModel vm;
     private final OnBackPressedCallback backPressedCallback =
             new OnBackPressedCallback(true) {
@@ -40,7 +42,9 @@ public class SettingsFragment
                 public void handleOnBackPressed() {
                     try {
                         //noinspection DataFlowIssue
-                        vm.writeMasterPassword(getContext(), pPassword.getText());
+                        vm.writeMasterUserAndPassword(getContext(),
+                                                      pMasterUsername.getText(),
+                                                      pMasterPassword.getText());
                         getParentFragmentManager().popBackStack();
 
                     } catch (@NonNull final IOException ignore) {
@@ -54,6 +58,7 @@ public class SettingsFragment
 
                 }
             };
+    private boolean hasPreviousPassword;
 
     @Override
     public void onCreatePreferences(@Nullable final Bundle savedInstanceState,
@@ -109,23 +114,24 @@ public class SettingsFragment
         findPreference(Prefs.SHELL)
                 .setSummaryProvider(EditTextPreference.SimpleSummaryProvider.getInstance());
 
-        pPassword = findPreference(PK_SSHD_MASTER_PASSWORD);
+        pMasterUsername = findPreference(PK_SSHD_MASTER_USERNAME);
+        pMasterPassword = findPreference(PK_SSHD_MASTER_PASSWORD);
         //noinspection DataFlowIssue
-        pPassword.setOnBindEditTextListener(editText -> {
+        pMasterPassword.setOnBindEditTextListener(editText -> {
             editText.setInputType(InputType.TYPE_CLASS_TEXT
                                   | InputType.TYPE_TEXT_VARIATION_PASSWORD);
             editText.selectAll();
         });
-        pPassword.setSummaryProvider(preference -> {
-            final String value = ((EditTextPreference) preference).getText();
-            if (value == null || value.isEmpty()) {
-                return getString(R.string.info_not_set);
-            } else {
-                return "********";
+        pMasterPassword.setSummaryProvider(preference -> {
+            if (!hasPreviousPassword) {
+                final String value = ((EditTextPreference) preference).getText();
+                if (value == null || value.isEmpty()) {
+                    return getString(R.string.info_not_set);
+                }
             }
+            return "********";
         });
     }
-
 
     @Override
     public void onViewCreated(@NonNull final View view,
@@ -144,7 +150,13 @@ public class SettingsFragment
         vm = new ViewModelProvider(this).get(MainViewModel.class);
         //noinspection ConstantConditions
         vm.init(getContext());
-        pPassword.setText(vm.readMasterPassword(getContext()));
+        final String[] previous = vm.readMasterUserAndPassword(getContext());
+        if (previous != null && previous.length == 2) {
+            pMasterUsername.setText(previous[0]);
+            // do NOT set the text, we only have the encrypted password.
+            pMasterPassword.setText("");
+            hasPreviousPassword = true;
+        }
     }
 
     @Override

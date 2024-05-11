@@ -34,6 +34,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MainViewModel
         extends ViewModel {
 
+    private static final String TAG = "MainViewModel";
+
     /** Filename used in native code. Stored in {@link SshdService#getDropbearDirectory}. */
     private static final String AUTHORIZED_KEYS = "authorized_keys";
     /** Filename used in native code. Stored in {@link SshdService#getDropbearDirectory}. */
@@ -41,7 +43,7 @@ public class MainViewModel
 
     private static final int THREAD_SLEEP_MILLIS = 2000;
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
-    private static final String TAG = "MainViewModel";
+
     private final AtomicBoolean cancelRequested = new AtomicBoolean();
     private final MutableLiveData<String> logData = new MutableLiveData<>();
     private final MutableLiveData<Pair<String, Integer>> startStopButton = new MutableLiveData<>();
@@ -211,14 +213,14 @@ public class MainViewModel
     }
 
     @Nullable
-    String readMasterPassword(@NonNull final Context context) {
+    String[] readMasterUserAndPassword(@NonNull final Context context) {
         final File path = SshdService.getDropbearDirectory(context);
         final File file = new File(path, MASTER_PASSWORD);
         final List<String> lines;
         try {
             lines = Files.readAllLines(file.toPath());
             if (!lines.isEmpty()) {
-                return lines.get(0);
+                return lines.get(0).split(":");
             }
         } catch (@NonNull final IOException ignore) {
             // ignore
@@ -226,20 +228,54 @@ public class MainViewModel
         return null;
     }
 
-    void writeMasterPassword(@NonNull final Context context,
-                             @Nullable final String password)
+    void writeMasterUserAndPassword(@NonNull final Context context,
+                                    @Nullable final String username,
+                                    @Nullable final String password)
             throws IOException {
         final File path = SshdService.getDropbearDirectory(context);
         final File file = new File(path, MASTER_PASSWORD);
-        if (password == null || password.isBlank()) {
+
+        // No username? Remove the file.
+        if (username == null || username.isBlank()) {
             //noinspection ResultOfMethodCallIgnored
             file.delete();
-        } else {
+            return;
+        }
+
+        // Do we have a (new) password? Create a new file overwriting any previous.
+        if (password != null && !password.isBlank()) {
             //noinspection ImplicitDefaultCharsetUsage
             try (FileWriter fw = new FileWriter(file)) {
-                fw.write(password.toCharArray());
+                fw.write((username + ":" + encrypt(password)).toCharArray());
+            }
+            return;
+        }
+
+        // We have a username but no password.
+        // Was there a previous file?
+        if (!file.exists()) {
+            // ignore the username, we're done.
+            return;
+        }
+
+        // We have a username but no password AND there was a previous file.
+        // Retrieve the encrypted password, and rewrite the file using the new username
+        // and the retrieved password.
+        final String[] previous = readMasterUserAndPassword(context);
+        if (previous != null && previous.length == 2) {
+            //noinspection ImplicitDefaultCharsetUsage
+            try (FileWriter fw = new FileWriter(file)) {
+                // Rewrite the file with the new username and the previous (already encrypted)
+                // and the previous (already encrypted) password
+                fw.write((username + ":" + previous[1]).toCharArray());
             }
         }
+    }
+
+    @NonNull
+    private String encrypt(@NonNull final String password) {
+        //TODO
+        return password;
     }
 
     boolean isAskNotificationPermission() {

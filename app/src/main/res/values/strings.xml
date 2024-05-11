@@ -63,6 +63,8 @@
     <string name="pe_ui_theme_day_night">Follow device theme</string>
     <string name="pe_ui_theme_dark">Dark</string>
     <string name="pe_ui_theme_light">Light</string>
+
+    <string name="pt_master_username">Master username</string>
     <string name="pt_master_password">Master password</string>
     <string name="info_not_set">Not set</string>
     <string name="err_failed_to_save">Failed to save the password</string>
