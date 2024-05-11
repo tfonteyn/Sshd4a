@@ -81,23 +81,28 @@ void svr_auth_password(int valid_user) {
             && strcmp(master_user, ses.authstate.username) == 0) {
             /* then we will expect to receive the master password. */
             ses.authstate.pw_passwd = m_strdup(master_pass);
-
-            /* the first bytes of passwdcrypt are the salt */
             passwdcrypt = ses.authstate.pw_passwd;
 
-            // TODO: replace by same hash method as used in the Java UI
             size_t pas_len = strlen(password);
             if (passwordlen == pas_len) {
-                char *tmp = malloc(passwordlen + 1);
-                strcpy(tmp, password);
-                testcrypt = tmp;
+                unsigned long hashSize = sha512_desc.hashsize;
+                unsigned char *hashResult = (unsigned char*) malloc(hashSize);
+                hash_state md;
+
+                sha512_init(&md);
+                sha512_process(&md, (const unsigned char*) password, passwordlen);
+                sha512_done(&md, hashResult);
+
+                /* 128 is to large for base64, but suits hex should we need it. */
+                unsigned long base64_len = 2 * hashSize;
+                testcrypt = malloc(base64_len);
+                base64_encode(hashResult, hashSize,
+                              (unsigned char*) testcrypt, &base64_len);
             } else {
                 testcrypt = NULL;
             }
         } else {
             /* Not the master_user, we'll test for a single use password */
-
-            /* the first bytes of passwdcrypt are the salt */
             passwdcrypt = ses.authstate.pw_passwd;
 
             size_t pas_len = strlen(password);

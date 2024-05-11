@@ -22,6 +22,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 
 public class SettingsFragment
         extends PreferenceFragmentCompat
@@ -47,7 +48,7 @@ public class SettingsFragment
                                                       pMasterPassword.getText());
                         getParentFragmentManager().popBackStack();
 
-                    } catch (@NonNull final IOException ignore) {
+                    } catch (@NonNull final IOException | NoSuchAlgorithmException ignore) {
                         // we should never get here... flw
                         //noinspection DataFlowIssue
                         Snackbar.make(getView(), R.string.err_failed_to_save,

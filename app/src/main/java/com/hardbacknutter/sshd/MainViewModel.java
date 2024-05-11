@@ -23,9 +23,13 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -231,7 +235,9 @@ public class MainViewModel
     void writeMasterUserAndPassword(@NonNull final Context context,
                                     @Nullable final String username,
                                     @Nullable final String password)
-            throws IOException {
+            throws IOException,
+                   NoSuchAlgorithmException {
+
         final File path = SshdService.getDropbearDirectory(context);
         final File file = new File(path, MASTER_PASSWORD);
 
@@ -246,7 +252,7 @@ public class MainViewModel
         if (password != null && !password.isBlank()) {
             //noinspection ImplicitDefaultCharsetUsage
             try (FileWriter fw = new FileWriter(file)) {
-                fw.write((username + ":" + encrypt(password)).toCharArray());
+                fw.write((username + ":" + hash(password)).toCharArray());
             }
             return;
         }
@@ -272,10 +278,21 @@ public class MainViewModel
         }
     }
 
+    /**
+     * Hash with SHA-512, and convert to a base64 string.
+     *
+     * @param password to hash
+     *
+     * @return base64 string
+     *
+     * @throws NoSuchAlgorithmException on ...
+     */
     @NonNull
-    private String encrypt(@NonNull final String password) {
-        //TODO
-        return password;
+    private String hash(@NonNull final String password)
+            throws NoSuchAlgorithmException {
+        final MessageDigest md = MessageDigest.getInstance("SHA-512");
+        final byte[] digest = md.digest(password.getBytes(StandardCharsets.UTF_8));
+        return Base64.getEncoder().encodeToString(digest);
     }
 
     boolean isAskNotificationPermission() {
