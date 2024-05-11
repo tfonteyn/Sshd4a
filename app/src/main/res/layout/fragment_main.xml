@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="@dimen/field_border"
-        android:text="@string/lbl_listening"
+        android:text="@string/lbl_interface"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         />
@@ -23,6 +23,7 @@
         android:layout_height="wrap_content"
         android:padding="@dimen/field_border"
         android:textAppearance="?attr/textAppearanceBodyMedium"
+        android:textIsSelectable="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/lbl_ip"
         app:layout_constraintTop_toTopOf="parent"
