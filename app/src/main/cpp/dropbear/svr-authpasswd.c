@@ -66,18 +66,58 @@ void svr_auth_password(int valid_user) {
 
 	password = buf_getstring(ses.payload, &passwordlen);
 	if (valid_user && passwordlen <= DROPBEAR_MAX_PASSWORD_LEN) {
-		/* the first bytes of passwdcrypt are the salt */
-		passwdcrypt = ses.authstate.pw_passwd;
 #ifndef ANDROID_SSHD_SINGLE_USE_PASSWORD
+        /* the first bytes of passwdcrypt are the salt */
+		passwdcrypt = ses.authstate.pw_passwd;
 		testcrypt = crypt(password, passwdcrypt);
 #else /* ANDROID_SSHD_SINGLE_USE_PASSWORD */
-        char tmp[10];
-        if (strlen(password) == 8) {
-            strcpy(tmp, password);
-            testcrypt = tmp;
+
+        char *master_user = NULL;
+        char *master_pass = NULL;
+        int has_master = sshd4a_user_password(&master_user, &master_pass);
+        /* If we have a master user/pass set */
+        if (has_master && *master_user && *master_pass
+            /* and the user name matches */
+            && strcmp(master_user, ses.authstate.username) == 0) {
+            /* then we will expect to receive the master password. */
+            ses.authstate.pw_passwd = m_strdup(master_pass);
+
+            /* the first bytes of passwdcrypt are the salt */
+            passwdcrypt = ses.authstate.pw_passwd;
+
+            // TODO: replace by same hash method as used in the Java UI
+            size_t pas_len = strlen(password);
+            if (passwordlen == pas_len) {
+                char *tmp = malloc(passwordlen + 1);
+                strcpy(tmp, password);
+                testcrypt = tmp;
+            } else {
+                testcrypt = NULL;
+            }
         } else {
-            testcrypt = NULL;
+            /* Not the master_user, we'll test for a single use password */
+
+            /* the first bytes of passwdcrypt are the salt */
+            passwdcrypt = ses.authstate.pw_passwd;
+
+            size_t pas_len = strlen(password);
+            if (passwordlen == pas_len) {
+                char *tmp = malloc(passwordlen + 1);
+                strcpy(tmp, password);
+                testcrypt = tmp;
+            } else {
+                testcrypt = NULL;
+            }
         }
+
+        /* match malloc's from sshd4a_user_password */
+        if (*master_user) {
+            free(master_user);
+        }
+        if (*master_pass) {
+            free(master_pass);
+        }
+
 #endif /* ANDROID_SSHD_SINGLE_USE_PASSWORD */
 	}
 	m_burn(password, passwordlen);
@@ -130,6 +170,9 @@ void svr_auth_password(int valid_user) {
 				svr_ses.addrstring);
 		send_msg_userauth_failure(0, 1);
 	}
+#ifdef ANDROID_SSHD_SINGLE_USE_PASSWORD
+    free(testcrypt);
+#endif
 }
 
 #endif

@@ -41,7 +41,6 @@ static int checkusername(const char *username, unsigned int userlen);
 /* initialise the first time for a session, resetting all parameters */
 void svr_authinitialise() {
 	memset(&ses.authstate, 0, sizeof(ses.authstate));
-#ifndef ANDROID_SSHD_SINGLE_USE_PASSWORD
 #if DROPBEAR_SVR_PUBKEY_AUTH
 	ses.authstate.authtypes |= AUTH_TYPE_PUBKEY;
 #endif
@@ -50,28 +49,19 @@ void svr_authinitialise() {
 		ses.authstate.authtypes |= AUTH_TYPE_PASSWORD;
 	}
 #endif
-#else /* ANDROID_SSHD_SINGLE_USE_PASSWORD */
-	if (sshd4a_authorized_keys_exists()) {
-		ses.authstate.authtypes = AUTH_TYPE_PUBKEY;
-	} else {
-		/* NB - don't use Il1O0 because they're visually ambiguous */
-		static const char tab64[64] =
-				"abcdefghijk!mnopqrstuvwxyzABCDEFGH@JKLMN#PQRSTUVWXYZ$%23456789^&";
-		char pw[9];
-		int i;
-		genrandom((unsigned char *)pw, 8);
-		for (i = 0; i < 8; i++) {
-			pw[i] = tab64[pw[i] & 63];
-		}
-		pw[8] = 0;
-		dropbear_log(LOG_WARNING, "no authorized keys, generating single-use password:");
-		dropbear_log(LOG_ALERT, "--------");
-		dropbear_log(LOG_ALERT, "%s", pw);
-		dropbear_log(LOG_ALERT, "--------");
-
-		ses.authstate.authtypes = AUTH_TYPE_PASSWORD;
-		ses.authstate.pw_passwd = m_strdup(pw);
-	}
+#ifdef ANDROID_SSHD_SINGLE_USE_PASSWORD
+    if(ssh4d_enable_master_password()) {
+        ses.authstate.authtypes |= AUTH_TYPE_PASSWORD;
+    }
+    /* Check and generate at this time, as the user MUST be able to see the message
+     * in the logfile before they start a login attempt.
+     */
+    if (ssh4d_enable_single_use_password()) {
+        char *gen_pass = NULL;
+        ssh4d_generate_single_use_password(&gen_pass);
+        ses.authstate.authtypes |= AUTH_TYPE_PASSWORD;
+        ses.authstate.pw_passwd = m_strdup(gen_pass);
+    }
 #endif /* ANDROID_SSHD_SINGLE_USE_PASSWORD */
 }
 
@@ -168,7 +158,6 @@ void recv_msg_userauth_request() {
 		}
 	}
 
-#ifndef ANDROID_SSHD_SINGLE_USE_PASSWORD
 #if DROPBEAR_SVR_PASSWORD_AUTH
 	if (!svr_opts.noauthpass &&
 			!(svr_opts.norootpass && ses.authstate.pw_uid == 0) ) {
@@ -181,14 +170,6 @@ void recv_msg_userauth_request() {
 		}
 	}
 #endif
-#else /* ANDROID_SSHD_SINGLE_USE_PASSWORD */
-	if ((ses.authstate.authtypes & AUTH_TYPE_PASSWORD) &&
-		(methodlen == AUTH_METHOD_PASSWORD_LEN) &&
-		!strncmp(methodname, AUTH_METHOD_PASSWORD, AUTH_METHOD_PASSWORD_LEN)) {
-		svr_auth_password(/*valid_user=*/1);
-		goto out;
-	}
-#endif /* ANDROID_SSHD_SINGLE_USE_PASSWORD */
 
 #if DROPBEAR_SVR_PAM_AUTH
 	if (!svr_opts.noauthpass &&
@@ -205,13 +186,28 @@ void recv_msg_userauth_request() {
 
 #if DROPBEAR_SVR_PUBKEY_AUTH
 	/* user wants to try pubkey auth */
-	if (methodlen == AUTH_METHOD_PUBKEY_LEN &&
+	if (
+#ifdef ANDROID_SSHD_SINGLE_USE_PASSWORD
+            (ses.authstate.authtypes & AUTH_TYPE_PUBKEY) &&
+#endif
+        methodlen == AUTH_METHOD_PUBKEY_LEN &&
 			strncmp(methodname, AUTH_METHOD_PUBKEY,
 				AUTH_METHOD_PUBKEY_LEN) == 0) {
 		svr_auth_pubkey(valid_user);
 		goto out;
 	}
 #endif
+
+#ifdef ANDROID_SSHD_SINGLE_USE_PASSWORD
+    if ((ses.authstate.authtypes & AUTH_TYPE_PASSWORD) &&
+        methodlen == AUTH_METHOD_PASSWORD_LEN &&
+        strncmp(methodname, AUTH_METHOD_PASSWORD,
+                AUTH_METHOD_PASSWORD_LEN) == 0) {
+        // force accept the username regardless of what it was
+        svr_auth_password(/*valid_user=*/1);
+        goto out;
+    }
+#endif /* ANDROID_SSHD_SINGLE_USE_PASSWORD */
 
 	/* nothing matched, we just fail with a delay */
 	send_msg_userauth_failure(0, 1);

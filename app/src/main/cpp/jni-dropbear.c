@@ -132,6 +132,63 @@ int sshd4a_authorized_keys_exists() {
     return 1;
 }
 
+int ssh4d_enable_master_password() {
+    return 1;
+}
+
+int sshd4a_user_password(char **user, char **password) {
+    char *fn = sshd4a_conf_file("master_password");
+    FILE *f = fopen(fn, "r");
+    free(fn); /* match "malloc()" from sshd4a_conf_file */
+    if (!f) {
+        return 0;
+    }
+
+    int ret_value = 0;
+
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t read;
+
+    read = getline(&line, &len, f);
+    if (read > 0 && strstr(line, ":") != NULL) {
+        char *p;
+        p = strtok(line, ":");
+        *user = strdup(p);
+
+        p = strtok(NULL,":");
+        *password = strdup(p);
+
+        ret_value = 1;
+    }
+
+    free(line);
+    fclose(f);
+    return ret_value;
+}
+
+int ssh4d_enable_single_use_password() {
+    return 1;
+}
+void ssh4d_generate_single_use_password(char **gen_pass) {
+    /* Don't use Il1O0 because they're visually ambiguous */
+    static const char tab64[64] =
+            "abcdefghijk!mnopqrstuvwxyzABCDEFGH@JKLMN#PQRSTUVWXYZ$%23456789^&";
+    char pw[9];
+    int i;
+    genrandom((unsigned char *)pw, 8);
+    for (i = 0; i < 8; i++) {
+        pw[i] = tab64[pw[i] & 63];
+    }
+    pw[8] = 0;
+    dropbear_log(LOG_WARNING, "Single-use password:");
+    dropbear_log(LOG_ALERT, "--------");
+    dropbear_log(LOG_ALERT, "%s", pw);
+    dropbear_log(LOG_ALERT, "--------");
+
+    *gen_pass = m_strdup(pw);
+}
+
 const char *from_java_string(JNIEnv *env, jstring str) {
     if (!str) {
         return "";

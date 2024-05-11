@@ -43,15 +43,21 @@
             android:defaultValue="/system/bin/sh"
             android:key="sshd.shell"
             android:title="@string/pt_shell" />
+        <!-- Not saved to preferences. Handled in code. -->
+        <EditTextPreference
+            android:defaultValue=""
+            android:key="sshd.master.password"
+            android:persistent="false"
+            android:title="@string/pt_master_password" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/pc_ui">
-    <ListPreference
-        android:defaultValue="0"
-        android:entries="@array/pe_ui_theme"
-        android:entryValues="@array/pv_ui_theme"
-        android:key="ui.theme"
-        android:title="@string/pt_ui_theme" />
+        <ListPreference
+            android:defaultValue="0"
+            android:entries="@array/pe_ui_theme"
+            android:entryValues="@array/pv_ui_theme"
+            android:key="ui.theme"
+            android:title="@string/pt_ui_theme" />
     </PreferenceCategory>
 
 </PreferenceScreen>

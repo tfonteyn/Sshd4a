@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.net.Uri;
-import androidx.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Pair;
 
@@ -16,10 +15,12 @@ import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import androidx.preference.PreferenceManager;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -33,7 +34,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MainViewModel
         extends ViewModel {
 
+    /** Filename used in native code. Stored in {@link SshdService#getDropbearDirectory}. */
     private static final String AUTHORIZED_KEYS = "authorized_keys";
+    /** Filename used in native code. Stored in {@link SshdService#getDropbearDirectory}. */
+    private static final String MASTER_PASSWORD = "master_password";
+
     private static final int THREAD_SLEEP_MILLIS = 2000;
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
     private static final String TAG = "MainViewModel";
@@ -203,6 +208,38 @@ public class MainViewModel
     void deleteAuthKeys(@NonNull final Context context) {
         //noinspection ResultOfMethodCallIgnored
         new File(SshdService.getDropbearDirectory(context), AUTHORIZED_KEYS).delete();
+    }
+
+    @Nullable
+    String readMasterPassword(@NonNull final Context context) {
+        final File path = SshdService.getDropbearDirectory(context);
+        final File file = new File(path, MASTER_PASSWORD);
+        final List<String> lines;
+        try {
+            lines = Files.readAllLines(file.toPath());
+            if (!lines.isEmpty()) {
+                return lines.get(0);
+            }
+        } catch (@NonNull final IOException ignore) {
+            // ignore
+        }
+        return null;
+    }
+
+    void writeMasterPassword(@NonNull final Context context,
+                             @Nullable final String password)
+            throws IOException {
+        final File path = SshdService.getDropbearDirectory(context);
+        final File file = new File(path, MASTER_PASSWORD);
+        if (password == null || password.isBlank()) {
+            //noinspection ResultOfMethodCallIgnored
+            file.delete();
+        } else {
+            //noinspection ImplicitDefaultCharsetUsage
+            try (FileWriter fw = new FileWriter(file)) {
+                fw.write(password.toCharArray());
+            }
+        }
     }
 
     boolean isAskNotificationPermission() {

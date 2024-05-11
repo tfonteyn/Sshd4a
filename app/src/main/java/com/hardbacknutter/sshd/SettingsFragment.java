@@ -10,6 +10,7 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
@@ -20,23 +21,39 @@ import androidx.preference.SwitchPreference;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
+import java.io.IOException;
 
 public class SettingsFragment
         extends PreferenceFragmentCompat
         implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     public static final String TAG = "SettingsFragment";
+    private static final String PK_SSHD_MASTER_PASSWORD = "sshd.master.password";
+    private SwitchPreference pRunOnBoot;
+    private SwitchPreference pRunInForeground;
+    private EditTextPreference pPort;
+    private EditTextPreference pPassword;
+    private MainViewModel vm;
     private final OnBackPressedCallback backPressedCallback =
             new OnBackPressedCallback(true) {
                 @Override
                 public void handleOnBackPressed() {
-                    getParentFragmentManager().popBackStack();
+                    try {
+                        //noinspection DataFlowIssue
+                        vm.writeMasterPassword(getContext(), pPassword.getText());
+                        getParentFragmentManager().popBackStack();
+
+                    } catch (@NonNull final IOException ignore) {
+                        // we should never get here... flw
+                        //noinspection DataFlowIssue
+                        Snackbar.make(getView(), R.string.err_failed_to_save,
+                                      Snackbar.LENGTH_LONG).show();
+                        getView().postDelayed(() -> getParentFragmentManager().popBackStack(),
+                                              2_000);
+                    }
+
                 }
             };
-
-    private SwitchPreference pRunOnBoot;
-    private SwitchPreference pRunInForeground;
-    private EditTextPreference pPort;
 
     @Override
     public void onCreatePreferences(@Nullable final Bundle savedInstanceState,
@@ -91,6 +108,22 @@ public class SettingsFragment
         //noinspection ConstantConditions
         findPreference(Prefs.SHELL)
                 .setSummaryProvider(EditTextPreference.SimpleSummaryProvider.getInstance());
+
+        pPassword = findPreference(PK_SSHD_MASTER_PASSWORD);
+        //noinspection DataFlowIssue
+        pPassword.setOnBindEditTextListener(editText -> {
+            editText.setInputType(InputType.TYPE_CLASS_TEXT
+                                  | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            editText.selectAll();
+        });
+        pPassword.setSummaryProvider(preference -> {
+            final String value = ((EditTextPreference) preference).getText();
+            if (value == null || value.isEmpty()) {
+                return getString(R.string.info_not_set);
+            } else {
+                return "********";
+            }
+        });
     }
 
 
@@ -107,6 +140,11 @@ public class SettingsFragment
         if (toolbar != null) {
             toolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24);
         }
+
+        vm = new ViewModelProvider(this).get(MainViewModel.class);
+        //noinspection ConstantConditions
+        vm.init(getContext());
+        pPassword.setText(vm.readMasterPassword(getContext()));
     }
 
     @Override
