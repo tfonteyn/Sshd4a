@@ -26,6 +26,7 @@ const char *conf_path = "";
 const char *env_var_list = "";
 /* enable the "buffersu" helper when the user has SuperSu installed. */
 int use_super_su_buffering = JNI_FALSE;
+int enable_single_use_passwords = JNI_TRUE;
 
 /* Construct the full path to the given configuration file. */
 char *sshd4a_conf_file(const char *fn) {
@@ -133,6 +134,7 @@ int sshd4a_authorized_keys_exists() {
 }
 
 int ssh4d_enable_master_password() {
+    /* not implemented; the user should just remove the master-user/pass settings in the UI. */
     return 1;
 }
 
@@ -168,8 +170,9 @@ int sshd4a_user_password(char **user, char **password) {
 }
 
 int ssh4d_enable_single_use_password() {
-    return 1;
+    return enable_single_use_passwords;
 }
+
 void ssh4d_generate_single_use_password(char **gen_pass) {
     /* Don't use Il1O0 because they're visually ambiguous */
     static const char tab64[64] =
@@ -215,13 +218,14 @@ static void null_atexit(void) {
  *
  * @param env
  * @param cl
- * @param j_lib_path                native library directory
- * @param j_dropbear_args           arguments to pass to the dropbear main
- * @param j_conf_path               location for "authorized_keys" etc
- * @param j_home_path               home directory for an ssh login
- * @param j_shell_exe               shell executable
- * @param j_env_var_list            list of environment variables
- * @param j_use_super_su_buffering  enable support for "SuperSu" rsync buffering
+ * @param j_lib_path                 native library directory
+ * @param j_dropbear_args            arguments to pass to the dropbear main
+ * @param j_conf_path                location for "authorized_keys" etc
+ * @param j_home_path                home directory for an ssh login
+ * @param j_shell_exe                shell executable
+ * @param j_env_var_list             list of environment variables
+ * @param j_enableSingleUsePasswords enable generating single-use passwords
+ * @param j_use_super_su_buffering   enable support for "SuperSu" rsync buffering
  *
  * @return On success, the PID of the dropbear process.  On failure, -1.
  */
@@ -235,6 +239,7 @@ Java_com_hardbacknutter_sshd_SshdService_start_1sshd(
         jstring j_home_path,
         jstring j_shell_exe,
         jstring j_env_var_list,
+        jint j_enableSingleUsePasswords,
         jint j_use_super_su_buffering) {
 
     pid_t pid = fork();
@@ -247,6 +252,7 @@ Java_com_hardbacknutter_sshd_SshdService_start_1sshd(
 
         sshd4a_shell_exe = from_java_string(env, j_shell_exe);
         env_var_list = from_java_string(env, j_env_var_list);
+        enable_single_use_passwords = j_enableSingleUsePasswords;
         use_super_su_buffering = j_use_super_su_buffering;
 
         const jsize argc = (*env)->GetArrayLength(env, j_dropbear_args);

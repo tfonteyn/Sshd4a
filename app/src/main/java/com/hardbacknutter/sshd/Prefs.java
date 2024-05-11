@@ -1,6 +1,6 @@
 package com.hardbacknutter.sshd;
 
-public final class Prefs {
+final class Prefs {
 
     static final String RUN_ON_BOOT = "service.start.onboot";
     static final String RUN_ON_OPEN = "service.start.onopen";
@@ -8,6 +8,8 @@ public final class Prefs {
 
     static final String SSHD_PORT = "sshd.port";
     static final String DEFAULT_PORT = "2222";
+
+    static final String ENABLE_SINGLE_USE_PASSWORDS = "sshd.enable.single.use.password";
 
     static final String HOME = "sshd.home";
     static final String ENV_VARS = "sshd.env";

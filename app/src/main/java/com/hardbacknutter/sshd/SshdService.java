@@ -240,6 +240,7 @@ public class SshdService
                                   @NonNull String homePath,
                                   @NonNull String shell,
                                   @NonNull String env,
+                                  int enableSingleUsePasswords,
                                   int useSuperSuBuffering);
 
     private native void kill(int pid);
@@ -301,11 +302,14 @@ public class SshdService
 
         final String env = pref.getString(Prefs.ENV_VARS, "");
 
+        final int enableSingleUsePasswords = pref.getBoolean(Prefs.ENABLE_SINGLE_USE_PASSWORDS,
+                                                        true) ? 1 : 0;
         final int useSuperSuBuffering = pref.getBoolean(Prefs.USE_SUPER_SU_BUFFERING,
                                                         false) ? 1 : 0;
 
         final int pid = start_sshd(getApplicationInfo().nativeLibraryDir,
                                    args, confPath, homePath, shellCmd, env,
+                                   enableSingleUsePasswords,
                                    useSuperSuBuffering);
         if (BuildConfig.DEBUG) {
             Log.d(TAG + "|startSshd", "start_sshd=" + pid);

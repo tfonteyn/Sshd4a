@@ -43,6 +43,11 @@
             android:defaultValue="/system/bin/sh"
             android:key="sshd.shell"
             android:title="@string/pt_shell" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="sshd.enable.single.use.password"
+            android:title="@string/pt_single_use_password"
+            />
         <!-- Not saved to preferences. Handled in code. -->
         <EditTextPreference
             android:defaultValue=""
