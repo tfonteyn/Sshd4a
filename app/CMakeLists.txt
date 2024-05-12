@@ -788,8 +788,23 @@ set(SRC_RSYNC
         )
 # #############################################################################
 
-# Indicate that "options.h" MUST read the "localoptions.h"
-add_compile_definitions(LOCALOPTIONS_H_EXISTS)
+# Code modifications are flagged with
+#   SSHD4A_REQUIRED_CHANGE
+# Used in comments to indicate code changes which are unconditional.
+# and the below
+#   SSHD4A_EXTEND_AUTHENTICATION
+#   SSHD4A_ALLOW_RSA_KEY_SIGNATURE_MISMATCH
+add_compile_definitions(
+        # Indicate that "options.h" MUST read the "localoptions.h"
+        LOCALOPTIONS_H_EXISTS
+        # Enable the code to enable/disable:
+        # - public key logins
+        # - single-use passwords
+        # - master-user/password
+        SSHD4A_EXTEND_AUTHENTICATION
+        # Enable the code that allows mismatches between key and signatures in some bad clients.
+        SSHD4A_ALLOW_RSA_KEY_SIGNATURE_MISMATCH
+)
 
 # compile tommath as an object library; to be statically linked later.
 add_library(tommath OBJECT ${SRC_TOM_MATH})

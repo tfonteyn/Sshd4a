@@ -1,23 +1,6 @@
 #ifndef SSHD4A_JNI_DROPBEAR_H
 #define SSHD4A_JNI_DROPBEAR_H
 
-/*
- * SSHD4A_REQUIRED_CHANGE
- * Used in comments to indicate code changes which are unconditional.
- */
-
-/*
- * Enable the code to enable/disable:
- * - public key logins
- * - single-use passwords
- * - master-user/password
- */
-#define SSHD4A_EXTEND_AUTHENTICATION 1
-/*
- * Enable the code that allows mismatches between key and signatures in some bad clients.
- */
-#define SSHD4A_ALLOW_RSA_KEY_SIGNATURE_MISMATCH 1
-
 #define SSHD4A_LIB_DIR  "SSHD4A_LIB_DIR"
 #define SSHD4A_CONF_DIR "SSHD4A_CONF_DIR"
 
