@@ -161,7 +161,7 @@
 #define _FILE_OFFSET_BITS 64
 #define _GNU_SOURCE 1
 
-/* ANDROID_SSHD: 64 versus 32 bit differences. */
+/* SSHD4A_REQUIRED_CHANGE: 64 versus 32 bit differences. */
 #if defined(__aarch64__) || defined(__x86_64__  )
 #define HAVE_LONG_DOUBLE 1
 #define HAVE_LONG_DOUBLE_WIDER 1
@@ -174,7 +174,7 @@
 #define SIZEOF_TIME_T 4
 #endif
 
-/* ANDROID_SSHD: configure bug (it did find MKSTEMP64)? We have mkstemp(). */
+/* SSHD4A_REQUIRED_CHANGE: configure bug (it did find MKSTEMP64)? We have mkstemp(). */
 #define HAVE_SECURE_MKSTEMP 1
 
 #endif /* __RSYNC_CONFIG_H */

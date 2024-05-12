@@ -265,10 +265,10 @@ int do_chmod(const char *path, mode_t mode)
 			code = 1;
 # endif
 		} else
-/* ANDROID_SSHD: replace 'chmod' with 'fchmod' */
+/* SSHD4A_REQUIRED_CHANGE: replace 'chmod' with 'fchmod' */
 #if 0
 			code = chmod(path, mode & CHMOD_BITS); /* DISCOURAGED FUNCTION */
-#else /* ANDROID_SSHD */
+#else /* SSHD4A_REQUIRED_CHANGE */
 			/* use brackets as this becomes the 'else' clause */
 		{
 			int fd = open(path, O_RDONLY);
@@ -279,7 +279,7 @@ int do_chmod(const char *path, mode_t mode)
 				close(fd);
 			}
 		}
-#endif /* ANDROID_SSHD */
+#endif /* SSHD4A_REQUIRED_CHANGE */
 		break;
 	}
 	if (code != 0 && (preserve_perms || preserve_executability))

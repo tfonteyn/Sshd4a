@@ -932,7 +932,7 @@
 
 /* Define to 1 if your system has a GNU libc compatible 'malloc' function, and
    to 0 otherwise. */
-/* ANDROID_SSHD: configure fails to find it due to android using an "#include_next" */
+/* SSHD4A_REQUIRED_CHANGE: configure fails to find it due to android using an "#include_next" */
 #define HAVE_MALLOC 1
 
 /* Define to 1 if you have the 'mblen' function. */
@@ -1355,7 +1355,7 @@
 /* #undef HAVE_STRUCT_PASSWD_PW_EXPIRE */
 
 /* Define to 1 if 'pw_gecos' is a member of 'struct passwd'. */
-/* ANDROID_SSHD: configure added this, but must be commented out! set to 0 is not enough? */
+/* SSHD4A_REQUIRED_CHANGE: configure added this, but must be commented out! set to 0 is not enough? */
 // #define HAVE_STRUCT_PASSWD_PW_GECOS 1
 
 /* Define to 1 if 'fd' is a member of 'struct pollfd'. */
@@ -2031,7 +2031,7 @@
 #define __res_state state
 
 /* Define to rpl_calloc if the replacement function should be used. */
-/* ANDROID_SSHD don't redefine this */
+/* SSHD4A_REQUIRED_CHANGE don't redefine this */
 // #define calloc rpl_calloc
 
 /* Define to '__inline__' or '__inline' if that's what the C compiler
@@ -2041,21 +2041,21 @@
 #endif
 
 /* Define to rpl_malloc if the replacement function should be used. */
-/* ANDROID_SSHD don't redefine this */
+/* SSHD4A_REQUIRED_CHANGE don't redefine this */
 //#define malloc rpl_malloc
 
 ///* Define to rpl_realloc if the replacement function should be used. */
-/* ANDROID_SSHD don't redefine this */
+/* SSHD4A_REQUIRED_CHANGE don't redefine this */
 //#define realloc rpl_realloc
 
 /* type to use in place of socklen_t if not defined */
 /* #undef socklen_t */
 
 
-/* ANDROID_SSHD: 64 versus 32 bit differences. */
+/* SSHD4A_REQUIRED_CHANGE: 64 versus 32 bit differences. */
 #define _FILE_OFFSET_BITS 64
 
-/* ANDROID_SSHD: 64 versus 32 bit differences. */
+/* SSHD4A_REQUIRED_CHANGE: 64 versus 32 bit differences. */
 #if defined(__aarch64__) || defined(__x86_64__ )
 #define SIZEOF_LONG_INT 8
 #define SIZEOF_TIME_T 8
@@ -2064,11 +2064,11 @@
 #define SIZEOF_TIME_T 4
 #endif
 
-/* ANDROID_SSHD: configure does not check this, but we need it. */
+/* SSHD4A_REQUIRED_CHANGE: configure does not check this, but we need it. */
 #define HAVE_ATTRIBUTE__SENTINEL__ 1
 
-/* ANDROID_SSHD, see "openbsd-compat/explicit_bzero.c" workaround */
+/* SSHD4A_REQUIRED_CHANGE, see "openbsd-compat/explicit_bzero.c" workaround */
 #define HAVE_BZERO 1
-/* ANDROID_SSHD end */
+/* SSHD4A_REQUIRED_CHANGE end */
 
 #endif /* __OPENSSH_CONFIG_H__ */

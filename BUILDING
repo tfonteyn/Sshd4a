@@ -105,7 +105,7 @@ git remote add upstream-rsync c:/tmp/sshd4a-tarballs/upstream-rsync
 git fetch upstream-rsync
 git merge --allow-unrelated-histories upstream-rsync/dev
 
-#    All changes are (should be) marked with ANDROID_SSHD*
+#    All changes are (should be) marked with SSHD4A_*
 #    Merge and solve conflicts as usual.
 
 cd ${SRC_ROOT}/${RSYNC}/app/src/main/cpp/
@@ -149,7 +149,7 @@ git remote add upstream-openssh c:/tmp/sshd4a-tarballs/upstream-openssh
 git fetch upstream-openssh
 git merge --allow-unrelated-histories upstream-openssh/dev
 
-#    All changes are (should be) marked with ANDROID_SSHD*
+#    All changes are (should be) marked with SSHD4A_*
 #    Merge and solve conflicts as usual.
 #    Update gradle.build: android.defaultConfig buildConfigField("String", "VERSION_OPENSSL"...
 #    Commit and build...
@@ -190,7 +190,7 @@ git fetch upstream-dropbear
 
 git merge --allow-unrelated-histories upstream-dropbear/dev
 
-#    All changes are (should be) marked with ANDROID_SSHD*
+#    All changes are (should be) marked with SSHD4A_*
 #    Merge and solve conflicts as usual.
 
 cd ${SRC_ROOT}/${DROPBEAR}/app/src/main/cpp

@@ -22,6 +22,8 @@
 #include "rsync.h"
 #include "itypes.h"
 #include "ifuncs.h"
+/* SSHD4A_REQUIRED_CHANGE */
+#include "../jni-dropbear.h"
 
 extern int quiet;
 extern int dry_run;
@@ -776,7 +778,7 @@ static int rsync_module(int f_in, int f_out, int i, const char *addr, const char
 	uid = MY_UID();
 	am_root = (uid == ROOT_UID);
 
-/* ANDROID_SSHD: disable root/multi-user related code. */
+/* SSHD4A_REQUIRED_CHANGE: disable root/multi-user related code. */
 #if 0
 	p = *lp_uid(module_id) ? lp_uid(module_id) : am_root ? NOBODY_USER : NULL;
 	if (p) {
@@ -787,7 +789,7 @@ static int rsync_module(int f_in, int f_out, int i, const char *addr, const char
 		}
 		set_uid = 1;
 	} else
-#endif /* ANDROID_SSHD */
+#endif /* SSHD4A_REQUIRED_CHANGE */
 		set_uid = 0;
 
 	p = *lp_gid(module_id) ? conf_strtok(lp_gid(module_id)) : NULL;
@@ -818,12 +820,12 @@ static int rsync_module(int f_in, int f_out, int i, const char *addr, const char
 			if (add_a_group(f_out, p) < 0)
 				return -1;
 		}
-/* ANDROID_SSHD: disable root/multi-user related code. */
+/* SSHD4A_REQUIRED_CHANGE: disable root/multi-user related code. */
 #if 0
 	} else if (am_root) {
 		if (add_a_group(f_out, NOBODY_GROUP) < 0)
 			return -1;
-#endif /* ANDROID_SSHD */
+#endif /* SSHD4A_REQUIRED_CHANGE */
 	}
 
 	module_dir = lp_path(module_id);
@@ -1267,24 +1269,24 @@ static void send_listing(int fd)
 static int load_config(int globals_only)
 {
 	if (!config_file) {
-/* ANDROID_SSHD */
+/* SSHD4A_REQUIRED_CHANGE */
 #if 0
 		if (am_daemon < 0 && am_root <= 0)
 			config_file = RSYNCD_USERCONF;
 		else
 			config_file = RSYNCD_SYSCONF;
 #endif
-/* ANDROID_SSHD: is this actually needed/useful?
+/* SSHD4A_REQUIRED_CHANGE: is this actually needed/useful?
  * i.e. the conf file is only used when running as a daemon.
  */
-		char *tmp = getenv("SSHD4A_CONF_DIR");
+		char *tmp = getenv(SSHD4A_CONF_DIR);
 		if (!tmp) {
 			config_file = RSYNCD_SYSCONF;
 		} else {
 			config_file = malloc(strlen(tmp) + strlen(RSYNCD_USERCONF) + 2);
 			sprintf(config_file, "%s/%s", tmp, RSYNCD_USERCONF);
 		}
-/* ANDROID_SSHD ^^^ */
+/* SSHD4A_REQUIRED_CHANGE ^^^ */
 	}
 	return lp_load(config_file, globals_only);
 }

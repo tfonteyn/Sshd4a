@@ -70,14 +70,14 @@ process_file(hash_state *hs, const char *filename,
 	}
 
 	readcount = 0;
-/* ANDROID_SSHD */
+/* SSHD4A_REQUIRED_CHANGE */
 #if 1
 	int already_blocked = 0;
-#endif /* ANDROID_SSHD */
+#endif /* SSHD4A_REQUIRED_CHANGE */
 	while (wantlen == 0 || readcount < wantlen) {
 		int readlen, wantread;
 		unsigned char readbuf[4096];
-/* ANDROID_SSHD
+/* SSHD4A_REQUIRED_CHANGE
  * dropbear removed this code between 2019.78 and 2020.81, I guess they didn't
  * really care because all it does is print a warning (I added the break that
  * makes already_blocked non-optional).  I think somebody went through here with
@@ -108,7 +108,7 @@ process_file(hash_state *hs, const char *filename,
 		}
 
 		if (already_blocked) break;
-#endif /* ANDROID_SSHD */
+#endif /* SSHD4A_REQUIRED_CHANGE */
 		if (wantlen == 0) {
 			wantread = sizeof(readbuf);
 		} else {

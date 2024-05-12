@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <syslog.h>
 
+#include "jni-dropbear.h"
 #include "dbrandom.h"
 #include "session.h"
 
@@ -110,37 +111,9 @@ void sshd4a_set_env() {
     }
 
     /* make available to buffersu. */
-    setenv("SSHD4A_LIB_DIR", lib_path, /*overwrite=*/1);
+    setenv(SSHD4A_LIB_DIR, lib_path, /*overwrite=*/ 1);
     /* make available to rsync */
-    setenv("SSHD4A_CONF_DIR", conf_path, /*overwrite=*/1);
-}
-
-/*
- * Called from "svr-auth.c/svr_authinitialise()"
- *
- * Depending on our configuration flags,
- * we add or remove authentication options to the global session structure.
- */
-void sshd4a_hook__svr_auth__svr_authinitialise() {
-    /* explicitly set/unset, one less place to add #ifdef */
-    if (sshd4a_enable_public_key_login()) {
-        ses.authstate.authtypes |= AUTH_TYPE_PUBKEY;
-    } else {
-        ses.authstate.authtypes &= ~AUTH_TYPE_PUBKEY;
-    }
-
-    if (sshd4a_enable_master_password()) {
-        ses.authstate.authtypes |= AUTH_TYPE_PASSWORD;
-    }
-    /* Check and generate at this time, as the user MUST be able to see the message
-     * in the logfile before they start a login attempt.
-     */
-    if (sshd4a_enable_single_use_password()) {
-        char *gen_pass = NULL;
-        sshd4a_generate_single_use_password(&gen_pass);
-        ses.authstate.authtypes |= AUTH_TYPE_PASSWORD;
-        ses.authstate.pw_passwd = m_strdup(gen_pass);
-    }
+    setenv(SSHD4A_CONF_DIR, conf_path, /*overwrite=*/ 1);
 }
 
 int sshd4a_enable_public_key_login() {

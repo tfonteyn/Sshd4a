@@ -284,14 +284,14 @@
 
 #define __res_state state
 
-/* ANDROID_SSHD: 64 versus 32 bit differences. */
+/* SSHD4A_REQUIRED_CHANGE: 64 versus 32 bit differences. */
 #define _FILE_OFFSET_BITS 64
 
-/* ANDROID_SSHD: configure added this, but must be commented out! set to 0 is not enough? */
+/* SSHD4A_REQUIRED_CHANGE: configure added this, but must be commented out! set to 0 is not enough? */
 //#define HAVE_STRUCT_PASSWD_PW_GECOS 1
 
 
-/* ANDROID_SSHD: 64 versus 32 bit differences. */
+/* SSHD4A_REQUIRED_CHANGE: 64 versus 32 bit differences. */
 #if defined(__aarch64__) || defined(__x86_64__ )
 #define SIZEOF_LONG_INT 8
 #define SIZEOF_TIME_T 8
@@ -300,18 +300,18 @@
 #define SIZEOF_TIME_T 4
 #endif
 
-/* ANDROID_SSHD: configure does not check this, but we need it. */
+/* SSHD4A_REQUIRED_CHANGE: configure does not check this, but we need it. */
 #define HAVE_ATTRIBUTE__SENTINEL__ 1
 
-/* ANDROID_SSHD begin: configure fails to find it due to android using an "#include_next" */
+/* SSHD4A_REQUIRED_CHANGE begin: configure fails to find it due to android using an "#include_next" */
 #define HAVE_MALLOC 1
 /* and don't redefine these */
 /* #define calloc rpl_calloc */
 /* #define malloc rpl_malloc */
 /* #define realloc rpl_realloc */
 
-/* ANDROID_SSHD, see "openbsd-compat/explicit_bzero.c" workaround */
+/* SSHD4A_REQUIRED_CHANGE, see "openbsd-compat/explicit_bzero.c" workaround */
 #define HAVE_BZERO 1
-/* ANDROID_SSHD end */
+/* SSHD4A_REQUIRED_CHANGE end */
 
 #endif /* __OPENSSH_CONFIG_H__ */

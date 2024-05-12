@@ -68,7 +68,7 @@ void common_session_init(int sock_in, int sock_out) {
 	/* Sets it to lowdelay */
 	update_channel_prio();
 
-/* ANDROID_SSHD: the kernel is multi-user, but we use DROPBEAR_SVR_MULTIUSER=0
+/* SSHD4A_REQUIRED_CHANGE: the kernel is multi-user, but we use DROPBEAR_SVR_MULTIUSER=0
  * as we only support a single user. So, we have to overrule it here. */
 #if 0
 #if !DROPBEAR_SVR_MULTIUSER
@@ -80,7 +80,7 @@ void common_session_init(int sock_in, int sock_out) {
 		dropbear_exit("Non-multiuser Dropbear requires a non-multiuser kernel");
 	}
 #endif
-#endif /* ANDROID_SSHD */
+#endif /* SSHD4A_REQUIRED_CHANGE */
 
 	now = monotonic_now();
 	ses.connect_time = now;
@@ -628,7 +628,7 @@ void fill_passwd(const char* username) {
 		m_free(ses.authstate.pw_dir);
 	if (ses.authstate.pw_shell)
 		m_free(ses.authstate.pw_shell);
-#ifndef ANDROID_SSHD_SINGLE_USE_PASSWORD
+#ifndef SSHD4A_EXTEND_AUTHENTICATION
 	if (ses.authstate.pw_passwd)
 		m_free(ses.authstate.pw_passwd);
 
@@ -656,7 +656,7 @@ void fill_passwd(const char* username) {
 		}
 		ses.authstate.pw_passwd = m_strdup(passwd_crypt);
 	}
-#else	/* ANDROID_SSHD_SINGLE_USE_PASSWORD */
+#else	/* SSHD4A_EXTEND_AUTHENTICATION */
 	ses.authstate.pw_uid = 0;
 	ses.authstate.pw_gid = 0;
 	ses.authstate.pw_name = m_strdup(username);
@@ -665,7 +665,7 @@ void fill_passwd(const char* username) {
 	if (!ses.authstate.pw_passwd) {
 		ses.authstate.pw_passwd = m_strdup("!!");
 	}
-#endif	/* ANDROID_SSHD_SINGLE_USE_PASSWORD */
+#endif	/* SSHD4A_EXTEND_AUTHENTICATION */
 }
 
 /* Called when channels are modified */

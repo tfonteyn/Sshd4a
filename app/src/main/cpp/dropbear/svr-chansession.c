@@ -327,14 +327,14 @@ static void cleanupchansess(const struct Channel *channel) {
 	m_free(chansess->original_command);
 
 	if (chansess->tty) {
-#ifndef ANDROID_SSHD_SINGLE_USE_PASSWORD
+#ifndef SSHD4A_EXTEND_AUTHENTICATION
 		/* write the utmp/wtmp login record */
 		li = chansess_login_alloc(chansess);
 		login_logout(li);
 		login_free_entry(li);
 
 		pty_release(chansess->tty);
-#endif /* ANDROID_SSHD_SINGLE_USE_PASSWORD */
+#endif /* SSHD4A_EXTEND_AUTHENTICATION */
 		m_free(chansess->tty);
 	}
 
@@ -613,12 +613,12 @@ static int sessionpty(struct ChanSess * chansess) {
 		dropbear_exit("Out of memory"); /* TODO disconnect */
 	}
 
-#ifndef ANDROID_SSHD_SINGLE_USE_PASSWORD
+#ifndef SSHD4A_EXTEND_AUTHENTICATION
 	pw = getpwnam(ses.authstate.pw_name);
 	if (!pw)
 		dropbear_exit("getpwnam failed after succeeding previously");
 	pty_setowner(pw, chansess->tty);
-#endif /* ANDROID_SSHD_SINGLE_USE_PASSWORD */
+#endif /* SSHD4A_EXTEND_AUTHENTICATION */
 
 	/* Set up the rows/col counts */
 	sessionwinchange(chansess);
@@ -849,14 +849,14 @@ static int ptycommand(struct Channel *channel, struct ChanSess *chansess) {
 			TRACE(("leave ptycommand: error redirecting filedesc"))
 			return DROPBEAR_FAILURE;
 			}
-#ifndef ANDROID_SSHD_SINGLE_USE_PASSWORD
+#ifndef SSHD4A_EXTEND_AUTHENTICATION
 		/* write the utmp/wtmp login record - must be after changing the
 		 * terminal used for stdout with the dup2 above, otherwise
 		 * the wtmp login will not be recorded */
 		li = chansess_login_alloc(chansess);
 		login_login(li);
 		login_free_entry(li);
-#endif /* ANDROID_SSHD_SINGLE_USE_PASSWORD */
+#endif /* SSHD4A_EXTEND_AUTHENTICATION */
 
 		/* Can now dup2 stderr. Messages from login_login() have gone
 		to the parent stderr */

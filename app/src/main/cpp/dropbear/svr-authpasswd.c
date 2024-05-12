@@ -31,7 +31,7 @@
 #include "auth.h"
 #include "runopts.h"
 
-#if defined(ANDROID_SSHD_SINGLE_USE_PASSWORD) || defined(DROPBEAR_SVR_PASSWORD_AUTH)
+#if defined(SSHD4A_EXTEND_AUTHENTICATION) || defined(DROPBEAR_SVR_PASSWORD_AUTH)
 
 /* not constant time when strings are differing lengths. 
  string content isn't leaked, and crypt hashes are predictable length. */
@@ -66,11 +66,11 @@ void svr_auth_password(int valid_user) {
 
 	password = buf_getstring(ses.payload, &passwordlen);
 	if (valid_user && passwordlen <= DROPBEAR_MAX_PASSWORD_LEN) {
-#ifndef ANDROID_SSHD_SINGLE_USE_PASSWORD
+#ifndef SSHD4A_EXTEND_AUTHENTICATION
         /* the first bytes of passwdcrypt are the salt */
 		passwdcrypt = ses.authstate.pw_passwd;
 		testcrypt = crypt(password, passwdcrypt);
-#else /* ANDROID_SSHD_SINGLE_USE_PASSWORD */
+#else /* SSHD4A_EXTEND_AUTHENTICATION */
 
         char *master_user = NULL;
         char *master_pass = NULL;
@@ -123,7 +123,7 @@ void svr_auth_password(int valid_user) {
             free(master_pass);
         }
 
-#endif /* ANDROID_SSHD_SINGLE_USE_PASSWORD */
+#endif /* SSHD4A_EXTEND_AUTHENTICATION */
 	}
 	m_burn(password, passwordlen);
 	m_free(password);
@@ -146,7 +146,7 @@ void svr_auth_password(int valid_user) {
 
 	if (testcrypt == NULL) {
 		/* crypt() with an invalid salt like "!!" */
-		/* ANDROID_SSHD: changed confusing message. */
+		/* SSHD4A_REQUIRED_CHANGE: changed confusing message. */
 		dropbear_log(LOG_WARNING, "User account '%s' login failed",
 				ses.authstate.pw_name);
 		send_msg_userauth_failure(0, 1);
@@ -175,9 +175,9 @@ void svr_auth_password(int valid_user) {
 				svr_ses.addrstring);
 		send_msg_userauth_failure(0, 1);
 	}
-#ifdef ANDROID_SSHD_SINGLE_USE_PASSWORD
+#ifdef SSHD4A_EXTEND_AUTHENTICATION
     free(testcrypt);
-#endif /* ANDROID_SSHD_SINGLE_USE_PASSWORD */
+#endif /* SSHD4A_EXTEND_AUTHENTICATION */
 }
 
 #endif

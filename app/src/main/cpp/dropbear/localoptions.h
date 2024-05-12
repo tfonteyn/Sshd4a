@@ -43,7 +43,7 @@
 #define DROPBEAR_SVR_AGENTFWD 0
 
 /* Disable the normal password login, we'll support passwords through the
- * ANDROID_SSHD_SINGLE_USE_PASSWORD switch. */
+ * SSHD4A_EXTEND_AUTHENTICATION switch. */
 #define DROPBEAR_SVR_PASSWORD_AUTH 0
 
 /* Not literally true, but we can only support a single user */

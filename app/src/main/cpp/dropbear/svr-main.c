@@ -196,7 +196,7 @@ static void main_noinetd(int argc, char ** argv, const char* multipath) {
 	if (svr_opts.forkbg) {
 		dropbear_log(LOG_INFO, "Running in background");
 	} else {
-		/* ANDROID_SSHD: changed confusing message. */
+		/* SSHD4A_REQUIRED_CHANGE: changed confusing message. */
 		dropbear_log(LOG_INFO, "Started");
 	}
 

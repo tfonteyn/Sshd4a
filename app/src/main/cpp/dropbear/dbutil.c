@@ -367,7 +367,7 @@ int spawn_command(void(*exec_fn)(const void *user_data), const void *exec_data,
 
 /* Runs a command with "sh -c". Will close FDs (except stdin/stdout/stderr) and
  * re-enabled SIGPIPE. If cmd is NULL, will run a login shell.
- * ANDROID_SSHD
+ * SSHD4A_REQUIRED_CHANGE
  */
 void run_shell_command(const char* cmd, unsigned int maxfd, char* usershell) {
 	char * argv[4];

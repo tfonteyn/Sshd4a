@@ -39,14 +39,14 @@ explicit_bzero(void *p, size_t n)
  * Indirect bzero through a volatile pointer to hopefully avoid
  * dead-store optimisation eliminating the call.
  */
-/* ANDROID_SSHD */
+/* SSHD4A_REQUIRED_CHANGE */
 #if 0
 static void (* volatile ssh_bzero)(void *, size_t) = bzero;
-#else /* ANDROID_SSHD */
+#else /* SSHD4A_REQUIRED_CHANGE */
 /* bzero need __overloadable, but in strings.h it's just a define for __bionic_bzero
  * so... this will do. */
 static void (* volatile ssh_bzero)(void *, size_t) = __bionic_bzero;
-#endif /* ANDROID_SSHD */
+#endif /* SSHD4A_REQUIRED_CHANGE */
 
 void
 explicit_bzero(void *p, size_t n)

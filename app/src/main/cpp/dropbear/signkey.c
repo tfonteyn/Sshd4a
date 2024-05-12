@@ -646,11 +646,11 @@ int buf_verify(buffer * buf, sign_key *key, enum signature_type expect_sigtype, 
 	sigtype = signature_type_from_name(type_name, type_name_len);
 	m_free(type_name);
 
-#ifndef ANDROID_SSHD_ALLOW_RSA_KEY_SIGNATURE_MISMATCH
+#ifndef SSHD4A_ALLOW_RSA_KEY_SIGNATURE_MISMATCH
 	if (expect_sigtype != sigtype) {
 			dropbear_exit("Non-matching signing type");
 	}
-#else /* ANDROID_SSHD_ALLOW_RSA_KEY_SIGNATURE_MISMATCH */
+#else /* SSHD4A_ALLOW_RSA_KEY_SIGNATURE_MISMATCH */
 	/* This is a WORKAROUND for broken clients which
 	 * mix up rsa key type and rsa signature type.
 	 * https://github.com/mkj/dropbear/pull/106
@@ -665,7 +665,7 @@ int buf_verify(buffer * buf, sign_key *key, enum signature_type expect_sigtype, 
 	} else if (expect_sigtype != sigtype) {
 		dropbear_exit("Non-matching signing type");
 	}
-#endif /* ANDROID_SSHD_ALLOW_RSA_KEY_SIGNATURE_MISMATCH */
+#endif /* SSHD4A_ALLOW_RSA_KEY_SIGNATURE_MISMATCH */
 
 	keytype = signkey_type_from_signature(sigtype);
 #if DROPBEAR_DSS

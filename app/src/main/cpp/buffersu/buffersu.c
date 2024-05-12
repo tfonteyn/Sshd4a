@@ -23,6 +23,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "../jni-dropbear.h"
+
 #define MAX_BUFSZ (1024 * 1024)
 
 static void die(void) {
@@ -230,7 +232,7 @@ if (FD_ISSET(child_stdout, &x##s)) fprintf(stderr, #x " child_stdout\n");
         close(p1[0]);
         close(p1[1]);
 
-        char *lib_path = getenv("SSHD4A_LIB_DIR");
+        char *lib_path = getenv(SSHD4A_LIB_DIR);
         if (!lib_path) {
             lib_path = "SSHD4A_LIB_DIR_not_set";
         }

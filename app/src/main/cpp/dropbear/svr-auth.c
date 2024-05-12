@@ -49,9 +49,32 @@ void svr_authinitialise() {
 		ses.authstate.authtypes |= AUTH_TYPE_PASSWORD;
 	}
 #endif
-#ifdef ANDROID_SSHD_SINGLE_USE_PASSWORD
-    sshd4a_hook__svr_auth__svr_authinitialise();
-#endif /* ANDROID_SSHD_SINGLE_USE_PASSWORD */
+#ifdef SSHD4A_EXTEND_AUTHENTICATION
+    /*
+     * Depending on our configuration flags,
+     * we add or remove authentication options to the global session structure.
+     */
+
+    /* explicitly set/unset, one less place to add #ifdef */
+    if (sshd4a_enable_public_key_login()) {
+        ses.authstate.authtypes |= AUTH_TYPE_PUBKEY;
+    } else {
+        ses.authstate.authtypes &= ~AUTH_TYPE_PUBKEY;
+    }
+
+    if (sshd4a_enable_master_password()) {
+        ses.authstate.authtypes |= AUTH_TYPE_PASSWORD;
+    }
+    /* Check and generate at this time, as the user MUST be able to see the message
+     * in the logfile before they start a login attempt.
+     */
+    if (sshd4a_enable_single_use_password()) {
+        char *gen_pass = NULL;
+        sshd4a_generate_single_use_password(&gen_pass);
+        ses.authstate.authtypes |= AUTH_TYPE_PASSWORD;
+        ses.authstate.pw_passwd = m_strdup(gen_pass);
+    }
+#endif /* SSHD4A_EXTEND_AUTHENTICATION */
 }
 
 /* Send a banner message if specified to the client. The client might
@@ -176,9 +199,9 @@ void recv_msg_userauth_request() {
 #if DROPBEAR_SVR_PUBKEY_AUTH
 	/* user wants to try pubkey auth */
 	if (
-#ifdef ANDROID_SSHD_SINGLE_USE_PASSWORD
+#ifdef SSHD4A_EXTEND_AUTHENTICATION
             (ses.authstate.authtypes & AUTH_TYPE_PUBKEY) &&
-#endif /* ANDROID_SSHD_SINGLE_USE_PASSWORD */
+#endif /* SSHD4A_EXTEND_AUTHENTICATION */
         methodlen == AUTH_METHOD_PUBKEY_LEN &&
 			strncmp(methodname, AUTH_METHOD_PUBKEY,
 				AUTH_METHOD_PUBKEY_LEN) == 0) {
@@ -187,7 +210,7 @@ void recv_msg_userauth_request() {
 	}
 #endif
 
-#ifdef ANDROID_SSHD_SINGLE_USE_PASSWORD
+#ifdef SSHD4A_EXTEND_AUTHENTICATION
     if ((ses.authstate.authtypes & AUTH_TYPE_PASSWORD) &&
         methodlen == AUTH_METHOD_PASSWORD_LEN &&
         strncmp(methodname, AUTH_METHOD_PASSWORD,
@@ -196,7 +219,7 @@ void recv_msg_userauth_request() {
         svr_auth_password(/*valid_user=*/1);
         goto out;
     }
-#endif /* ANDROID_SSHD_SINGLE_USE_PASSWORD */
+#endif /* SSHD4A_EXTEND_AUTHENTICATION */
 
 	/* nothing matched, we just fail with a delay */
 	send_msg_userauth_failure(0, 1);
@@ -289,7 +312,7 @@ static int checkusername(const char *username, unsigned int userlen) {
 	}
 
 	/* check if we are running as non-root, and login user is different from the server */
-#ifndef ANDROID_SSHD_SINGLE_USE_PASSWORD
+#ifndef SSHD4A_EXTEND_AUTHENTICATION
 	uid = geteuid();
 	if (!(DROPBEAR_SVR_MULTIUSER && uid == 0) && uid != ses.authstate.pw_uid) {
 		TRACE(("running as nonroot, only server uid is allowed"))
@@ -353,7 +376,7 @@ static int checkusername(const char *username, unsigned int userlen) {
 goodshell:
 	endusershell();
 	TRACE(("matching shell"))
-#endif /* ANDROID_SSHD_SINGLE_USE_PASSWORD */
+#endif /* SSHD4A_EXTEND_AUTHENTICATION */
 
 	TRACE(("uid = %d", ses.authstate.pw_uid))
 	TRACE(("leave checkusername"))
