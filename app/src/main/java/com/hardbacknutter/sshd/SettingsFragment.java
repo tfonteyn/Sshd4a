@@ -29,20 +29,25 @@ public class SettingsFragment
         implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     public static final String TAG = "SettingsFragment";
+    /** Not persisted, written directly to the dropbear directory. */
     private static final String PK_SSHD_MASTER_USERNAME = "sshd.master.username";
+    /** Not persisted, written directly to the dropbear directory. */
     private static final String PK_SSHD_MASTER_PASSWORD = "sshd.master.password";
+
     private SwitchPreference pRunOnBoot;
     private SwitchPreference pRunInForeground;
     private EditTextPreference pPort;
     private EditTextPreference pMasterUsername;
     private EditTextPreference pMasterPassword;
+
     private MainViewModel vm;
+
     private final OnBackPressedCallback backPressedCallback =
             new OnBackPressedCallback(true) {
+                @SuppressWarnings("DataFlowIssue")
                 @Override
                 public void handleOnBackPressed() {
                     try {
-                        //noinspection DataFlowIssue
                         vm.writeMasterUserAndPassword(getContext(),
                                                       pMasterUsername.getText(),
                                                       pMasterPassword.getText());
@@ -50,7 +55,6 @@ public class SettingsFragment
 
                     } catch (@NonNull final IOException | NoSuchAlgorithmException ignore) {
                         // we should never get here... flw
-                        //noinspection DataFlowIssue
                         Snackbar.make(getView(), R.string.err_failed_to_save,
                                       Snackbar.LENGTH_LONG).show();
                         getView().postDelayed(() -> getParentFragmentManager().popBackStack(),
@@ -61,11 +65,11 @@ public class SettingsFragment
             };
     private boolean hasPreviousPassword;
 
+    @SuppressWarnings("DataFlowIssue")
     @Override
     public void onCreatePreferences(@Nullable final Bundle savedInstanceState,
                                     @Nullable final String rootKey) {
         final Context context = getContext();
-        //noinspection ConstantConditions
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
         final String homePath = prefs.getString(Prefs.HOME, null);
@@ -95,29 +99,25 @@ public class SettingsFragment
         pRunInForeground = findPreference(Prefs.RUN_IN_FOREGROUND);
 
         pPort = findPreference(Prefs.SSHD_PORT);
-        //noinspection ConstantConditions
         pPort.setSummaryProvider(EditTextPreference.SimpleSummaryProvider.getInstance());
         pPort.setOnBindEditTextListener(editText -> {
             editText.setInputType(InputType.TYPE_CLASS_NUMBER);
             editText.selectAll();
         });
 
-        //noinspection ConstantConditions
         findPreference(Prefs.DROPBEAR_CMDLINE_OPTIONS)
                 .setSummaryProvider(EditTextPreference.SimpleSummaryProvider.getInstance());
-        //noinspection ConstantConditions
         findPreference(Prefs.ENV_VARS)
                 .setSummaryProvider(EditTextPreference.SimpleSummaryProvider.getInstance());
-        //noinspection ConstantConditions
         findPreference(Prefs.HOME)
                 .setSummaryProvider(EditTextPreference.SimpleSummaryProvider.getInstance());
-        //noinspection ConstantConditions
         findPreference(Prefs.SHELL)
                 .setSummaryProvider(EditTextPreference.SimpleSummaryProvider.getInstance());
 
         pMasterUsername = findPreference(PK_SSHD_MASTER_USERNAME);
+        pMasterUsername.setSummaryProvider(EditTextPreference.SimpleSummaryProvider.getInstance());
+
         pMasterPassword = findPreference(PK_SSHD_MASTER_PASSWORD);
-        //noinspection DataFlowIssue
         pMasterPassword.setOnBindEditTextListener(editText -> {
             editText.setInputType(InputType.TYPE_CLASS_TEXT
                                   | InputType.TYPE_TEXT_VARIATION_PASSWORD);
@@ -127,7 +127,7 @@ public class SettingsFragment
             if (!hasPreviousPassword) {
                 final String value = ((EditTextPreference) preference).getText();
                 if (value == null || value.isEmpty()) {
-                    return getString(R.string.info_not_set);
+                    return getString(R.string.pref_not_set);
                 }
             }
             return "********";
@@ -151,10 +151,11 @@ public class SettingsFragment
         vm = new ViewModelProvider(this).get(MainViewModel.class);
         //noinspection ConstantConditions
         vm.init(getContext());
+
         final String[] previous = vm.readMasterUserAndPassword(getContext());
         if (previous != null && previous.length == 2) {
             pMasterUsername.setText(previous[0]);
-            // do NOT set the text, we only have the encrypted password.
+            // do NOT set the text, we only have the hashed password.
             pMasterPassword.setText("");
             hasPreviousPassword = true;
         }

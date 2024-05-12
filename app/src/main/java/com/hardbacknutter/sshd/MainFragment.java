@@ -91,7 +91,7 @@ public class MainFragment
         vm.init(getContext());
         vm.onLogUpdate().observe(getViewLifecycleOwner(), output -> {
             // We always replace the WHOLE content. TODO: receive and append updates only
-            vb.log.setText(output);
+            vb.log.setText(String.join("\n", output));
             vb.logScroller.post(() -> vb.logScroller.fullScroll(ScrollView.FOCUS_DOWN));
         });
         vm.onUpdateUI().observe(getViewLifecycleOwner(), textAndColor ->
@@ -217,7 +217,10 @@ public class MainFragment
         new MaterialAlertDialogBuilder(context)
                 .setIcon(R.drawable.ic_baseline_info_24)
                 .setTitle(R.string.app_name)
-                .setMessage(getString(R.string.msg_about, version))
+                .setMessage(getString(R.string.msg_about, version,
+                                      BuildConfig.VERSION_DROPBEAR,
+                                      BuildConfig.VERSION_RSYNC,
+                                      BuildConfig.VERSION_OPENSSH))
                 .setCancelable(true)
                 .setPositiveButton(android.R.string.ok, (d, which) -> d.dismiss())
                 .create()
@@ -280,7 +283,6 @@ public class MainFragment
                     //noinspection ConstantConditions
                     vm.stopService(getContext());
                 } else {
-                    vb.log.setText("");
                     //noinspection ConstantConditions
                     if (!vm.startService(getContext())) {
                         //noinspection ConstantConditions

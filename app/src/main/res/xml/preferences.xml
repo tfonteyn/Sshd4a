@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:app="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory android:title="@string/pc_startup">
         <SwitchPreference
             android:defaultValue="false"
@@ -47,6 +48,7 @@
             android:defaultValue="true"
             android:key="sshd.enable.single.use.password"
             android:title="@string/pt_single_use_password"
+            app:summary="@string/pt_single_use_password_info"
             />
         <!-- Not saved to preferences. Handled in code. -->
         <EditTextPreference

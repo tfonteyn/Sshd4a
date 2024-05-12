@@ -49,7 +49,7 @@ public class MainViewModel
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
 
     private final AtomicBoolean cancelRequested = new AtomicBoolean();
-    private final MutableLiveData<String> logData = new MutableLiveData<>();
+    private final MutableLiveData<List<String>> logData = new MutableLiveData<>();
     private final MutableLiveData<Pair<String, Integer>> startStopButton = new MutableLiveData<>();
     private SharedPreferences pref;
 
@@ -58,7 +58,7 @@ public class MainViewModel
     private Pair<String, Integer> stopBtn;
 
     @NonNull
-    MutableLiveData<String> onLogUpdate() {
+    MutableLiveData<List<String>> onLogUpdate() {
         return logData;
     }
 
@@ -66,6 +66,11 @@ public class MainViewModel
         return startStopButton;
     }
 
+    /**
+     * Pseudo constructor.
+     *
+     * @param context Current context
+     */
     void init(@NonNull final Context context) {
         if (pref == null) {
             pref = PreferenceManager.getDefaultSharedPreferences(context);
@@ -90,6 +95,9 @@ public class MainViewModel
         }
     }
 
+    /**
+     * Centralized code to trigger a UI update.
+     */
     void updateUI() {
         startStopButton.setValue(SshdService.isRunning() ? stopBtn : startBtn);
     }
@@ -128,6 +136,11 @@ public class MainViewModel
         cancelRequested.set(true);
     }
 
+    /**
+     * Start a thread to monitor the logfile.
+     *
+     * @param context Current context
+     */
     void startUpdateThread(@NonNull final Context context) {
         cancelRequested.set(false);
         final String path = SshdService.getDropbearDirectory(context).getPath();
@@ -155,16 +168,24 @@ public class MainViewModel
         });
     }
 
+    /**
+     * Collect up to {@link BuildConfig#NR_OF_LOG_LINES} lines from the end of the log file.
+     *
+     * @param file to read
+     *
+     * @return  list
+     */
     @WorkerThread
     @NonNull
-    private String collectLogLines(@NonNull final File file) {
-        final List<String> all = new ArrayList<>();
+    private List<String> collectLogLines(@NonNull final File file) {
+        final List<String> lines = new ArrayList<>();
         try {
             if (file.exists()) {
+                //noinspection ImplicitDefaultCharsetUsage
                 try (BufferedReader r = new BufferedReader(new FileReader(file))) {
                     String line;
                     while ((line = r.readLine()) != null) {
-                        all.add(line);
+                        lines.add(line);
                     }
                 }
             }
@@ -172,11 +193,11 @@ public class MainViewModel
             // ignore
         }
 
-        final int size = all.size();
+        final int size = lines.size();
         if (size > BuildConfig.NR_OF_LOG_LINES) {
-            return String.join("\n", all.subList(size - BuildConfig.NR_OF_LOG_LINES, size));
+            return lines.subList(size - BuildConfig.NR_OF_LOG_LINES, size);
         } else {
-            return String.join("\n", all);
+            return lines;
         }
     }
 
@@ -193,6 +214,7 @@ public class MainViewModel
                           @NonNull final Uri uri) {
         final File path = SshdService.getDropbearDirectory(context);
 
+        // First write to a new temp file
         final File tmpFile = new File(path, AUTHORIZED_KEYS + ".tmp");
 
         String error = null;
@@ -216,6 +238,13 @@ public class MainViewModel
         new File(SshdService.getDropbearDirectory(context), AUTHORIZED_KEYS).delete();
     }
 
+    /**
+     * Read the master user + hashed password from the dropbear file.
+     *
+     * @param context Current context
+     *
+     * @return a String array with [0] the username, and [1] the hashed/base64 password.
+     */
     @Nullable
     String[] readMasterUserAndPassword(@NonNull final Context context) {
         final File path = SshdService.getDropbearDirectory(context);

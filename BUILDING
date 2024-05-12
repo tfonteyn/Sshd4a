@@ -111,7 +111,8 @@ git merge --allow-unrelated-histories upstream-rsync/dev
 cd ${SRC_ROOT}/${RSYNC}/app/src/main/cpp/
 ./prebuild-rsyn.sh
 
-    Now commit and build...
+#    Update gradle.build: android.defaultConfig buildConfigField("String", "VERSION_RSYNC"...
+#    Commit and build...
 
 # ############################################################################
 #  Step 2.2 - OPENSSH - https://github.com/openssh/openssh-portable
@@ -150,6 +151,7 @@ git merge --allow-unrelated-histories upstream-openssh/dev
 
 #    All changes are (should be) marked with ANDROID_SSHD*
 #    Merge and solve conflicts as usual.
+#    Update gradle.build: android.defaultConfig buildConfigField("String", "VERSION_OPENSSL"...
 #    Commit and build...
 
 # ############################################################################
@@ -194,6 +196,7 @@ git merge --allow-unrelated-histories upstream-dropbear/dev
 cd ${SRC_ROOT}/${DROPBEAR}/app/src/main/cpp
 ./prebuild-dropbear.sh
 
+#    Update gradle.build: android.defaultConfig buildConfigField("String", "VERSION_DROPBEAR"...
 #    Commit and build...
 
 # ############################################################################

@@ -1,23 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--suppress LongLine -->
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Sshd4a</string>
     <string name="service_name">Sshd4a</string>
     <string name="service_description">Provides an sshd server with shell access, rsync and scp/sftp services.</string>
 
-    <string name="msg_about">Version %1$s
-        \n
-        \ndropbear 2022.82
-        \nrsync 3.2.6
-        \nsftp-server from OpenSSH 9.6p1
-    </string>
+    <string name="msg_about">Version %1$s\n\ndropbear %2$s\nrsync %3$s\nsftp-server from OpenSSH %4$s</string>
 
-    <string name="msg_request_files_management">
-        This application needs special permission to access your files in order to be able to use \'rsync\'.
-        Without this permission the functionality of this app will be severely limited.\n
-        \n
-        After clicking \'OK\' you will be asked to enable this permission.\n
-        Scroll down in the list of applications and enable Sshd4a.
-    </string>
+    <string name="msg_request_files_management" tools:ignore="TypographyQuotes">This application needs special permission to access your files in order to be able to use \"rsync\". Without this permission the functionality of this app will be severely limited.\n\n After tapping ‘OK’ you will be asked to enable this permission.\n Scroll down in the list of applications and enable Sshd4a.</string>
 
     <string name="err_service_failed_to_start">The service failed to start. Try again and check the log.</string>
     <string name="err_key_import">Something went wrong while importing your keys.</string>
@@ -48,7 +38,7 @@
     <string name="ps_foreground_off">The service will only run while this app is in the foreground.</string>
 
     <string name="pc_dropbear">Dropbear SSH</string>
-    <string name="pt_port">Port Number (\>1024)</string>
+    <string name="pt_port">Port Number (1024 &lt; port &lt; 32768)</string>
     <string name="pt_rsync_buffer">SuperSU/rsync buffer.</string>
     <string name="ps_supersu">Enable this option if you are using https://supersuroot.org/</string>
     <string name="pt_cmdline_options">Extra Commandline options</string>
@@ -64,9 +54,11 @@
     <string name="pe_ui_theme_dark">Dark</string>
     <string name="pe_ui_theme_light">Light</string>
 
+    <string name="pref_not_set">Not set</string>
+
     <string name="pt_master_username">Master username</string>
     <string name="pt_master_password">Master password</string>
-    <string name="info_not_set">Not set</string>
     <string name="err_failed_to_save">Failed to save the password</string>
+
     <string name="pt_single_use_password">Single use password</string>
 </resources>
