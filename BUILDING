@@ -1,86 +1,40 @@
 BUILD INSTRUCTIONS:
-
-# Code drops for dropbear/portable-openssh/rsync:
-
-# download tarballs (*.tar.gz or *.tar.bz2) from
-
-    https://matt.ucc.asn.au/dropbear/dropbear.html
-    https://github.com/openssh/openssh-portable
-    https://rsync.samba.org/
+- Android SDK and NDK
+- 7Zip command line '7z'
 
 # ############################################################################
+# Typically in ~/.bashrc
+# ############################################################################
+export JAVA_HOME=/cygdrive/c/d/jdk/
+export PATH=${JAVA_HOME}/bin:${PATH}
 
-# replace version numbers in the below strings after download:
+SDK=/cygdrive/c/d/sdk
+NDK=${SDK}/ndk/26.2.11394342
 
-export DROPBEAR_VERSION="dropbear-2022.82"
-export OPENSSH_VERSION="openssh-portable-V_9_1_P1"
-export RSYNC_VERSION="rsync-3.2.6"
+export TOOLCHAIN=${NDK}/toolchains/llvm/prebuilt/windows-x86_64
+export PATH=${SDK}/platform-tools:${TOOLCHAIN}/bin:${PATH}
 
-# the root dir with the tarballs
+# ############################################################################
+# Step 1 - Setting up the toolchain
+# ############################################################################
+
+# From the root dir with the tarball
 export SRC_ROOT=`pwd`
-
-7z x -so ${DROPBEAR_VERSION}* | tar xf -
-7z x -so ${OPENSSH_VERSION}* | tar xf -
-7z x -so ${RSYNC_VERSION}* | tar xf -
-
-# remove broken and/or unneeded rsync symlink
-rm ${RSYNC_VERSION}/md2man
-
-# content for ".gitattributes"
-export GATRR="* text eol=lf\n*.txt text\n*.png binary\n"
-
-# ############################################################################
-
-# rename the directories so we don't need to change the git remote names
-export DROPBEAR="upstream-dropbear"
-export OPENSSH="upstream-openssh"
-export RSYNC="upstream-rsync"
-
-# Prep dropbear
-cd ${SRC_ROOT}
-mkdir -p ${DROPBEAR}/app/src/main/cpp/
-mv ${DROPBEAR_VERSION} ${DROPBEAR}/app/src/main/cpp/dropbear
-cd ${DROPBEAR}
-echo -e "${GATRR}" >.gitattributes
-git init .
-# ignore warnings about txt files in "rsa-testvectors"
-git add * .gitattributes
-git commit -a -m "${DROPBEAR_VERSION}"
-
-# Prep openssh
-cd ${SRC_ROOT}
-mkdir -p ${OPENSSH}/app/src/main/cpp/
-mv ${OPENSSH_VERSION} ${OPENSSH}/app/src/main/cpp/openssh
-cd ${OPENSSH}
-echo -e "${GATRR}" >.gitattributes
-git init .
-git add * .gitattributes
-git commit -a -m "${OPENSSH_VERSION}"
-
-# Prep rsync
-cd ${SRC_ROOT}
-mkdir -p ${RSYNC}/app/src/main/cpp/
-mv ${RSYNC_VERSION} ${RSYNC}/app/src/main/cpp/rsync
-cd ${RSYNC}
-echo -e "${GATRR}" >.gitattributes
-git init .
-git add * .gitattributes
-git commit -a -m "${RSYNC_VERSION}"
-
-cd ${SRC_ROOT}
-
-# ############################################################################
-
-# creating "config.h" etc...
 
 # TOOLCHAIN is expected to point to your ndk environment toolchain.
 [ -n "${TOOLCHAIN}" ] || { echo "TOOLCHAIN must be set"; exit 1; }
+
+if [ ! -d "$NDK" ]; then
+  echo "$NDK does not exist."
+  return
+fi
+
 
 # Set this to your minSdkVersion.
 export API=26
 
 echo "Only choose one of these, depending on your device..."
-echo "1) aarch64-linux-android"
+echo "1) aarch64-linux-android ... which is most likely this one"
 echo "2) armv7a-linux-androideabi"
 echo "3) i686-linux-android"
 echo "4) x86_64-linux-android"
@@ -112,34 +66,162 @@ export LD=${TOOLCHAIN}/bin/ld
 export RANLIB=${TOOLCHAIN}/bin/llvm-ranlib
 export STRIP=${TOOLCHAIN}/bin/llvm-strip
 
-# Configure dropbear
-cd ${SRC_ROOT}/${DROPBEAR}/app/src/main/cpp/dropbear
-./configure --host $TARGET --disable-syslog --disable-lastlog \
-            --disable-utmp --disable-wtmp \
-            --enable-bundled-libtom --enable-largefile
+# content for ".gitattributes"
+export GATRR="* text eol=lf\n*.txt text\n*.png binary\n"
 
-# Configure openssh
-cd ${SRC_ROOT}/${OPENSSH}/app/src/main/cpp/openssh
-autoreconf
-./configure --host $TARGET --disable-lastlog --disable-utmp --disable-wtmp \
-            --enable-largefile --without-openssl
+# ############################################################################
+# Step 2.1 - RSYNC - https://rsync.samba.org/
+# https://download.samba.org/pub/rsync/src/rsync-3.3.0.tar.gz
+# ############################################################################
+# replace base filename in the below string after download:
+export RSYNC_VERSION="rsync-3.3.0"
+
+cd ${SRC_ROOT}
+7z x -so ${RSYNC_VERSION}* | tar xf -
+# remove broken and/or unneeded rsync symlink
+rm ${RSYNC_VERSION}/md2man
+# rename the directory so we don't need to change the git remote names
+export RSYNC="upstream-rsync"
+
+# Prep rsync
+mkdir -p ${RSYNC}/app/src/main/cpp/
+mv ${RSYNC_VERSION} ${RSYNC}/app/src/main/cpp/rsync
+cd ${RSYNC}
+echo -e "${GATRR}" >.gitattributes
+git init .
+git add * .gitattributes
+git commit -a -m "${RSYNC_VERSION}"
+cd ${SRC_ROOT}
 
 # Configure rsync
 cd ${SRC_ROOT}/${RSYNC}/app/src/main/cpp/rsync
 ./configure --host $TARGET --disable-openssl --disable-xxhash --disable-zstd --disable-lz4 \
             --disable-md2man --disable-roll-simd --disable-md5-asm --disable-roll-asm \
             --enable-largefile
-exit
+cd ${SRC_ROOT}
+
+# Add remote: "upstream-rsync" pointing to the location used above
+git remote add upstream-rsync c:/tmp/sshd4a-tarballs/upstream-rsync
+git fetch upstream-rsync
+git merge --allow-unrelated-histories upstream-rsync/dev
+
+#    All changes are (should be) marked with ANDROID_SSHD*
+#    Merge and solve conflicts as usual.
+
+cd ${SRC_ROOT}/${RSYNC}/app/src/main/cpp/
+./prebuild-rsyn.sh
+
+    Now commit and build...
 
 # ############################################################################
+#  Step 2.2 - OPENSSH - https://github.com/openssh/openssh-portable
+# https://mirror.ox.ac.uk/pub/OpenBSD/OpenSSH/portable/openssh-9.7p1.tar.gz
+# ############################################################################
+# replace base filename in the below string after download:
+export OPENSSH_VERSION="openssh-9.7p1"
 
-dropbear configh.
+cd ${SRC_ROOT}
+7z x -so ${OPENSSH_VERSION}* | tar xf -
+# rename the directory so we don't need to change the git remote names
+export OPENSSH="upstream-openssh"
+
+# Prep openssh
+mkdir -p ${OPENSSH}/app/src/main/cpp/
+mv ${OPENSSH_VERSION} ${OPENSSH}/app/src/main/cpp/openssh
+cd ${OPENSSH}
+echo -e "${GATRR}" >.gitattributes
+git init .
+git add * .gitattributes
+git commit -a -m "${OPENSSH_VERSION}"
+cd ${SRC_ROOT}
+
+# Configure openssh
+cd ${SRC_ROOT}/${OPENSSH}/app/src/main/cpp/openssh
+# autoreconf is normally in /usr/bin
+autoreconf
+./configure --host $TARGET --disable-lastlog --disable-utmp --disable-wtmp \
+            --enable-largefile --without-openssl
+cd ${SRC_ROOT}
+
+# Add remote: "upstream-openssh" pointing to the location used above
+git remote add upstream-openssh c:/tmp/sshd4a-tarballs/upstream-openssh
+git fetch upstream-openssh
+git merge --allow-unrelated-histories upstream-openssh/dev
+
+#    All changes are (should be) marked with ANDROID_SSHD*
+#    Merge and solve conflicts as usual.
+#    Commit and build...
+
+# ############################################################################
+# Step 2.3 - DROPBEAR - https://matt.ucc.asn.au/dropbear/dropbear.html
+# https://matt.ucc.asn.au/dropbear/dropbear-2024.85.tar.bz2
+# ############################################################################
+# replace base filename in the below string after download:
+export DROPBEAR_VERSION="dropbear-2024.85"
+
+cd ${SRC_ROOT}
+7z x -so ${DROPBEAR_VERSION}* | tar xf -
+# rename the directory so we don't need to change the git remote names
+export DROPBEAR="upstream-dropbear"
+
+# Prep dropbear
+mkdir -p ${DROPBEAR}/app/src/main/cpp/
+mv ${DROPBEAR_VERSION} ${DROPBEAR}/app/src/main/cpp/dropbear
+cd ${DROPBEAR}
+echo -e "${GATRR}" >.gitattributes
+git init .
+# ignore warnings about txt files in "rsa-testvectors"
+git add * .gitattributes
+git commit -a -m "${DROPBEAR_VERSION}"
+cd ${SRC_ROOT}
+
+# Configure dropbear
+cd ${SRC_ROOT}/${DROPBEAR}/app/src/main/cpp/dropbear
+./configure --host $TARGET --disable-syslog --disable-lastlog \
+            --disable-utmp --disable-wtmp \
+            --enable-bundled-libtom --enable-largefile
+cd ${SRC_ROOT}
+
+# Add remote: "upstream-dropbear" pointing to the location used above
+git remote add upstream-dropbear c:/tmp/sshd4a-tarballs/upstream-dropbear
+git fetch upstream-dropbear
+
+git merge --allow-unrelated-histories upstream-dropbear/dev
+
+#    All changes are (should be) marked with ANDROID_SSHD*
+#    Merge and solve conflicts as usual.
+
+cd ${SRC_ROOT}/${DROPBEAR}/app/src/main/cpp
+./prebuild-dropbear.sh
+
+#    Commit and build...
+
+# ############################################################################
+config.h changes - should not be needed to reapply these after a code drop
+as the config.h should be untouched.
+
+------------------------------------------------------------------------------
+# ${SRC_ROOT}/${RSYNC}/app/src/main/cpp/rsync/config.h
+------------------------------------------------------------------------------
+- armv7: extra "#define _FILE_OFFSET_BITS 64"
+  which can be added to the 64 bit versions without any issue. Done.
+- armv7 versus 64 using  #if defined(__aarch64__) || defined(__x86_64__ ) ...
+  #define HAVE_LONG_DOUBLE 1        <==> absent
+  #define HAVE_LONG_DOUBLE_WIDER 1  <==> absent
+  #define SIZEOF_CHARP  8           <==> 4
+  #define SIZEOF_LONG   8           <==> 4
+  #define SIZEOF_TIME_T 8           <==> 4
+
+------------------------------------------------------------------------------
+# ${SRC_ROOT}/${RSYNC}/app/src/main/cpp/dropbear/config.h
+------------------------------------------------------------------------------
 - aarch64 and x86_64 were identical
 - armv7: extra "#define _FILE_OFFSET_BITS 64"
   which can be added to the 64 bit versions without any issue. Done.
-------------------------------------------------------------------------------
 
-openssh config.h
+------------------------------------------------------------------------------
+# ${SRC_ROOT}/${RSYNC}/app/src/main/cpp/openssh/config.h
+------------------------------------------------------------------------------
 - aarch64 and x86_64 were identical
 - armv7: extra "#define _FILE_OFFSET_BITS 64"
   which can be added to the 64 bit versions without any issue. Done.
@@ -153,31 +235,6 @@ openssh config.h
   #define HAVE_MALLOC 1
   // see "openbsd-compat/explicit_bzero.c" workaround
   #define HAVE_BZERO 1
-------------------------------------------------------------------------------
-
-rsync config.h
-- armv7: extra "#define _FILE_OFFSET_BITS 64"
-  which can be added to the 64 bit versions without any issue. Done.
-- armv7 versus 64 using  #if defined(__aarch64__) || defined(__x86_64__ ) ...
-  #define HAVE_LONG_DOUBLE 1        <==> absent
-  #define HAVE_LONG_DOUBLE_WIDER 1  <==> absent
-  #define SIZEOF_CHARP  8           <==> 4
-  #define SIZEOF_LONG   8           <==> 4
-  #define SIZEOF_TIME_T 8           <==> 4
-------------------------------------------------------------------------------
-
-From within the "app/src/main/cpp" directory (!), run the following scripts.
-These scripts are very dumb, be careful.
-
-    - "prebuild-dropbear.sh"
-       This is only needed once after a dropbear code drop.
-
-    - "prebuild-rsync.sh"
-      This is only needed once after a rsync code drop.
-
-Upgrading dropbear/openssh/rsync:
-    All changes are (should be) marked with ANDROID_SSHD*
-    Merge and solve conflicts as usual.
 
 # ############################################################################
 
