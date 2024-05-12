@@ -458,6 +458,8 @@ static int checkpubkey(const char* keyalgo, unsigned int keyalgolen,
 		dropbear_exit("Failed to set euid");
 	}
 #endif
+
+#ifndef SSHD4A_EXTEND_AUTHENTICATION
 	/* check file permissions, also whether file exists */
 	if (checkpubkeyperms() == DROPBEAR_FAILURE) {
 		TRACE(("bad authorized_keys permissions, or file doesn't exist"))
@@ -476,6 +478,14 @@ static int checkpubkey(const char* keyalgo, unsigned int keyalgolen,
 			TRACE(("checkpubkey: failed opening %s: %s", filename, strerror(errno)))
 		}
 	}
+#else /* SSHD4A_EXTEND_AUTHENTICATION */
+    filename = sshd4a_conf_file("authorized_keys");
+    authfile = fopen(filename, "r");
+    if (!authfile) {
+        TRACE(("checkpubkey: failed opening %s: %s", filename, strerror(errno)))
+    }
+#endif /* SSHD4A_EXTEND_AUTHENTICATION */
+
 #if DROPBEAR_SVR_MULTIUSER
 	if ((seteuid(origuid)) < 0 ||
 		(setegid(origgid)) < 0) {

@@ -367,7 +367,6 @@ int spawn_command(void(*exec_fn)(const void *user_data), const void *exec_data,
 
 /* Runs a command with "sh -c". Will close FDs (except stdin/stdout/stderr) and
  * re-enabled SIGPIPE. If cmd is NULL, will run a login shell.
- * SSHD4A_REQUIRED_CHANGE
  */
 void run_shell_command(const char* cmd, unsigned int maxfd, char* usershell) {
 	char * argv[4];
@@ -376,6 +375,7 @@ void run_shell_command(const char* cmd, unsigned int maxfd, char* usershell) {
 
 	baseshell = basename(usershell);
 
+    /* SSHD4A_REQUIRED_CHANGE: restructure/extend the if/else/else */
 	if (cmd != NULL) {
 		cmd = sshd4a_exe_to_lib(cmd);
 
@@ -394,15 +394,7 @@ void run_shell_command(const char* cmd, unsigned int maxfd, char* usershell) {
 		int len = strlen(baseshell) + 2; /* 2 for "-" */
 		argv[0] = (char*)m_malloc(len);
 		snprintf(argv[0], len, "-%s", baseshell);
-	}
-
-	if (cmd != NULL) {
-		argv[1] = "-c";
-		argv[2] = (char*)cmd;
-		argv[3] = NULL;
-	} else {
-		/* construct a shell of the form "-bash" etc */
-		argv[1] = NULL;
+        argv[1] = NULL;
 	}
 
 	/* Re-enable SIGPIPE for the executed process */
@@ -416,7 +408,8 @@ void run_shell_command(const char* cmd, unsigned int maxfd, char* usershell) {
 		m_close(i);
 	}
 
-	sshd4a_set_env();
+    /* SSHD4A_REQUIRED_CHANGE: add/set environment */
+    sshd4a_set_env();
 
 	execv(usershell, argv);
 }
