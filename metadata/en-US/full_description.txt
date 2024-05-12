@@ -1,0 +1,9 @@
+<p>
+<i>Sshd4a</i> provides an 'sshd' server with shell access, rsync and scp/sftp services.
+ <br/>Services are provided by:
+ <ul>
+     <li><a href="dropbear">https://matt.ucc.asn.au/dropbear/dropbear.html</a></li>
+     <li><a href="rsync.samba.org">https://rsync.samba.org/</a></li>
+     <li><a href="openssh">https://github.com/openssh/openssh-portable</a></li>
+</ul>
+</p>

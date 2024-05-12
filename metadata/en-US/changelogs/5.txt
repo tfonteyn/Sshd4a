@@ -1,0 +1,6 @@
+- Added support for a master user/password
+- Added user-settings to enable/disable individual authentication method.
+- Updated services:
+  - Dropbear 2024.85
+  - rsync 3.3.0
+  - sftp-server from OpenSSH 9.7p1

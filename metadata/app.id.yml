@@ -1,0 +1,43 @@
+# F-Droid metadata template
+#
+# See https://f-droid.org/docs/ for more details
+# and the Metadata reference
+# https://f-droid.org/docs/Build_Metadata_Reference/
+#
+# Quick Fastlane Cheat-Sheet:
+# https://gitlab.com/-/snippets/1895688
+#
+# Single-line fields start right after the colon (with a whitespace).
+
+Summary: An 'sshd' server with shell access, rsync and scp/sftp services.
+Categories:
+  - Reading
+
+License: GPL-3.0-or-later
+SourceCode: https://github.com/tfonteyn/Sshd4a
+IssueTracker: https://github.com/tfonteyn/Sshd4a/issues
+
+RepoType: git
+Repo: https://github.com/tfonteyn/Sshd4a.git
+Binaries: https://github.com/tfonteyn/Sshd4a/releases/download/v%v/Sshd4a-%v-arm.apk
+
+Builds:
+  - versionName: '1.2.0'
+    versionCode: 5
+    commit: v1.2.0
+    subdir: app
+    gradle: [ 'release' ]
+    output: Sshd4a-release-v1.2.0.apk
+
+
+# MaintainerNotes: |-
+#     Here go the notes to take into account for future updates, builds, etc.
+#     Will be published in the wiki if present.
+
+# The following options are described at this location:
+# https://f-droid.org/docs/Build_Metadata_Reference
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+AllowedAPKSigningKeys: df971ce7d58d3cdf377c32e0e2f53d6599bd7f130a50c0529c45583ddc12a008
+CurrentVersion: '1.2.0'
+CurrentVersionCode: 5
