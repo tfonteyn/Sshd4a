@@ -9,7 +9,7 @@ on:
       - master
 jobs:
   build:
-    runs-on: ${{ matrix.os || 'ubuntu-20.04' }}
+    runs-on: ${{ matrix.os || 'ubuntu-22.04' }}
     strategy:
       matrix:
         # XXX uncomment the line below to work with act, see https://github.com/nektos/act/issues/996
@@ -32,9 +32,17 @@ jobs:
             multi: 1
             multiwrapper: 1
 
+          - name: client only
+            runcheck: 'no'
+            make_target: PROGRAMS=dbclient
+
+          - name: server only
+            runcheck: 'no'
+            make_target: PROGRAMS=dropbear
+
           - name: bundled libtom, bionic , no writev()
             # test can use an older distro with bundled libtommath
-            os: ubuntu-18.04
+            os: ubuntu-20.04
             configure_flags: --enable-bundled-libtom --enable-werror
             # NOWRITEV is unrelated, test here to save a job
             nowritev: 1
@@ -50,11 +58,12 @@ jobs:
           - name: c89
             extracflags: -std=c89 -Wdeclaration-after-statement
 
-          - name: macos 10.15
-            os: macos-10.15
+          - name: macos 12
+            os: macos-12
             cc: clang
-            # OS X says daemon() and utmp are deprecated
-            extracflags: -Wno-deprecated-declarations
+            # OS X says daemon() and utmp are deprecated.
+            # OS X tests for undefined TARGET_OS_EMBEDDED in libc headers
+            extracflags: -Wno-deprecated-declarations -Wno-undef
             runcheck: 'no'
             apt: 'no'
             # fails with:
@@ -64,7 +73,7 @@ jobs:
           - name: macos 11
             os: macos-11
             cc: clang
-            extracflags: -Wno-deprecated-declarations
+            extracflags: -Wno-deprecated-declarations -Wno-undef
             runcheck: 'no'
             apt: 'no'
             ranlib: ranlib -no_warning_for_no_symbols
@@ -73,6 +82,65 @@ jobs:
           - name: DEBUG_TRACE
             localoptions: |
               #define DEBUG_TRACE 5
+
+          # Check off-by-default options don't bitrot
+          - name: nondefault options
+            nondefault: 1
+            configure_flags: --enable-pam
+            localoptions: |
+              #define DROPBEAR_USE_SSH_CONFIG 1
+
+          - name: most options disabled
+            configure_flags: --disable-harden --disable-zlib --disable-openpty --disable-lastlog
+            runcheck: 'no'
+            localoptions: |
+              #define DROPBEAR_RSA 0
+              #define INETD_MODE 0
+              #define DROPBEAR_REEXEC 0
+              #define DROPBEAR_SMALL_CODE 0
+              #define DROPBEAR_CLI_LOCALTCPFWD 0
+              #define DROPBEAR_CLI_REMOTETCPFWD 0
+              #define DROPBEAR_SVR_LOCALTCPFWD 0
+              #define DROPBEAR_SVR_REMOTETCPFWD 0
+              #define DROPBEAR_SVR_AGENTFWD 0
+              #define DROPBEAR_CLI_AGENTFWD 0
+              #define DROPBEAR_CLI_PROXYCMD 0
+              #define DROPBEAR_USER_ALGO_LIST 0
+              #define DROPBEAR_AES128 0
+              #define DROPBEAR_AES256 0
+              #define DROPBEAR_ENABLE_CTR_MODE 0
+              #define DROPBEAR_SHA1_HMAC 0
+              #define DROPBEAR_SHA2_256_HMAC 0
+              #define DROPBEAR_RSA 0
+              #define DROPBEAR_ECDSA 0
+              #define DROPBEAR_SK_KEYS 0
+              #define DROPBEAR_DELAY_HOSTKEY 0
+              #define DROPBEAR_DH_GROUP14_SHA1 0
+              #define DROPBEAR_DH_GROUP14_SHA256 0
+              #define DROPBEAR_ECDH 0
+              #define DROPBEAR_DH_GROUP1_CLIENTONLY 0
+              #define DO_MOTD 0
+              #define DROPBEAR_SVR_PUBKEY_AUTH 0
+              #define DROPBEAR_CLI_PASSWORD_AUTH 0
+              #define DROPBEAR_CLI_PUBKEY_AUTH 0
+              #define DROPBEAR_USE_PASSWORD_ENV 0
+              #define DROPBEAR_SFTPSERVER 0
+
+          - name: other algo combos
+            runcheck: 'no'
+            # disables all sha1
+            localoptions: |
+              #define DROPBEAR_SHA1_HMAC 0
+              #define DROPBEAR_RSA_SHA1 0
+              #define DROPBEAR_DH_GROUP14_SHA1 0
+              #define DROPBEAR_ECDSA 0
+              #define DROPBEAR_ED25519 0
+              #define DROPBEAR_SK_KEYS 0
+              #define DROPBEAR_ENABLE_GCM_MODE 1
+              #define DROPBEAR_3DES 1
+              #define DROPBEAR_DH_GROUP16 1
+              #define DROPBEAR_SHA2_512_HMAC 1
+              #define DROPBEAR_CLI_PUBKEY_AUTH 0
 
           # # Fuzzers run standalone. A bit superfluous with cifuzz, but
           # # good to run the whole corpus to keep it working.
@@ -101,6 +169,7 @@ jobs:
       LDFLAGS: ${{ matrix.ldflags }}
       EXTRACFLAGS: ${{ matrix.extracflags }}
       CONFIGURE_FLAGS: ${{ matrix.configure_flags || '--enable-werror' }}
+      MAKE_TARGET: ${{ matrix.make_target }}
       # for fuzzing
       CXX: clang++
       RANLIB: ${{ matrix.ranlib || 'ranlib' }}
@@ -115,9 +184,9 @@ jobs:
         if: ${{ matrix.apt != 'no' }}
         run: |
           sudo apt-get -y update
-          sudo apt-get -y install zlib1g-dev libtomcrypt-dev libtommath-dev mercurial python3-venv $CC
+          sudo apt-get -y install zlib1g-dev libtomcrypt-dev libtommath-dev mercurial python3-venv libpam0g-dev $CC
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: configure
         run: ./configure $CONFIGURE_FLAGS CFLAGS="-O2 -Wall -Wno-pointer-sign $EXTRACFLAGS" --prefix="$HOME/inst" || (cat config.log; exit 1)
@@ -128,11 +197,20 @@ jobs:
 
       - name: localoptions
         run: |
-          echo "$LOCALOPTIONS" > localoptions.h
-          cat localoptions.h
+          echo "$LOCALOPTIONS" | tee localoptions.h
+
+      - name: nondefault
+        if: ${{ matrix.nondefault }}
+        run: |
+          # Turn on anything that's off by default. Rough but seems sufficient
+          grep ' 0$' src/default_options.h | sed 's/0$/1/' > localoptions.h
+          # PAM clashes with password
+          echo "#define DROPBEAR_SVR_PASSWORD_AUTH 0" >> localoptions.h
+          # 1 second timeout is too short
+          sed -i "s/DEFAULT_IDLE_TIMEOUT 1/DEFAULT_IDLE_TIMEOUT 99/" localoptions.h
 
       - name: make
-        run: make -j3
+        run: make -j3 $MAKE_TARGET
 
       - name: multilink
         if: ${{ matrix.multilink }}
@@ -155,6 +233,7 @@ jobs:
         run: make install
 
       - name: keys
+        if: ${{ matrix.runcheck != 'no' }}
         run: |
           mkdir -p ~/.ssh
           # remove old files so we can rerun in-place with "act -r" during test development
@@ -182,16 +261,19 @@ jobs:
 
       # Sanity check that the binary runs
       - name: genrsa
+        if: ${{ matrix.runcheck != 'no' }}
         run: ~/inst/bin/dropbearkey -t rsa -f testrsa
-      - name: gendss
-        run: ~/inst/bin/dropbearkey -t dss -f testdss
       - name: genecdsa256
+        if: ${{ matrix.runcheck != 'no' }}
         run: ~/inst/bin/dropbearkey -t ecdsa -f testec256 -s 256
       - name: genecdsa384
+        if: ${{ matrix.runcheck != 'no' }}
         run: ~/inst/bin/dropbearkey -t ecdsa -f testec384 -s 384
       - name: genecdsa521
+        if: ${{ matrix.runcheck != 'no' }}
         run: ~/inst/bin/dropbearkey -t ecdsa -f testec521 -s 521
       - name: gened25519
+        if: ${{ matrix.runcheck != 'no' }}
         run: ~/inst/bin/dropbearkey -t ed25519 -f tested25519
 
       - name: fuzz
