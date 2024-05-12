@@ -50,18 +50,7 @@ void svr_authinitialise() {
 	}
 #endif
 #ifdef ANDROID_SSHD_SINGLE_USE_PASSWORD
-    if(sshd4a_enable_master_password()) {
-        ses.authstate.authtypes |= AUTH_TYPE_PASSWORD;
-    }
-    /* Check and generate at this time, as the user MUST be able to see the message
-     * in the logfile before they start a login attempt.
-     */
-    if (sshd4a_enable_single_use_password()) {
-        char *gen_pass = NULL;
-        sshd4a_generate_single_use_password(&gen_pass);
-        ses.authstate.authtypes |= AUTH_TYPE_PASSWORD;
-        ses.authstate.pw_passwd = m_strdup(gen_pass);
-    }
+    sshd4a_hook__svr_auth__svr_authinitialise();
 #endif /* ANDROID_SSHD_SINGLE_USE_PASSWORD */
 }
 

@@ -12,7 +12,7 @@
 #include <syslog.h>
 
 #include "dbrandom.h"
-#include "dbutil.h"
+#include "session.h"
 
 /* executable for a shell */
 const char *sshd4a_shell_exe = "";
@@ -116,10 +116,42 @@ void sshd4a_set_env() {
 }
 
 /*
+ * Called from "svr-auth.c/svr_authinitialise()"
+ *
+ * Depending on our configuration flags,
+ * we add or remove authentication options to the global session structure.
+ */
+void sshd4a_hook__svr_auth__svr_authinitialise() {
+    /* explicitly set/unset, one less place to add #ifdef */
+    if (sshd4a_enable_public_key_login()) {
+        ses.authstate.authtypes |= AUTH_TYPE_PUBKEY;
+    } else {
+        ses.authstate.authtypes &= ~AUTH_TYPE_PUBKEY;
+    }
+
+    if (sshd4a_enable_master_password()) {
+        ses.authstate.authtypes |= AUTH_TYPE_PASSWORD;
+    }
+    /* Check and generate at this time, as the user MUST be able to see the message
+     * in the logfile before they start a login attempt.
+     */
+    if (sshd4a_enable_single_use_password()) {
+        char *gen_pass = NULL;
+        sshd4a_generate_single_use_password(&gen_pass);
+        ses.authstate.authtypes |= AUTH_TYPE_PASSWORD;
+        ses.authstate.pw_passwd = m_strdup(gen_pass);
+    }
+}
+
+int sshd4a_enable_public_key_login() {
+    return enable_public_key_login;
+}
+
+/*
  * returns 1 if "authorized_keys" exists and is longer than
  * MIN_AUTHKEYS_LINE (10 bytes) as defined in "dropbear/svr-authpubkey.c"
  */
-int sshd4a_authorized_keys_exists() {
+__attribute__((unused)) int sshd4a_authorized_keys_exists() {
     char *fn = sshd4a_conf_file("authorized_keys");
     FILE *f = fopen(fn, "r");
     free(fn); /* match "malloc()" from sshd4a_conf_file */

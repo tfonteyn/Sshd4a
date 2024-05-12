@@ -1,22 +1,7 @@
 /*
- * See ../jni-dropbear.c:
+ * Include the methods from jni-dropbear injected in regular dropbear code.
  */
-extern const char *sshd4a_shell_exe;
-extern const char *sshd4a_home_path;
-
-char *sshd4a_conf_file(const char *fn);
-char *sshd4a_exe_to_lib(const char *cmd);
-void sshd4a_set_env();
-int  sshd4a_authorized_keys_exists();
-void sshd4a_generate_single_use_password(char **gen_pass);
-int  sshd4a_enable_master_password();
-int  sshd4a_enable_single_use_password();
-int  sshd4a_user_password(char **user, char **password);
-
-/* enable the code to create single-use passwords if there is no "authorized_keys" file. */
-#define ANDROID_SSHD_SINGLE_USE_PASSWORD 1
-/* enable the code that allows mismatches between key and signatures in some bad clients. */
-#define ANDROID_SSHD_ALLOW_RSA_KEY_SIGNATURE_MISMATCH 1
+#include "../jni-dropbear.h"
 
 /*
  * The below are all dropbear specific settings.
@@ -56,15 +41,18 @@ int  sshd4a_user_password(char **user, char **password);
 #define DROPBEAR_CLI_PUBKEY_AUTH 0
 
 #define DROPBEAR_SVR_AGENTFWD 0
+
 /* Disable the normal password login, we'll support passwords through the
  * ANDROID_SSHD_SINGLE_USE_PASSWORD switch. */
 #define DROPBEAR_SVR_PASSWORD_AUTH 0
 
-/* not literally true, but we can only support a single user */
+/* Not literally true, but we can only support a single user */
 #define DROPBEAR_SVR_MULTIUSER 0
 
 #define DROPBEAR_USER_ALGO_LIST 0
 #define DROPBEAR_ENABLE_GCM_MODE 1
+
+/* We are paranoid. */
 #define DROPBEAR_SHA2_512_HMAC 1
 
 #define DO_MOTD 0
