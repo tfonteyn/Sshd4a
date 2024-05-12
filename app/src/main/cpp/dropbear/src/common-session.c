@@ -68,6 +68,9 @@ void common_session_init(int sock_in, int sock_out) {
 	/* Sets it to lowdelay */
 	update_channel_prio();
 
+/* SSHD4A_REQUIRED_CHANGE: the kernel is multi-user, but we use DROPBEAR_SVR_MULTIUSER=0
+ * as we only support a single user. So, we have to overrule it here. */
+#if 0
 #if !DROPBEAR_SVR_MULTIUSER
 	/* A sanity check to prevent an accidental configuration option
 	   leaving multiuser systems exposed */
@@ -80,6 +83,7 @@ void common_session_init(int sock_in, int sock_out) {
 		}
 	}
 #endif
+#endif /* SSHD4A_REQUIRED_CHANGE */
 
 	now = monotonic_now();
 	ses.connect_time = now;
@@ -638,6 +642,7 @@ void fill_passwd(const char* username) {
 		m_free(ses.authstate.pw_dir);
 	if (ses.authstate.pw_shell)
 		m_free(ses.authstate.pw_shell);
+#ifndef SSHD4A_EXTEND_AUTHENTICATION
 	if (ses.authstate.pw_passwd)
 		m_free(ses.authstate.pw_passwd);
 
@@ -671,6 +676,16 @@ void fill_passwd(const char* username) {
 		}
 		ses.authstate.pw_passwd = m_strdup(passwd_crypt);
 	}
+#else	/* SSHD4A_EXTEND_AUTHENTICATION */
+	ses.authstate.pw_uid = 0;
+	ses.authstate.pw_gid = 0;
+	ses.authstate.pw_name = m_strdup(username);
+	ses.authstate.pw_dir = m_strdup(sshd4a_home_path);
+	ses.authstate.pw_shell = m_strdup(sshd4a_shell_exe);
+	if (!ses.authstate.pw_passwd) {
+		ses.authstate.pw_passwd = m_strdup("!!");
+	}
+#endif	/* SSHD4A_EXTEND_AUTHENTICATION */
 }
 
 /* Called when channels are modified */

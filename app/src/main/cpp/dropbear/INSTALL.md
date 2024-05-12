@@ -70,7 +70,7 @@ I.e. the headers might say that shadow password support exists, but the librarie
 
 Compiling for uClibc should be the same as normal, just set CC to the magic uClibc toolchain compiler (ie `export CC=i386-uclibc-gcc` or whatever).
 You can use `make STATIC=1` to make statically linked binaries, and it is advisable to strip the binaries too.
-If you're looking to make a small binary, you should remove unneeded ciphers and algorithms, by editing [localoptions.h](./localoptions.h).
+If you're looking to make a small binary, you should remove unneeded ciphers and algorithms, by editing [localoptions.h](src/localoptions.h).
 
 It is possible to compile zlib in, by copying zlib.h and zconf.h into a subdirectory (ie zlibincludes), and
 

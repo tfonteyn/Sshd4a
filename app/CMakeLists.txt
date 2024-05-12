@@ -618,68 +618,68 @@ set(SRC_TOM_CRYPT
         )
 
 set(SRC_DROPBEAR
-        src/main/cpp/dropbear/atomicio.c
-        src/main/cpp/dropbear/bignum.c
-        src/main/cpp/dropbear/buffer.c
-        src/main/cpp/dropbear/chachapoly.c
-        src/main/cpp/dropbear/circbuffer.c
-        src/main/cpp/dropbear/common-algo.c
-        src/main/cpp/dropbear/common-channel.c
-        src/main/cpp/dropbear/common-chansession.c
-        src/main/cpp/dropbear/common-kex.c
-        src/main/cpp/dropbear/common-runopts.c
-        src/main/cpp/dropbear/common-session.c
-        src/main/cpp/dropbear/compat.c
-        src/main/cpp/dropbear/crypto_desc.c
-        src/main/cpp/dropbear/curve25519.c
-        src/main/cpp/dropbear/dbhelpers.c
-        src/main/cpp/dropbear/dbmalloc.c
-        src/main/cpp/dropbear/dbrandom.c
-        src/main/cpp/dropbear/dbutil.c
-        src/main/cpp/dropbear/dh_groups.c
-        src/main/cpp/dropbear/dss.c
-        src/main/cpp/dropbear/ecc.c
-        src/main/cpp/dropbear/ecdsa.c
-        src/main/cpp/dropbear/ed25519.c
-        src/main/cpp/dropbear/gcm.c
-        src/main/cpp/dropbear/gendss.c
-        src/main/cpp/dropbear/gened25519.c
-        src/main/cpp/dropbear/genrsa.c
-        src/main/cpp/dropbear/gensignkey.c
-        src/main/cpp/dropbear/keyimport.c
-        src/main/cpp/dropbear/list.c
-        src/main/cpp/dropbear/listener.c
-        src/main/cpp/dropbear/loginrec.c
-        src/main/cpp/dropbear/ltc_prng.c
-        src/main/cpp/dropbear/netio.c
-        src/main/cpp/dropbear/packet.c
-        src/main/cpp/dropbear/process-packet.c
-        src/main/cpp/dropbear/queue.c
-        src/main/cpp/dropbear/rsa.c
-        src/main/cpp/dropbear/signkey.c
-        src/main/cpp/dropbear/signkey_ossh.c
-        src/main/cpp/dropbear/sk-ecdsa.c
-        src/main/cpp/dropbear/sk-ed25519.c
-        src/main/cpp/dropbear/sshpty.c
-        src/main/cpp/dropbear/svr-auth.c
-        src/main/cpp/dropbear/svr-authpasswd.c
-        src/main/cpp/dropbear/svr-authpubkey.c
-        src/main/cpp/dropbear/svr-authpubkeyoptions.c
-        src/main/cpp/dropbear/svr-chansession.c
-        src/main/cpp/dropbear/svr-kex.c
-        src/main/cpp/dropbear/svr-main.c
-        src/main/cpp/dropbear/svr-runopts.c
-        src/main/cpp/dropbear/svr-service.c
-        src/main/cpp/dropbear/svr-session.c
-        src/main/cpp/dropbear/svr-tcpfwd.c
-        src/main/cpp/dropbear/tcp-accept.c
-        src/main/cpp/dropbear/termcodes.c
+        src/main/cpp/dropbear/src/atomicio.c
+        src/main/cpp/dropbear/src/bignum.c
+        src/main/cpp/dropbear/src/buffer.c
+        src/main/cpp/dropbear/src/chachapoly.c
+        src/main/cpp/dropbear/src/circbuffer.c
+        src/main/cpp/dropbear/src/common-algo.c
+        src/main/cpp/dropbear/src/common-channel.c
+        src/main/cpp/dropbear/src/common-chansession.c
+        src/main/cpp/dropbear/src/common-kex.c
+        src/main/cpp/dropbear/src/common-runopts.c
+        src/main/cpp/dropbear/src/common-session.c
+        src/main/cpp/dropbear/src/compat.c
+        src/main/cpp/dropbear/src/crypto_desc.c
+        src/main/cpp/dropbear/src/curve25519.c
+        src/main/cpp/dropbear/src/dbhelpers.c
+        src/main/cpp/dropbear/src/dbmalloc.c
+        src/main/cpp/dropbear/src/dbrandom.c
+        src/main/cpp/dropbear/src/dbutil.c
+        src/main/cpp/dropbear/src/dh_groups.c
+        src/main/cpp/dropbear/src/dss.c
+        src/main/cpp/dropbear/src/ecc.c
+        src/main/cpp/dropbear/src/ecdsa.c
+        src/main/cpp/dropbear/src/ed25519.c
+        src/main/cpp/dropbear/src/gcm.c
+        src/main/cpp/dropbear/src/gendss.c
+        src/main/cpp/dropbear/src/gened25519.c
+        src/main/cpp/dropbear/src/genrsa.c
+        src/main/cpp/dropbear/src/gensignkey.c
+        src/main/cpp/dropbear/src/keyimport.c
+        src/main/cpp/dropbear/src/list.c
+        src/main/cpp/dropbear/src/listener.c
+        src/main/cpp/dropbear/src/loginrec.c
+        src/main/cpp/dropbear/src/ltc_prng.c
+        src/main/cpp/dropbear/src/netio.c
+        src/main/cpp/dropbear/src/packet.c
+        src/main/cpp/dropbear/src/process-packet.c
+        src/main/cpp/dropbear/src/queue.c
+        src/main/cpp/dropbear/src/rsa.c
+        src/main/cpp/dropbear/src/signkey.c
+        src/main/cpp/dropbear/src/signkey_ossh.c
+        src/main/cpp/dropbear/src/sk-ecdsa.c
+        src/main/cpp/dropbear/src/sk-ed25519.c
+        src/main/cpp/dropbear/src/sshpty.c
+        src/main/cpp/dropbear/src/svr-auth.c
+        src/main/cpp/dropbear/src/svr-authpasswd.c
+        src/main/cpp/dropbear/src/svr-authpubkey.c
+        src/main/cpp/dropbear/src/svr-authpubkeyoptions.c
+        src/main/cpp/dropbear/src/svr-chansession.c
+        src/main/cpp/dropbear/src/svr-kex.c
+        src/main/cpp/dropbear/src/svr-main.c
+        src/main/cpp/dropbear/src/svr-runopts.c
+        src/main/cpp/dropbear/src/svr-service.c
+        src/main/cpp/dropbear/src/svr-session.c
+        src/main/cpp/dropbear/src/svr-tcpfwd.c
+        src/main/cpp/dropbear/src/tcp-accept.c
+        src/main/cpp/dropbear/src/termcodes.c
         )
 
 set(SRC_DROPBEAR_SCP
-        src/main/cpp/dropbear/scp.c
-        src/main/cpp/dropbear/scpmisc.c
-        src/main/cpp/dropbear/atomicio.c
+        src/main/cpp/dropbear/src/scp.c
+        src/main/cpp/dropbear/src/scpmisc.c
+        src/main/cpp/dropbear/src/atomicio.c
         )
 
 set(SRC_SFTP_SERVER
@@ -788,10 +788,14 @@ set(SRC_RSYNC
         )
 # #############################################################################
 
+# Indicate that "options.h" MUST read the "localoptions.h"
+add_compile_definitions(LOCALOPTIONS_H_EXISTS)
+
 # compile tommath as an object library; to be statically linked later.
 add_library(tommath OBJECT ${SRC_TOM_MATH})
 target_include_directories(tommath PRIVATE
         src/main/cpp/dropbear
+        src/main/cpp/dropbear/src
         src/main/cpp/dropbear/libtomcrypt/src/headers
         src/main/cpp/dropbear/libtommath
         )
@@ -802,6 +806,7 @@ add_library(tomcrypt OBJECT ${SRC_TOM_CRYPT})
 target_compile_definitions(tomcrypt PRIVATE LTC_SOURCE)
 target_include_directories(tomcrypt PRIVATE
         src/main/cpp/dropbear
+        src/main/cpp/dropbear/src
         src/main/cpp/dropbear/libtomcrypt/src/headers
         src/main/cpp/dropbear/libtommath
         )
@@ -810,6 +815,7 @@ target_include_directories(tomcrypt PRIVATE
 add_library(dropbear OBJECT ${SRC_DROPBEAR})
 target_include_directories(dropbear PRIVATE
         src/main/cpp/dropbear
+        src/main/cpp/dropbear/src
         src/main/cpp/dropbear/libtomcrypt/src/headers
         src/main/cpp/dropbear/libtommath
         )
@@ -821,6 +827,7 @@ target_link_options(jni-dropbear PRIVATE -lz)
 target_link_libraries(jni-dropbear tommath tomcrypt dropbear)
 target_include_directories(jni-dropbear PRIVATE
         src/main/cpp/dropbear
+        src/main/cpp/dropbear/src
         src/main/cpp/dropbear/libtomcrypt/src/headers
         src/main/cpp/dropbear/libtommath
 )
@@ -829,6 +836,7 @@ target_include_directories(jni-dropbear PRIVATE
 add_executable(libscp.so ${SRC_DROPBEAR_SCP})
 target_include_directories(libscp.so PRIVATE
         src/main/cpp/dropbear
+        src/main/cpp/dropbear/src
         src/main/cpp/dropbear/libtomcrypt/src/headers
         src/main/cpp/dropbear/libtommath
         )

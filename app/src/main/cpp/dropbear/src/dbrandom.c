@@ -70,9 +70,45 @@ process_file(hash_state *hs, const char *filename,
 	}
 
 	readcount = 0;
+/* SSHD4A_REQUIRED_CHANGE */
+#if 1
+	int already_blocked = 0;
+#endif /* SSHD4A_REQUIRED_CHANGE */
 	while (wantlen == 0 || readcount < wantlen) {
 		int readlen, wantread;
 		unsigned char readbuf[4096];
+/* SSHD4A_REQUIRED_CHANGE
+ * dropbear removed this code between 2019.78 and 2020.81, I guess they didn't
+ * really care because all it does is print a warning (I added the break that
+ * makes already_blocked non-optional).  I think somebody went through here with
+ * a mind towards guaranteeing there is always sufficient entropy to prevent
+ * obvious attacks, but I don't care.  My change (commit 60fcaa6) solved a real
+ * problem so I'm preserving this hack. - Greg 2020/12/28
+ *
+ * in short: abort if the input is very large / takes to long to read
+ */
+#if 1
+		if (!already_blocked && !prngd)
+		{
+			int res;
+			struct timeval timeout;
+			fd_set read_fds;
+
+			timeout.tv_sec  = 0;
+			timeout.tv_usec = 1000;
+
+			DROPBEAR_FD_ZERO(&read_fds);
+			FD_SET(readfd, &read_fds);
+			res = select(readfd + 1, &read_fds, NULL, NULL, &timeout);
+			if (res == 0)
+			{
+				dropbear_log(LOG_WARNING, "Warning: Reading the randomness source '%s' seems to have blocked.\nYou may need to find a better entropy source.", filename);
+				already_blocked = 1;
+			}
+		}
+
+		if (already_blocked) break;
+#endif /* SSHD4A_REQUIRED_CHANGE */
 		if (wantlen == 0) {
 			wantread = sizeof(readbuf);
 		} else {

@@ -26,7 +26,7 @@ Although generated, the first two files are checked in as they change very infre
 
 #### Debug printing
 
-Set `#define DEBUG_TRACE 1` in [localoptions.h](./localoptions.h) to enable a `-v` verbose option for dropbear and dbclient.
+Set `#define DEBUG_TRACE 1` in [localoptions.h](src/localoptions.h) to enable a `-v` verbose option for dropbear and dbclient.
 Higher numbers can be used to allow increased debug levels, with `-v` argument repeated.
 
 For development running `dropbear -F -E` is useful to run in the foreground.
@@ -43,7 +43,7 @@ Dropbear has a `-R` option to generate hostkeys upon the first connection as req
 
 Default algorithm lists are specified in [common-algo.c](./src/common-algo.c). They are in priority order, the client's first matching choice is used (see [rfc4253](https://www.rfc-editor.org/rfc/rfc4253.html)). Dropbear client has `-c` and `-m` arguments to choose which are enabled at runtime (doesn't work for server as of June 2020).
 
-Enabling/disabling algorithms is done in [localoptions.h](./localoptions.h), see [default_options.h](./src/default_options.h).
+Enabling/disabling algorithms is done in [localoptions.h](src/localoptions.h), see [default_options.h](./src/default_options.h).
 
 #### Style
 

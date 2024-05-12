@@ -304,7 +304,9 @@ void tolocal(int, char *[]);
 void toremote(char *, int, char *[]);
 void usage(void);
 
-#if defined(DBMULTI_scp) || !DROPBEAR_MULTI
+/* SSHD4A_REQUIRED_CHANGE: we need to use dropbear_main, but NOT scp_main, hence we need to
+ * remove:  "#if defined(DBMULTI_scp) || !DROPBEAR_MULTI" + matching "#endif"
+ */
 #if defined(DBMULTI_scp) && DROPBEAR_MULTI
 int scp_main(int argc, char **argv)
 #else
@@ -452,7 +454,7 @@ main(int argc, char **argv)
 	}
 	exit(errs != 0);
 }
-#endif /* DBMULTI_scp stuff */
+/* SSHD4A_REQUIRED_CHANGE: removed #endif DBMULTI_scp stuff */
 
 void
 toremote(char *targ, int argc, char **argv)

@@ -194,7 +194,8 @@ static void main_noinetd(int argc, char ** argv, const char* multipath) {
 	if (svr_opts.forkbg) {
 		dropbear_log(LOG_INFO, "Running in background");
 	} else {
-		dropbear_log(LOG_INFO, "Not backgrounding");
+		/* SSHD4A_REQUIRED_CHANGE: changed confusing message. */
+		dropbear_log(LOG_INFO, "Started");
 	}
 
 	/* create a PID file so that we can be killed easily */

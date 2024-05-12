@@ -95,7 +95,4 @@
 #define _FILE_OFFSET_BITS 64
 #define _GNU_SOURCE
 
-/* SSHD4A_REQUIRED_CHANGE: add localoptions.h */
-#define LOCALOPTIONS_H_EXISTS 1
-
 #endif /* __DROPBEAR_CONFIG_H__ */

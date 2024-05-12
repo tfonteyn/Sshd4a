@@ -21,8 +21,8 @@
 /scp
 /scp-progress
 config.h
-default_options_guard.h
-localoptions.h
+src/default_options_guard.h
+src/localoptions.h
 Makefile
 tags
 .pytest*

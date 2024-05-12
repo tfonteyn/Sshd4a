@@ -31,7 +31,7 @@
 #include "auth.h"
 #include "runopts.h"
 
-#if DROPBEAR_SVR_PASSWORD_AUTH
+#if defined(SSHD4A_EXTEND_AUTHENTICATION) || defined(DROPBEAR_SVR_PASSWORD_AUTH)
 
 /* not constant time when strings are differing lengths. 
  string content isn't leaked, and crypt hashes are predictable length. */
@@ -66,9 +66,64 @@ void svr_auth_password(int valid_user) {
 
 	password = buf_getstring(ses.payload, &passwordlen);
 	if (valid_user && passwordlen <= DROPBEAR_MAX_PASSWORD_LEN) {
-		/* the first bytes of passwdcrypt are the salt */
+#ifndef SSHD4A_EXTEND_AUTHENTICATION
+        /* the first bytes of passwdcrypt are the salt */
 		passwdcrypt = ses.authstate.pw_passwd;
 		testcrypt = crypt(password, passwdcrypt);
+#else /* SSHD4A_EXTEND_AUTHENTICATION */
+
+        char *master_user = NULL;
+        char *master_pass = NULL;
+        int has_master = sshd4a_user_password(&master_user, &master_pass);
+        /* If we have a master user/pass set */
+        if (has_master && *master_user && *master_pass
+            /* and the user name matches */
+            && strcmp(master_user, ses.authstate.username) == 0) {
+            /* then we will expect to receive the master password. */
+            ses.authstate.pw_passwd = m_strdup(master_pass);
+            passwdcrypt = ses.authstate.pw_passwd;
+
+            size_t pas_len = strlen(password);
+            if (passwordlen == pas_len) {
+                unsigned long hashSize = sha512_desc.hashsize;
+                unsigned char *hashResult = (unsigned char*) malloc(hashSize);
+                hash_state md;
+
+                sha512_init(&md);
+                sha512_process(&md, (const unsigned char*) password, passwordlen);
+                sha512_done(&md, hashResult);
+
+                /* 128 is to large for base64, but suits hex should we need it. */
+                unsigned long base64_len = 2 * hashSize;
+                testcrypt = malloc(base64_len);
+                base64_encode(hashResult, hashSize,
+                              (unsigned char*) testcrypt, &base64_len);
+            } else {
+                testcrypt = NULL;
+            }
+        } else {
+            /* Not the master_user, we'll test for a single use password */
+            passwdcrypt = ses.authstate.pw_passwd;
+
+            size_t pas_len = strlen(password);
+            if (passwordlen == pas_len) {
+                char *tmp = malloc(passwordlen + 1);
+                strcpy(tmp, password);
+                testcrypt = tmp;
+            } else {
+                testcrypt = NULL;
+            }
+        }
+
+        /* match malloc's from sshd4a_user_password */
+        if (*master_user) {
+            free(master_user);
+        }
+        if (*master_pass) {
+            free(master_pass);
+        }
+
+#endif /* SSHD4A_EXTEND_AUTHENTICATION */
 	}
 	m_burn(password, passwordlen);
 	m_free(password);
@@ -91,7 +146,8 @@ void svr_auth_password(int valid_user) {
 
 	if (testcrypt == NULL) {
 		/* crypt() with an invalid salt like "!!" */
-		dropbear_log(LOG_WARNING, "User account '%s' is locked",
+		/* SSHD4A_REQUIRED_CHANGE: changed confusing message. */
+		dropbear_log(LOG_WARNING, "User account '%s' login failed",
 				ses.authstate.pw_name);
 		send_msg_userauth_failure(0, 1);
 		return;
@@ -129,6 +185,9 @@ void svr_auth_password(int valid_user) {
 				svr_ses.addrstring);
 		send_msg_userauth_failure(0, 1);
 	}
+#ifdef SSHD4A_EXTEND_AUTHENTICATION
+    free(testcrypt);
+#endif /* SSHD4A_EXTEND_AUTHENTICATION */
 }
 
 #endif

@@ -24,3 +24,5 @@ awk -f define-from-md.awk  -v hfile=default-dont-compress.h rsync.1.md
 
 #TODO: figure out how to actually calculate EXTRA_ROUNDING?
 echo -e "#define EXTRA_ROUNDING 0\n" >rounding.h
+
+cd ..
