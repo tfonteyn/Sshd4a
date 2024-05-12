@@ -86,18 +86,18 @@ void svr_auth_password(int valid_user) {
             size_t pas_len = strlen(password);
             if (passwordlen == pas_len) {
                 unsigned long hashSize = sha512_desc.hashsize;
-                unsigned char *hashResult = (unsigned char*) malloc(hashSize);
+                unsigned char *hashResult = m_malloc(hashSize);
                 hash_state md;
 
                 sha512_init(&md);
-                sha512_process(&md, (const unsigned char*) password, passwordlen);
+                sha512_process(&md, (const unsigned char *) password, passwordlen);
                 sha512_done(&md, hashResult);
 
                 /* 128 is to large for base64, but suits hex should we need it. */
                 unsigned long base64_len = 2 * hashSize;
-                testcrypt = malloc(base64_len);
+                testcrypt = m_malloc(base64_len);
                 base64_encode(hashResult, hashSize,
-                              (unsigned char*) testcrypt, &base64_len);
+                              (unsigned char *) testcrypt, &base64_len);
             } else {
                 testcrypt = NULL;
             }
@@ -107,20 +107,19 @@ void svr_auth_password(int valid_user) {
 
             size_t pas_len = strlen(password);
             if (passwordlen == pas_len) {
-                char *tmp = malloc(passwordlen + 1);
-                strcpy(tmp, password);
-                testcrypt = tmp;
+                testcrypt = m_malloc(passwordlen + 1);
+                strcpy(testcrypt, password);
             } else {
                 testcrypt = NULL;
             }
         }
 
         /* match malloc's from sshd4a_user_password */
-        if (*master_user) {
-            free(master_user);
+        if (master_user) {
+            m_free(master_user);
         }
-        if (*master_pass) {
-            free(master_pass);
+        if (master_pass) {
+            m_free(master_pass);
         }
 
 #endif /* SSHD4A_EXTEND_AUTHENTICATION */
@@ -186,7 +185,9 @@ void svr_auth_password(int valid_user) {
 		send_msg_userauth_failure(0, 1);
 	}
 #ifdef SSHD4A_EXTEND_AUTHENTICATION
-    free(testcrypt);
+    if (testcrypt) {
+        m_free(testcrypt);
+    }
 #endif /* SSHD4A_EXTEND_AUTHENTICATION */
 }
 

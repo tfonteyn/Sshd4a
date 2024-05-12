@@ -35,7 +35,7 @@ int enable_super_su_buffering = JNI_FALSE;
 
 /* Construct the full path to the given configuration file. */
 char *sshd4a_conf_file(const char *fn) {
-    char *ret = malloc(strlen(conf_path) + strlen(fn) + 1 + /* '\0' */ 1);
+    char *ret = m_malloc(strlen(conf_path) + strlen(fn) + 1 + /* '\0' */ 1);
     sprintf(ret, "%s/%s", conf_path, fn);
     return ret;
 }
@@ -43,23 +43,23 @@ char *sshd4a_conf_file(const char *fn) {
 /* Convert the name of the given executable to the full path with the fake libEXE.so name. */
 char *sshd4a_exe_to_lib(const char *cmd) {
     if (cmd && !strncmp(cmd, "scp ", 4)) {
-        char *t = malloc(strlen(lib_path) + 11 + strlen(cmd) + /* '\0' */ 1);
+        char *t = m_malloc(strlen(lib_path) + 11 + strlen(cmd) + /* '\0' */ 1);
         sprintf(t, "%s/libscp.so %s", lib_path, cmd + 4);
         return t;
 
     } else if (cmd && !strncmp(cmd, "rsync ", 6)) {
         char *t;
         if (enable_super_su_buffering) {
-            t = malloc(strlen(lib_path) + 16 + strlen(cmd) - 6 + /* '\0' */ 1);
+            t = m_malloc(strlen(lib_path) + 16 + strlen(cmd) - 6 + /* '\0' */ 1);
             sprintf(t, "%s/libbuffersu.so %s", lib_path, cmd + 6);
         } else {
-            t = malloc(strlen(lib_path) + 13 + strlen(cmd) - 6 + /* '\0' */ 1);
+            t = m_malloc(strlen(lib_path) + 13 + strlen(cmd) - 6 + /* '\0' */ 1);
             sprintf(t, "%s/librsync.so %s", lib_path, cmd + 6);
         }
         return t;
 
     } else if (cmd && !strncmp(cmd, "sftp-server", 11)) {
-        char *t = malloc(strlen(lib_path) + 18 + /* '\0' */ 1);
+        char *t = m_malloc(strlen(lib_path) + 18 + /* '\0' */ 1);
         sprintf(t, "%s/libsftp-server.so", lib_path);
         return t;
     }
@@ -98,15 +98,15 @@ void sshd4a_set_env() {
         }
 
         if (name_len) {
-            char *n = malloc(name_len + 1);
-            char *v = malloc(val_len + 1);
+            char *n = m_malloc(name_len + 1);
+            char *v = m_malloc(val_len + 1);
             memcpy(n, name, name_len);
             memcpy(v, val, val_len);
             n[name_len] = 0;
             v[val_len] = 0;
             setenv(n, v, /*overwrite=*/1);    /* might fail *shrug* */
-            free(n);
-            free(v);
+            m_free(n);
+            m_free(v);
         }
     }
 
@@ -127,7 +127,7 @@ int sshd4a_enable_public_key_login() {
 __attribute__((unused)) int sshd4a_authorized_keys_exists() {
     char *fn = sshd4a_conf_file("authorized_keys");
     FILE *f = fopen(fn, "r");
-    free(fn); /* match "malloc()" from sshd4a_conf_file */
+    m_free(fn); /* match "m_malloc()" from sshd4a_conf_file */
     if (!f) {
         return 0;
     }
@@ -173,7 +173,7 @@ int sshd4a_enable_master_password() {
 int sshd4a_user_password(char **user, char **password) {
     char *fn = sshd4a_conf_file("master_password");
     FILE *f = fopen(fn, "r");
-    free(fn); /* match "malloc()" from sshd4a_conf_file */
+    m_free(fn); /* match "m_malloc()" from sshd4a_conf_file */
     if (!f) {
         return 0;
     }
@@ -195,7 +195,7 @@ int sshd4a_user_password(char **user, char **password) {
 
         ret_value = 1;
     }
-
+    /* match realloc() from getline(..) */
     free(line);
     fclose(f);
     return ret_value;
