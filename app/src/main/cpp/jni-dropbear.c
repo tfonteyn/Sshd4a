@@ -27,7 +27,7 @@ const char *conf_path = "";
 /* name/value pairs with environment variables */
 const char *env_var_list = "";
 
-int enable_public_key_login = JNI_TRUE;
+int enable_public_key_auth = JNI_TRUE;
 int enable_single_use_passwords = JNI_TRUE;
 
 /* enable the "buffersu" helper when the user has SuperSu installed. */
@@ -117,7 +117,7 @@ void sshd4a_set_env() {
 }
 
 int sshd4a_enable_public_key_login() {
-    return enable_public_key_login;
+    return enable_public_key_auth;
 }
 
 /*
@@ -152,7 +152,7 @@ void sshd4a_generate_single_use_password(char **gen_pass) {
             "abcdefghijk!mnopqrstuvwxyzABCDEFGH@JKLMN#PQRSTUVWXYZ$%23456789^&";
     char pw[9];
     int i;
-    genrandom((unsigned char *)pw, 8);
+    genrandom((unsigned char *) pw, 8);
     for (i = 0; i < 8; i++) {
         pw[i] = tab64[pw[i] & 63];
     }
@@ -190,7 +190,7 @@ int sshd4a_user_password(char **user, char **password) {
         p = strtok(line, ":");
         *user = strdup(p);
 
-        p = strtok(NULL,":");
+        p = strtok(NULL, ":");
         *password = strdup(p);
 
         ret_value = 1;
@@ -233,7 +233,7 @@ static void null_atexit(void) {
  * @param j_home_path                home directory for an ssh login
  * @param j_shell_exe                shell executable
  * @param j_env_var_list             list of environment variables
- * @param j_enablePublickeyLogin     enable public key logins
+ * @param j_enablePublickeyAuth      enable public key logins
  * @param j_enableSingleUsePasswords enable generating single-use passwords
  * @param j_enableSuperSuBuffering   enable support for "SuperSu" rsync buffering
  *
@@ -249,7 +249,7 @@ Java_com_hardbacknutter_sshd_SshdService_start_1sshd(
         jstring j_home_path,
         jstring j_shell_exe,
         jstring j_env_var_list,
-        jboolean j_enablePublickeyLogin,
+        jboolean j_enablePublickeyAuth,
         jboolean j_enableSingleUsePasswords,
         jboolean j_enableSuperSuBuffering) {
 
@@ -264,7 +264,7 @@ Java_com_hardbacknutter_sshd_SshdService_start_1sshd(
         sshd4a_shell_exe = from_java_string(env, j_shell_exe);
         env_var_list = from_java_string(env, j_env_var_list);
 
-        enable_public_key_login = j_enablePublickeyLogin;
+        enable_public_key_auth = j_enablePublickeyAuth;
         enable_single_use_passwords = j_enableSingleUsePasswords;
         enable_super_su_buffering = j_enableSuperSuBuffering;
 
@@ -326,4 +326,20 @@ Java_com_hardbacknutter_sshd_SshdService_waitpid(
         return WEXITSTATUS(status);
     }
     return 0;
+}
+
+JNIEXPORT void JNICALL
+Java_com_hardbacknutter_sshd_SshdSettings_enable_1single_1use_1password(
+        JNIEnv *env,
+        jobject thiz,
+        jboolean j_enable) {
+    enable_single_use_passwords = j_enable;
+}
+
+JNIEXPORT void JNICALL
+Java_com_hardbacknutter_sshd_SshdSettings_enable_1public_1key_1auth(
+        JNIEnv *env,
+        jobject thiz,
+        jboolean j_enable) {
+    enable_public_key_auth = j_enable;
 }
