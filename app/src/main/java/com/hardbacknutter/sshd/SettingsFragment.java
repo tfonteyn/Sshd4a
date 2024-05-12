@@ -179,7 +179,7 @@ public class SettingsFragment
     }
 
     @Override
-    public void onSharedPreferenceChanged(@NonNull final SharedPreferences sharedPreferences,
+    public void onSharedPreferenceChanged(@NonNull final SharedPreferences prefs,
                                           @Nullable final String key) {
         if (key == null) {
             return;
@@ -193,11 +193,23 @@ public class SettingsFragment
                 break;
             }
             case Prefs.SSHD_PORT: {
-                final int port = getPort(sharedPreferences);
+                final int port = getPort(prefs);
                 if (port < 1024 || port > 32768) {
                     pPort.setText(Prefs.DEFAULT_PORT);
                     //noinspection ConstantConditions
                     Snackbar.make(getView(), R.string.err_port_number, Snackbar.LENGTH_LONG).show();
+                }
+                break;
+            }
+            case Prefs.ENABLE_PUBLIC_KEY_LOGIN:{
+                if (SshdService.isRunning()) {
+                    SshdSettings.enable_public_key_auth(prefs.getBoolean(key, true));
+                }
+                break;
+            }
+            case Prefs.ENABLE_SINGLE_USE_PASSWORDS:{
+                if (SshdService.isRunning()) {
+                    SshdSettings.enable_single_use_password(prefs.getBoolean(key, true));
                 }
                 break;
             }
