@@ -23,12 +23,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
@@ -81,7 +77,6 @@ public class SshdService
         extends Service {
 
     static final String SERVICE_UI_REQUEST = "ServiceUIRequest";
-    static final String DROPBEAR_ERR = "dropbear.err";
     private static final String NOTIFICATION_CHANNEL_ID =
             "com.hardbacknutter.sshd.NOTIFICATION_CHANNEL";
     private static final int ONGOING_NOTIFICATION_ID = 1;
@@ -179,68 +174,13 @@ public class SshdService
     }
 
 
-    /**
-     * Typically only returns a single address, but there could be a list/mix of IPv4 and IPv6.
-     * <p>
-     * See <a href="https://developer.android.com/studio/run/emulator-networking>emulator</a>.
-     *
-     * @return a list of all IP addresses used by the device.
-     */
-    @SuppressWarnings("SameParameterValue")
-    @NonNull
-    static List<String> getHostAddresses(final int limit) {
-        try {
-            return Collections
-                    .list(NetworkInterface.getNetworkInterfaces())
-                    .stream()
-                    .flatMap(ni -> Collections.list(ni.getInetAddresses()).stream())
-                    .filter(ina -> !ina.isLoopbackAddress() && !ina.isLinkLocalAddress())
-                    .map(InetAddress::getHostAddress)
-                    .filter(Objects::nonNull)
-//                    .map(ip -> {
-//                        // strip of the scope id for IPv6 if present
-//                        //noinspection ConstantConditions
-//                        int i = ip.indexOf('%');
-//                        return i != -1 ? ip.substring(0, i) : ip;
-//                    })
-                    // sorting will move IPv6 to the end of the list
-                    .sorted()
-                    .limit(limit)
-                    .collect(Collectors.toList());
-        } catch (@NonNull final Exception ignore) {
-            // ignore
-        }
-
-        return new ArrayList<>();
-    }
-
-    @NonNull
-    static File getDropbearDirectory(@NonNull final Context context) {
-        final File path = new File(context.getFilesDir(), ".dropbear");
-        if (!path.exists()) {
-            //noinspection ResultOfMethodCallIgnored
-            path.mkdir();
-        }
-        return path;
-    }
-
-    @NonNull
-    private static String getHomePath(@NonNull final Context context,
-                                      @NonNull final SharedPreferences pref) {
-        String homePath = pref.getString(Prefs.HOME, null);
-        if (homePath == null || !new File(homePath).exists()) {
-            homePath = context.getFilesDir().getPath();
-        }
-        return homePath;
-    }
-
     private native int start_sshd(@NonNull String lib,
                                   @NonNull String[] dropbearArgs,
                                   @NonNull String confPath,
                                   @NonNull String homePath,
                                   @NonNull String shell,
                                   @NonNull String env,
-                                  boolean enablePublickeyLogin,
+                                  boolean enablePublickeyAuth,
                                   boolean enableSingleUsePasswords,
                                   boolean enableSuperSuBuffering);
 
@@ -249,7 +189,7 @@ public class SshdService
     private native int waitpid(int pid);
 
     private int readPidFile() {
-        final File pidFile = new File(getDropbearDirectory(this), DROPBEAR_PID);
+        final File pidFile = new File(SshdSettings.getDropbearDirectory(this), DROPBEAR_PID);
         int pid = 0;
         if (pidFile.exists()) {
             try (BufferedReader r = new BufferedReader(new FileReader(pidFile))) {
@@ -293,8 +233,8 @@ public class SshdService
         }
         final String[] args = argList.toArray(Z_STRING);
 
-        final String confPath = getDropbearDirectory(this).getPath();
-        final String homePath = getHomePath(this, pref);
+        final String confPath = SshdSettings.getDropbearDirectory(this).getPath();
+        final String homePath = SshdSettings.getHomePath(this, pref);
 
         String shellCmd = pref.getString(Prefs.SHELL, null);
         if (shellCmd == null || !new File(shellCmd).exists()) {
@@ -440,7 +380,7 @@ public class SshdService
         startSshd();
 
         if (runInForeground) {
-            final List<String> ipList = getHostAddresses(3);
+            final List<String> ipList = SshdSettings.getHostAddresses(3);
             if (ipList.isEmpty()) {
                 throw new IllegalStateException();
             }

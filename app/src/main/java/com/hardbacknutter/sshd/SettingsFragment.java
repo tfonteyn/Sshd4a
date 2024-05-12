@@ -48,9 +48,9 @@ public class SettingsFragment
                 @Override
                 public void handleOnBackPressed() {
                     try {
-                        vm.writeMasterUserAndPassword(getContext(),
-                                                      pMasterUsername.getText(),
-                                                      pMasterPassword.getText());
+                        SshdSettings.writeMasterUserAndPassword(getContext(),
+                                                                pMasterUsername.getText(),
+                                                                pMasterPassword.getText());
                         getParentFragmentManager().popBackStack();
 
                     } catch (@NonNull final IOException | NoSuchAlgorithmException ignore) {
@@ -152,7 +152,7 @@ public class SettingsFragment
         //noinspection ConstantConditions
         vm.init(getContext());
 
-        final String[] previous = vm.readMasterUserAndPassword(getContext());
+        final String[] previous = SshdSettings.readMasterUserAndPassword(getContext());
         if (previous != null && previous.length == 2) {
             pMasterUsername.setText(previous[0]);
             // do NOT set the text, we only have the hashed password.

@@ -169,7 +169,7 @@ public class MainFragment
 
     private void populateNetworkAddressList() {
         // limit 3... assuming a max of 1 mobile + 1 wifi + 1 eth
-        final List<String> ipList = SshdService.getHostAddresses(3);
+        final List<String> ipList = SshdSettings.getHostAddresses(3);
         if (ipList.isEmpty()) {
             // should never happen... flw
             vb.ip.setText(R.string.err_no_ip);

@@ -20,16 +20,11 @@ import androidx.preference.PreferenceManager;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -39,11 +34,6 @@ public class MainViewModel
         extends ViewModel {
 
     private static final String TAG = "MainViewModel";
-
-    /** Filename used in native code. Stored in {@link SshdService#getDropbearDirectory}. */
-    private static final String AUTHORIZED_KEYS = "authorized_keys";
-    /** Filename used in native code. Stored in {@link SshdService#getDropbearDirectory}. */
-    private static final String MASTER_PASSWORD = "master_password";
 
     private static final int THREAD_SLEEP_MILLIS = 2000;
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
@@ -143,10 +133,10 @@ public class MainViewModel
      */
     void startUpdateThread(@NonNull final Context context) {
         cancelRequested.set(false);
-        final String path = SshdService.getDropbearDirectory(context).getPath();
+        final String path = SshdSettings.getDropbearDirectory(context).getPath();
         // poll for changes to the dropbear error file
         EXECUTOR_SERVICE.execute(() -> {
-            final File file = new File(path, SshdService.DROPBEAR_ERR);
+            final File file = new File(path, SshdSettings.DROPBEAR_ERR);
             long lastModified = 0;
             long lastLength = 0;
             while (!cancelRequested.get()) {
@@ -212,16 +202,16 @@ public class MainViewModel
     @Nullable
     String importAuthKeys(@NonNull final Context context,
                           @NonNull final Uri uri) {
-        final File path = SshdService.getDropbearDirectory(context);
+        final File path = SshdSettings.getDropbearDirectory(context);
 
         // First write to a new temp file
-        final File tmpFile = new File(path, AUTHORIZED_KEYS + ".tmp");
+        final File tmpFile = new File(path, SshdSettings.AUTHORIZED_KEYS + ".tmp");
 
         String error = null;
 
         try (InputStream is = context.getContentResolver().openInputStream(uri)) {
             Files.copy(is, tmpFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            if (!tmpFile.renameTo(new File(path, AUTHORIZED_KEYS))) {
+            if (!tmpFile.renameTo(new File(path, SshdSettings.AUTHORIZED_KEYS))) {
                 error = context.getString(R.string.err_key_import);
             }
         } catch (@NonNull final IOException e) {
@@ -235,93 +225,7 @@ public class MainViewModel
 
     void deleteAuthKeys(@NonNull final Context context) {
         //noinspection ResultOfMethodCallIgnored
-        new File(SshdService.getDropbearDirectory(context), AUTHORIZED_KEYS).delete();
-    }
-
-    /**
-     * Read the master user + hashed password from the dropbear file.
-     *
-     * @param context Current context
-     *
-     * @return a String array with [0] the username, and [1] the hashed/base64 password.
-     */
-    @Nullable
-    String[] readMasterUserAndPassword(@NonNull final Context context) {
-        final File path = SshdService.getDropbearDirectory(context);
-        final File file = new File(path, MASTER_PASSWORD);
-        final List<String> lines;
-        try {
-            lines = Files.readAllLines(file.toPath());
-            if (!lines.isEmpty()) {
-                return lines.get(0).split(":");
-            }
-        } catch (@NonNull final IOException ignore) {
-            // ignore
-        }
-        return null;
-    }
-
-    void writeMasterUserAndPassword(@NonNull final Context context,
-                                    @Nullable final String username,
-                                    @Nullable final String password)
-            throws IOException,
-                   NoSuchAlgorithmException {
-
-        final File path = SshdService.getDropbearDirectory(context);
-        final File file = new File(path, MASTER_PASSWORD);
-
-        // No username? Remove the file.
-        if (username == null || username.isBlank()) {
-            //noinspection ResultOfMethodCallIgnored
-            file.delete();
-            return;
-        }
-
-        // Do we have a (new) password? Create a new file overwriting any previous.
-        if (password != null && !password.isBlank()) {
-            //noinspection ImplicitDefaultCharsetUsage
-            try (FileWriter fw = new FileWriter(file)) {
-                fw.write((username + ":" + hash(password)).toCharArray());
-            }
-            return;
-        }
-
-        // We have a username but no password.
-        // Was there a previous file?
-        if (!file.exists()) {
-            // ignore the username, we're done.
-            return;
-        }
-
-        // We have a username but no password AND there was a previous file.
-        // Retrieve the encrypted password, and rewrite the file using the new username
-        // and the retrieved password.
-        final String[] previous = readMasterUserAndPassword(context);
-        if (previous != null && previous.length == 2) {
-            //noinspection ImplicitDefaultCharsetUsage
-            try (FileWriter fw = new FileWriter(file)) {
-                // Rewrite the file with the new username and the previous (already encrypted)
-                // and the previous (already encrypted) password
-                fw.write((username + ":" + previous[1]).toCharArray());
-            }
-        }
-    }
-
-    /**
-     * Hash with SHA-512, and convert to a base64 string.
-     *
-     * @param password to hash
-     *
-     * @return base64 string
-     *
-     * @throws NoSuchAlgorithmException on ...
-     */
-    @NonNull
-    private String hash(@NonNull final String password)
-            throws NoSuchAlgorithmException {
-        final MessageDigest md = MessageDigest.getInstance("SHA-512");
-        final byte[] digest = md.digest(password.getBytes(StandardCharsets.UTF_8));
-        return Base64.getEncoder().encodeToString(digest);
+        new File(SshdSettings.getDropbearDirectory(context), SshdSettings.AUTHORIZED_KEYS).delete();
     }
 
     boolean isAskNotificationPermission() {
