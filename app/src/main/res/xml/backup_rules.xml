@@ -10,4 +10,10 @@
         domain="file"
         path="./dropbear/dropbear.err.old" />
 
+    <exclude
+        domain="file"
+        path="./dropbear/master_password" />
+    <exclude
+        domain="file"
+        path="./dropbear/authorized_keys" />
 </full-backup-content>
