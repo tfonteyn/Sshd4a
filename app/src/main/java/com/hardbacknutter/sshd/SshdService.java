@@ -81,11 +81,11 @@ public class SshdService
         extends Service {
 
     static final String SERVICE_UI_REQUEST = "ServiceUIRequest";
+    static final String DROPBEAR_ERR = "dropbear.err";
     private static final String NOTIFICATION_CHANNEL_ID =
             "com.hardbacknutter.sshd.NOTIFICATION_CHANNEL";
     private static final int ONGOING_NOTIFICATION_ID = 1;
     private static final String DROPBEAR_PID = "dropbear.pid";
-    static final String DROPBEAR_ERR = "dropbear.err";
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
 
     private static final String TAG = "SshdService";
@@ -240,8 +240,9 @@ public class SshdService
                                   @NonNull String homePath,
                                   @NonNull String shell,
                                   @NonNull String env,
-                                  int enableSingleUsePasswords,
-                                  int useSuperSuBuffering);
+                                  boolean enablePublickeyLogin,
+                                  boolean enableSingleUsePasswords,
+                                  boolean enableSuperSuBuffering);
 
     private native void kill(int pid);
 
@@ -302,15 +303,18 @@ public class SshdService
 
         final String env = pref.getString(Prefs.ENV_VARS, "");
 
-        final int enableSingleUsePasswords = pref.getBoolean(Prefs.ENABLE_SINGLE_USE_PASSWORDS,
-                                                        true) ? 1 : 0;
-        final int useSuperSuBuffering = pref.getBoolean(Prefs.USE_SUPER_SU_BUFFERING,
-                                                        false) ? 1 : 0;
+        final boolean enablePublickeyLogin =
+                pref.getBoolean(Prefs.ENABLE_PUBLIC_KEY_LOGIN, true);
+        final boolean enableSingleUsePasswords =
+                pref.getBoolean(Prefs.ENABLE_SINGLE_USE_PASSWORDS, true);
+        final boolean enableSuperSuBuffering =
+                pref.getBoolean(Prefs.ENABLE_SUPER_SU_BUFFERING, false);
 
         final int pid = start_sshd(getApplicationInfo().nativeLibraryDir,
                                    args, confPath, homePath, shellCmd, env,
+                                   enablePublickeyLogin,
                                    enableSingleUsePasswords,
-                                   useSuperSuBuffering);
+                                   enableSuperSuBuffering);
         if (BuildConfig.DEBUG) {
             Log.d(TAG + "|startSshd", "start_sshd=" + pid);
         }

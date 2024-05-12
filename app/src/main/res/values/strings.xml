@@ -61,4 +61,7 @@
     <string name="err_failed_to_save">Failed to save the password</string>
 
     <string name="pt_single_use_password">Single use password</string>
+    <string name="pt_single_use_password_info">Allow logins using a single-use password, which will be displayed in the log onscreen when a login attempt is made.</string>
+    <string name="pt_public_key_login">Public key login</string>
+    <string name="pt_public_key_login_info">Allow logins using a public key.</string>
 </resources>

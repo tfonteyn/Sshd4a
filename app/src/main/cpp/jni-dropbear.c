@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <syslog.h>
+
 #include "dbrandom.h"
 #include "dbutil.h"
 
@@ -24,9 +25,12 @@ const char *lib_path = "";
 const char *conf_path = "";
 /* name/value pairs with environment variables */
 const char *env_var_list = "";
-/* enable the "buffersu" helper when the user has SuperSu installed. */
-int use_super_su_buffering = JNI_FALSE;
+
+int enable_public_key_login = JNI_TRUE;
 int enable_single_use_passwords = JNI_TRUE;
+
+/* enable the "buffersu" helper when the user has SuperSu installed. */
+int enable_super_su_buffering = JNI_FALSE;
 
 /* Construct the full path to the given configuration file. */
 char *sshd4a_conf_file(const char *fn) {
@@ -44,7 +48,7 @@ char *sshd4a_exe_to_lib(const char *cmd) {
 
     } else if (cmd && !strncmp(cmd, "rsync ", 6)) {
         char *t;
-        if (use_super_su_buffering) {
+        if (enable_super_su_buffering) {
             t = malloc(strlen(lib_path) + 16 + strlen(cmd) - 6 + /* '\0' */ 1);
             sprintf(t, "%s/libbuffersu.so %s", lib_path, cmd + 6);
         } else {
@@ -133,6 +137,29 @@ int sshd4a_authorized_keys_exists() {
     return 1;
 }
 
+int sshd4a_enable_single_use_password() {
+    return enable_single_use_passwords;
+}
+
+void sshd4a_generate_single_use_password(char **gen_pass) {
+    /* Don't use Il1O0 because they're visually ambiguous */
+    static const char tab64[64] =
+            "abcdefghijk!mnopqrstuvwxyzABCDEFGH@JKLMN#PQRSTUVWXYZ$%23456789^&";
+    char pw[9];
+    int i;
+    genrandom((unsigned char *)pw, 8);
+    for (i = 0; i < 8; i++) {
+        pw[i] = tab64[pw[i] & 63];
+    }
+    pw[8] = 0;
+    dropbear_log(LOG_WARNING, "Single-use password:");
+    dropbear_log(LOG_ALERT, "--------");
+    dropbear_log(LOG_ALERT, "%s", pw);
+    dropbear_log(LOG_ALERT, "--------");
+
+    *gen_pass = m_strdup(pw);
+}
+
 int sshd4a_enable_master_password() {
     /* not implemented; the user should just remove the master-user/pass settings in the UI. */
     return 1;
@@ -169,29 +196,6 @@ int sshd4a_user_password(char **user, char **password) {
     return ret_value;
 }
 
-int sshd4a_enable_single_use_password() {
-    return enable_single_use_passwords;
-}
-
-void sshd4a_generate_single_use_password(char **gen_pass) {
-    /* Don't use Il1O0 because they're visually ambiguous */
-    static const char tab64[64] =
-            "abcdefghijk!mnopqrstuvwxyzABCDEFGH@JKLMN#PQRSTUVWXYZ$%23456789^&";
-    char pw[9];
-    int i;
-    genrandom((unsigned char *)pw, 8);
-    for (i = 0; i < 8; i++) {
-        pw[i] = tab64[pw[i] & 63];
-    }
-    pw[8] = 0;
-    dropbear_log(LOG_WARNING, "Single-use password:");
-    dropbear_log(LOG_ALERT, "--------");
-    dropbear_log(LOG_ALERT, "%s", pw);
-    dropbear_log(LOG_ALERT, "--------");
-
-    *gen_pass = m_strdup(pw);
-}
-
 const char *from_java_string(JNIEnv *env, jstring str) {
     if (!str) {
         return "";
@@ -224,8 +228,9 @@ static void null_atexit(void) {
  * @param j_home_path                home directory for an ssh login
  * @param j_shell_exe                shell executable
  * @param j_env_var_list             list of environment variables
+ * @param j_enablePublickeyLogin     enable public key logins
  * @param j_enableSingleUsePasswords enable generating single-use passwords
- * @param j_use_super_su_buffering   enable support for "SuperSu" rsync buffering
+ * @param j_enableSuperSuBuffering   enable support for "SuperSu" rsync buffering
  *
  * @return On success, the PID of the dropbear process.  On failure, -1.
  */
@@ -239,8 +244,9 @@ Java_com_hardbacknutter_sshd_SshdService_start_1sshd(
         jstring j_home_path,
         jstring j_shell_exe,
         jstring j_env_var_list,
-        jint j_enableSingleUsePasswords,
-        jint j_use_super_su_buffering) {
+        jboolean j_enablePublickeyLogin,
+        jboolean j_enableSingleUsePasswords,
+        jboolean j_enableSuperSuBuffering) {
 
     pid_t pid = fork();
     if (pid == 0) {
@@ -252,8 +258,10 @@ Java_com_hardbacknutter_sshd_SshdService_start_1sshd(
 
         sshd4a_shell_exe = from_java_string(env, j_shell_exe);
         env_var_list = from_java_string(env, j_env_var_list);
+
+        enable_public_key_login = j_enablePublickeyLogin;
         enable_single_use_passwords = j_enableSingleUsePasswords;
-        use_super_su_buffering = j_use_super_su_buffering;
+        enable_super_su_buffering = j_enableSuperSuBuffering;
 
         const jsize argc = (*env)->GetArrayLength(env, j_dropbear_args);
         const char *argv[argc];

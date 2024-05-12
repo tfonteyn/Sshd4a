@@ -10,6 +10,7 @@ final class Prefs {
     static final String DEFAULT_PORT = "2222";
 
     static final String ENABLE_SINGLE_USE_PASSWORDS = "sshd.enable.single.use.password";
+    static final String ENABLE_PUBLIC_KEY_LOGIN = "sshd.enable.publickey.login";
 
     static final String HOME = "sshd.home";
     static final String ENV_VARS = "sshd.env";
@@ -21,7 +22,7 @@ final class Prefs {
     /**
      * <a href="https://supersuroot.org/">https://supersuroot.org/</a>
      */
-    static final String USE_SUPER_SU_BUFFERING = "rsyncbuffer";
+    static final String ENABLE_SUPER_SU_BUFFERING = "rsyncbuffer";
     static final String UI_THEME = "ui.theme";
     static final String UI_NOTIFICATION_ASK_PERMISSION = "ui.notification.ask_permission";
 

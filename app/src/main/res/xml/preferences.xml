@@ -50,6 +50,12 @@
             android:title="@string/pt_single_use_password"
             app:summary="@string/pt_single_use_password_info"
             />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="sshd.enable.publickey.login"
+            android:title="@string/pt_public_key_login"
+            app:summary="@string/pt_public_key_login_info"
+            />
         <!-- Not saved to preferences. Handled in code. -->
         <EditTextPreference
             android:defaultValue=""
