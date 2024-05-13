@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -29,7 +30,8 @@ final class SshdSettings {
     /** Filename used in native code. Stored in {@link SshdSettings#getDropbearDirectory}. */
     static final String AUTHORIZED_KEYS = "authorized_keys";
     /** Filename used in native code. Stored in {@link SshdSettings#getDropbearDirectory}. */
-    private static final String MASTER_PASSWORD = "master_password";
+    @VisibleForTesting
+    static final String MASTER_PASSWORD = "master_password";
 
     private SshdSettings() {
     }
@@ -122,40 +124,51 @@ final class SshdSettings {
         final File path = getDropbearDirectory(context);
         final File file = new File(path, MASTER_PASSWORD);
 
-        // No username? Remove the file.
+        // No username ?
         if (username == null || username.isBlank()) {
-            //noinspection ResultOfMethodCallIgnored
-            file.delete();
-            return;
-        }
-
-        // Do we have a (new) password? Create a new file overwriting any previous.
-        if (password != null && !password.isBlank()) {
-            //noinspection ImplicitDefaultCharsetUsage
-            try (FileWriter fw = new FileWriter(file)) {
-                fw.write((username + ":" + hash(password)).toCharArray());
+            // Remove any existing file, and we're done.
+            if (file.exists()) {
+                //noinspection ResultOfMethodCallIgnored
+                file.delete();
             }
             return;
         }
 
-        // We have a username but no password.
-        // Was there a previous file?
-        if (!file.exists()) {
-            // ignore the username, we're done.
-            return;
+        // Do we have a username but no password?
+        if (password == null || password.isBlank()) {
+            // If the file does NOT exist, we're done.
+            if (!file.exists()) {
+                return;
+            }
+
+            // We have a username, no password, the file exist.
+            // Retrieve the previously encrypted password,
+            final String[] previous = readMasterUserAndPassword(context);
+            // and rewrite the file using the new username
+            // and the retrieved password.
+            if (previous != null && previous.length == 2) {
+                //noinspection ImplicitDefaultCharsetUsage
+                try (FileWriter fw = new FileWriter(file)) {
+                    // Rewrite the file with the new username
+                    // and the previous (already hashed) password
+                    fw.write((username + ":" + previous[1]).toCharArray());
+                }
+                return;
+            } else {
+                // We failed to get the previous? This should not be happening
+                throw new IOException("Could not read previous user/password");
+            }
         }
 
-        // We have a username but no password AND there was a previous file.
-        // Retrieve the encrypted password, and rewrite the file using the new username
-        // and the retrieved password.
-        final String[] previous = readMasterUserAndPassword(context);
-        if (previous != null && previous.length == 2) {
-            //noinspection ImplicitDefaultCharsetUsage
-            try (FileWriter fw = new FileWriter(file)) {
-                // Rewrite the file with the new username and the previous (already encrypted)
-                // and the previous (already encrypted) password
-                fw.write((username + ":" + previous[1]).toCharArray());
-            }
+        // We have a user and password.
+        // Create the file if it does not exist yet.
+        //noinspection ResultOfMethodCallIgnored
+        file.createNewFile();
+
+        // Finally write the user and hashed password to the file.
+        //noinspection ImplicitDefaultCharsetUsage
+        try (FileWriter fw = new FileWriter(file)) {
+            fw.write((username + ":" + hash(password)).toCharArray());
         }
     }
 
