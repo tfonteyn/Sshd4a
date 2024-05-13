@@ -203,13 +203,13 @@ public class SettingsFragment
             }
             case Prefs.ENABLE_PUBLIC_KEY_LOGIN:{
                 if (SshdService.isRunning()) {
-                    SshdSettings.enable_public_key_auth(prefs.getBoolean(key, true));
+                    SshdSettings.enablePublicKeyAuth(prefs.getBoolean(key, true));
                 }
                 break;
             }
             case Prefs.ENABLE_SINGLE_USE_PASSWORDS:{
                 if (SshdService.isRunning()) {
-                    SshdSettings.enable_single_use_password(prefs.getBoolean(key, true));
+                    SshdSettings.enableSingleUsePassword(prefs.getBoolean(key, true));
                 }
                 break;
             }

@@ -332,7 +332,7 @@ Java_com_hardbacknutter_sshd_SshdService_waitpid(
 }
 
 JNIEXPORT void JNICALL
-Java_com_hardbacknutter_sshd_SshdSettings_enable_1single_1use_1password(
+Java_com_hardbacknutter_sshd_SshdSettings_enableSingleUsePassword(
         JNIEnv *env,
         jobject thiz,
         jboolean j_enable) {
@@ -340,7 +340,7 @@ Java_com_hardbacknutter_sshd_SshdSettings_enable_1single_1use_1password(
 }
 
 JNIEXPORT void JNICALL
-Java_com_hardbacknutter_sshd_SshdSettings_enable_1public_1key_1auth(
+Java_com_hardbacknutter_sshd_SshdSettings_enablePublicKeyAuth(
         JNIEnv *env,
         jobject thiz,
         jboolean j_enable) {
