@@ -51,8 +51,8 @@ public class UserPasswordTest {
             throws NoSuchAlgorithmException {
         final MessageDigest md = MessageDigest.getInstance("SHA-512");
         final byte[] digest = md.digest(password.getBytes(StandardCharsets.UTF_8));
-        StringBuilder sb = new StringBuilder();
-        for (byte b : digest) {
+        final StringBuilder sb = new StringBuilder();
+        for (final byte b : digest) {
             sb.append(String.format("%02X ", b));
         }
         Log.d(password, sb.toString());
