@@ -16,4 +16,28 @@ ext {
     minSdkVersion = 30
     targetSdkVersion = 34
     compileSdkVersion = 34
+
+    // https://github.com/google/desugar_jdk_libs
+    desugarVersion = '2.0.4'
+
+    // https://developer.android.com/jetpack/androidx/versions
+
+    androidxActivityVersion = '1.9.0'
+    androidxAppcompatVersion = "1.6.1"
+    androidxConstraintlayoutVersion = "2.1.4"
+    androidxCoreVersion = '1.13.1'
+    androidxFragmentVersion = '1.7.0'
+    androidxLifecycleVersion = '2.7.0'
+    androidxPreferenceVersion = "1.2.1"
+    androidxTransition = "1.5.0"
+
+
+    // https://github.com/material-components/material-components-android/releases
+    googleMaterialVersion = '1.12.0'
+
+    // https://developer.android.com/jetpack/androidx/releases/test
+    androidxArchCoreTestingVersion = "2.2.0"
+    androidxTestCoreVersion = "1.5.0"
+    androidxTestRunnerVersion = "1.5.2"
+    androidxTestRulesVersion = "1.5.0"
 }
