@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/start_action"
-        android:title="@string/btn_start"
+        android:title="@string/lbl_start"
         app:actionLayout="@layout/toolbar_menu_buttons_start"
         app:showAsAction="always" />
 

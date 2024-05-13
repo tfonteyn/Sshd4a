@@ -221,7 +221,7 @@ public class MainFragment
         new MaterialAlertDialogBuilder(context)
                 .setIcon(R.drawable.ic_baseline_info_24)
                 .setTitle(R.string.app_name)
-                .setMessage(getString(R.string.msg_about, version,
+                .setMessage(getString(R.string.about_versions, version,
                                       SshdSettings.getDropbearVersion(),
                                       SshdSettings.getRsyncVersion(),
                                       SshdSettings.getOpensshVersion()))
@@ -237,7 +237,7 @@ public class MainFragment
         new MaterialAlertDialogBuilder(context)
                 .setIcon(R.drawable.ic_baseline_warning_24)
                 .setTitle(R.string.lbl_reset_keys)
-                .setMessage(R.string.msg_reset_keys)
+                .setMessage(R.string.confirm_reset_keys)
                 .setCancelable(true)
                 .setNegativeButton(android.R.string.cancel, (d, which) -> d.dismiss())
                 .setPositiveButton(android.R.string.ok, (d, which) -> vm.deleteAuthKeys(context))

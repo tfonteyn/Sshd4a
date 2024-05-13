@@ -23,7 +23,7 @@
         <EditTextPreference
             android:defaultValue="2222"
             android:key="sshd.port"
-            android:title="@string/pt_port" />
+            android:title="@string/pt_port"/>
         <SwitchPreference
             android:defaultValue="false"
             android:key="rsyncbuffer"
@@ -34,7 +34,7 @@
             android:title="@string/pt_cmdline_options" />
         <EditTextPreference
             android:key="sshd.env"
-            android:title="@string/pt_env" />
+            android:title="@string/pt_env"/>
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pc_paths">
         <EditTextPreference
@@ -48,7 +48,7 @@
             android:defaultValue="true"
             android:key="sshd.enable.single.use.password"
             android:title="@string/pt_single_use_password"
-            app:summary="@string/pt_single_use_password_info"
+            app:summary="@string/ps_single_use_password_info"
             />
         <SwitchPreference
             android:defaultValue="true"

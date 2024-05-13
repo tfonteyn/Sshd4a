@@ -412,7 +412,7 @@ public class SshdService
             }
 
             startForeground(ONGOING_NOTIFICATION_ID, createNotification(
-                    getString(R.string.msg_listening_on, s, bindAddress)));
+                    getString(R.string.info_listening_on_ip_port, s, bindAddress)));
         }
 
         // If we (i.e. this service, which is != this sshd process) get killed,

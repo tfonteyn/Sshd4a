@@ -4,6 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/btn_start"
     style="@style/Button.Action.Toolbar"
-    android:text="@string/btn_start"
+    android:text="@string/lbl_start"
     tools:viewBindingIgnore="true"
     />

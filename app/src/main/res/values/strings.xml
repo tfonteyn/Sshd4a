@@ -5,63 +5,102 @@
     <string name="service_name">Sshd4a</string>
     <string name="service_description">Provides an sshd server with shell access, rsync and scp/sftp services.</string>
 
-    <string name="msg_about">Version %1$s\n\ndropbear %2$s\nrsync %3$s\nsftp-server from %4$s</string>
-
+    <!-- Dialog message/question. -->
     <string name="msg_request_files_management" tools:ignore="TypographyQuotes">This application needs special permission to access your files in order to be able to use \"rsync\". Without this permission the functionality of this app will be severely limited.\n\n After tapping ‘OK’ you will be asked to enable this permission.\n Scroll down in the list of applications and enable Sshd4a.</string>
+
+    <string name="lbl_about">About</string>
+    <string name="about_versions">Version %1$s\n\ndropbear %2$s\nrsync %3$s\nsftp-server from %4$s</string>
+    <string name="info_listening_on_ip_port">Sshd4a is listening on %1$s:%2$s</string>
 
     <string name="err_service_failed_to_start">The service failed to start. Try again and check the log.</string>
     <string name="err_key_import">Something went wrong while importing your keys.</string>
     <string name="err_no_version">Unknown</string>
     <string name="err_no_ip">No network interfaces found?</string>
     <string name="err_port_number">The port must be between 1024 and 32768</string>
+    <string name="err_failed_to_save">Failed to save the password</string>
 
+    <!-- Dialog title. -->
+    <string name="warning">Warning</string>
+    <!-- Dialog message/question. -->
+    <string name="warning_no_auth_methods">You have disabled all authentication methods. Are you sure you want to do this?</string>
+
+    <!-- Shown at the top of the screen followed by the list of interfaces (IP numbers) -->
     <string name="lbl_interface">Interface:</string>
+    <!-- Shown at the top of the screen followed by the port number -->
     <string name="lbl_port">Port:</string>
-    <string name="msg_listening_on">Sshd4a is listening on %1$s:%2$s</string>
 
-    <string name="btn_start">Start</string>
-    <string name="btn_stop">Stop</string>
+    <!-- Button label. -->
+    <string name="lbl_start">Start</string>
+    <!-- Button label. -->
+    <string name="lbl_stop">Stop</string>
 
+    <!-- Menu option / screen title. -->
     <string name="lbl_settings">Settings</string>
+    <!-- Menu option. -->
     <string name="lbl_import_keys" tools:ignore="TypographyQuotes">Import an \"authorized_keys\" file</string>
+    <!-- Menu option. -->
     <string name="lbl_reset_keys">Delete all authorized keys</string>
-    <string name="msg_reset_keys">Delete all authorized_keys?\nYou will only be able to login with single-use passwords.</string>
-    <string name="lbl_about">About</string>
+    <!-- Dialog message/question. -->
+    <string name="confirm_reset_keys">Delete all authorized_keys?\nYou will only be able to login with single-use passwords.</string>
 
-
-    <!-- Settings fragment -->
+    <!-- Preference category title -->
     <string name="pc_startup">Startup</string>
+    <!-- Preference option -->
     <string name="pt_onboot">Start the service when your device is booted.</string>
+    <!-- Preference option -->
     <string name="pt_onopen">Start the service when this app is launched.</string>
+    <!-- Preference option -->
     <string name="pt_foreground">Foreground Service</string>
+    <!-- Preference summary/info message. -->
     <string name="ps_foreground_on">The service will keep running even when this app is in the background. A permanent/unobtrusive notification will be displayed.</string>
+    <!-- Preference summary/info message. -->
     <string name="ps_foreground_off">The service will only run while this app is in the foreground.</string>
 
+    <!-- Preference category title -->
     <string name="pc_dropbear">Dropbear SSH</string>
+    <!-- Preference option -->
     <string name="pt_port">Port Number (1024 &lt; port &lt; 32768)</string>
+    <!-- Preference option -->
     <string name="pt_rsync_buffer">SuperSU/rsync buffer.</string>
+    <!-- Preference summary/info message. -->
     <string name="ps_supersu">Enable this option if you are using https://supersuroot.org/</string>
+    <!-- Preference option -->
     <string name="pt_cmdline_options">Extra Commandline options</string>
+    <!-- Preference option -->
     <string name="pt_env" tools:ignore="TypographyQuotes">Environment variables.\n(one \"name=value\" per line)</string>
 
+    <!-- Preference category title -->
     <string name="pc_paths">SSH Login</string>
+    <!-- Preference option -->
     <string name="pt_home">Home Directory</string>
+    <!-- Preference option -->
     <string name="pt_shell">Login Shell</string>
 
+    <!-- Preference category title -->
     <string name="pc_ui">User Interface</string>
+    <!-- Preference option -->
     <string name="pt_ui_theme">Theme</string>
+    <!-- Preference value for "pt_ui_theme" -->
     <string name="pe_ui_theme_day_night">Follow device theme</string>
+    <!-- Preference value for "pt_ui_theme" -->
     <string name="pe_ui_theme_dark">Dark</string>
+    <!-- Preference value for "pt_ui_theme" -->
     <string name="pe_ui_theme_light">Light</string>
 
     <string name="pref_not_set">Not set</string>
 
+    <!-- Preference option -->
     <string name="pt_master_username">Master username</string>
+    <!-- Preference option -->
     <string name="pt_master_password">Master password</string>
-    <string name="err_failed_to_save">Failed to save the password</string>
 
+    <!-- Preference option -->
     <string name="pt_single_use_password">Single use password</string>
-    <string name="pt_single_use_password_info">Allow logins using a single-use password, which will be displayed in the log onscreen when a login attempt is made.</string>
+    <!-- Preference summary/info message. -->
+    <string name="ps_single_use_password_info">Allow logins using a single-use password, which will be displayed in the log onscreen when a login attempt is made.</string>
+    <!-- Preference option -->
     <string name="pt_public_key_login">Public key login</string>
+    <!-- Preference option -->
     <string name="pt_public_key_login_info">Allow logins using a public key.</string>
+
 </resources>

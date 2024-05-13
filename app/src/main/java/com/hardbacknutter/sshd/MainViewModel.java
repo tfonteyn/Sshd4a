@@ -80,8 +80,8 @@ public class MainViewModel
                 a.recycle();
             }
 
-            startBtn = new Pair<>(context.getString(R.string.btn_start), startColor);
-            stopBtn = new Pair<>(context.getString(R.string.btn_stop), stopColor);
+            startBtn = new Pair<>(context.getString(R.string.lbl_start), startColor);
+            stopBtn = new Pair<>(context.getString(R.string.lbl_stop), stopColor);
         }
     }
 
