@@ -68,10 +68,6 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("int", "NR_OF_LOG_LINES", "50")
-
-        buildConfigField("String", "VERSION_DROPBEAR", "\"2024.85\"")
-        buildConfigField("String", "VERSION_RSYNC", "\"3.3.0\"")
-        buildConfigField("String", "VERSION_OPENSSH", "\"9.7p1\"")
     }
 
     buildTypes {

@@ -5,7 +5,7 @@
     <string name="service_name">Sshd4a</string>
     <string name="service_description">Provides an sshd server with shell access, rsync and scp/sftp services.</string>
 
-    <string name="msg_about">Version %1$s\n\ndropbear %2$s\nrsync %3$s\nsftp-server from OpenSSH %4$s</string>
+    <string name="msg_about">Version %1$s\n\ndropbear %2$s\nrsync %3$s\nsftp-server from %4$s</string>
 
     <string name="msg_request_files_management" tools:ignore="TypographyQuotes">This application needs special permission to access your files in order to be able to use \"rsync\". Without this permission the functionality of this app will be severely limited.\n\n After tapping ‘OK’ you will be asked to enable this permission.\n Scroll down in the list of applications and enable Sshd4a.</string>
 

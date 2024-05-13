@@ -218,9 +218,9 @@ public class MainFragment
                 .setIcon(R.drawable.ic_baseline_info_24)
                 .setTitle(R.string.app_name)
                 .setMessage(getString(R.string.msg_about, version,
-                                      BuildConfig.VERSION_DROPBEAR,
-                                      BuildConfig.VERSION_RSYNC,
-                                      BuildConfig.VERSION_OPENSSH))
+                                      SshdSettings.getDropbearVersion(),
+                                      SshdSettings.getRsyncVersion(),
+                                      SshdSettings.getOpensshVersion()))
                 .setCancelable(true)
                 .setPositiveButton(android.R.string.ok, (d, which) -> d.dismiss())
                 .create()

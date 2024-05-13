@@ -179,4 +179,8 @@ final class SshdSettings {
     public static native void enable_public_key_auth(boolean enable);
 
     public static native void enable_single_use_password(boolean enable);
+
+    public static native String getDropbearVersion();
+    public static native String getOpensshVersion();
+    public static native String getRsyncVersion();
 }

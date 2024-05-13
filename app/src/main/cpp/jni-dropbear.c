@@ -11,6 +11,9 @@
 #include <errno.h>
 #include <syslog.h>
 
+#include "openssh/version.h"
+#include "rsync/version.h"
+
 #include "jni-dropbear.h"
 #include "dbrandom.h"
 #include "session.h"
@@ -342,4 +345,20 @@ Java_com_hardbacknutter_sshd_SshdSettings_enable_1public_1key_1auth(
         jobject thiz,
         jboolean j_enable) {
     enable_public_key_auth = j_enable;
+}
+
+extern const char *rsync_version(void);
+JNIEXPORT jstring JNICALL
+Java_com_hardbacknutter_sshd_SshdSettings_getRsyncVersion(JNIEnv *env,
+                                                          jclass clazz) {
+    return (*env)->NewStringUTF(env, RSYNC_VERSION);
+}
+JNIEXPORT jstring JNICALL
+Java_com_hardbacknutter_sshd_SshdSettings_getOpensshVersion(JNIEnv *env, jclass clazz) {
+    return (*env)->NewStringUTF(env, SSH_RELEASE);
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_hardbacknutter_sshd_SshdSettings_getDropbearVersion(JNIEnv *env, jclass clazz) {
+    return (*env)->NewStringUTF(env, DROPBEAR_VERSION);
 }
