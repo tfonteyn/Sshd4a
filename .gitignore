@@ -3,6 +3,7 @@
 .cxx
 .externalNativeBuild
 .gradle
+/.idea/androidTestResultsUserPreferences.xml
 /.idea/assetWizardSettings.xml
 /.idea/caches
 /.idea/checkstyle-idea.xml
@@ -13,8 +14,8 @@
 /.idea/inspectionProfiles/Project_Default.xml
 /.idea/libraries
 /.idea/modules.xml
-/.idea/other.xml
 /.idea/navEditor.xml
+/.idea/other.xml
 /.idea/workspace.xml
 /build
 /captures
