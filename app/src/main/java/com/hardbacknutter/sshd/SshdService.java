@@ -76,24 +76,31 @@ import java.util.stream.Collectors;
 public class SshdService
         extends Service {
 
+    /** Intent filter name for receiving broadcasts. */
     static final String SERVICE_UI_REQUEST = "ServiceUIRequest";
+
     private static final String NOTIFICATION_CHANNEL_ID =
             "com.hardbacknutter.sshd.NOTIFICATION_CHANNEL";
     private static final int ONGOING_NOTIFICATION_ID = 1;
+
     private static final String DROPBEAR_PID = "dropbear.pid";
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
 
+    /* If restarting sshd twice within 10 seconds, give up. */
+    private static final int MIN_DURATION_MS = 10_000;
+
+    /** Log tag. */
     private static final String TAG = "SshdService";
-    private static final Object lock = new Object();
+    private static final String[] Z_STRING = new String[0];
+
     /**
      * Extra command line options to pass to the dropbear executable.
      * Splits on spaces, but respects " and \
      */
     private static final Pattern CMD_OPTIONS_PATTERN = Pattern.compile(
             "\\S*\"([^\"]*)\"\\S*|(\\S+)");
-    /* If restarting sshd twice within 10 seconds, give up. */
-    private static final int MIN_DURATION_MS = 10_000;
-    private static final String[] Z_STRING = new String[0];
+
+    private static final Object lock = new Object();
     /**
      * There is only ever one sshd (dropbear) process active.
      * As the service instance is controlled by the OS,
@@ -118,11 +125,18 @@ public class SshdService
     private boolean channelCreated;
     private String bindAddress;
 
+    /**
+     * Check if the native process is running.
+     *
+     * @return flag
+     */
     static boolean isRunning() {
         return sshdPid > 0;
     }
 
     /**
+     * Start the service.
+     *
      * @param started identifier for the caller
      * @param context Current context
      *
@@ -192,6 +206,7 @@ public class SshdService
         final File pidFile = new File(SshdSettings.getDropbearDirectory(this), DROPBEAR_PID);
         int pid = 0;
         if (pidFile.exists()) {
+            //noinspection ImplicitDefaultCharsetUsage
             try (BufferedReader r = new BufferedReader(new FileReader(pidFile))) {
                 pid = Integer.parseInt(r.readLine());
             } catch (@NonNull final IOException ignore) {
@@ -337,6 +352,7 @@ public class SshdService
         updateUI();
     }
 
+    @Override
     public void onCreate() {
         super.onCreate();
 
@@ -354,6 +370,7 @@ public class SshdService
         }
     }
 
+    @Override
     @Nullable
     public IBinder onBind(@Nullable final Intent intent) {
         return null;
@@ -367,6 +384,7 @@ public class SshdService
      *               its process has gone away.
      *               ==> Reminder: do NOT use for config data...
      */
+    @Override
     public int onStartCommand(@Nullable final Intent intent,
                               final int flags,
                               final int startId) {
@@ -402,6 +420,7 @@ public class SshdService
         return START_STICKY;
     }
 
+    @Override
     public void onDestroy() {
         if (BuildConfig.DEBUG) {
             Log.d(TAG + "|onDestroy", "ENTER");
