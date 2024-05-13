@@ -114,8 +114,12 @@ public class MainFragment
                     .setMessage(R.string.msg_request_files_management)
                     .setCancelable(false)
                     .setNegativeButton(android.R.string.cancel, (d, which) -> d.dismiss())
-                    .setPositiveButton(android.R.string.ok, (d, which) -> startActivity(
-                            new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)))
+                    .setPositiveButton(android.R.string.ok, (d, which) -> {
+                        // TODO: the dialog does not dismiss first time??
+                        d.dismiss();
+                        startActivity(new Intent(
+                                Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION));
+                    })
                     .create()
                     .show();
         }
