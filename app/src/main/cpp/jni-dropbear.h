@@ -4,6 +4,9 @@
 #define SSHD4A_LIB_DIR  "SSHD4A_LIB_DIR"
 #define SSHD4A_CONF_DIR "SSHD4A_CONF_DIR"
 
+#define MASTER_PASSWORD_FILE "master_password"
+#define AUTHORIZED_KEYS_FILE "authorized_keys"
+
 extern const char *sshd4a_shell_exe;
 extern const char *sshd4a_home_path;
 

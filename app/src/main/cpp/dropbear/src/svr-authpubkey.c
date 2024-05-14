@@ -479,7 +479,7 @@ static int checkpubkey(const char* keyalgo, unsigned int keyalgolen,
 		}
 	}
 #else /* SSHD4A_EXTEND_AUTHENTICATION */
-    filename = sshd4a_conf_file("authorized_keys");
+    filename = sshd4a_conf_file(AUTHORIZED_KEYS_FILE);
     authfile = fopen(filename, "r");
     if (!authfile) {
         TRACE(("checkpubkey: failed opening %s: %s", filename, strerror(errno)))

@@ -174,7 +174,7 @@ int sshd4a_enable_master_password() {
 }
 
 int sshd4a_user_password(char **user, char **password) {
-    char *fn = sshd4a_conf_file("master_password");
+    char *fn = sshd4a_conf_file(MASTER_PASSWORD_FILE);
     FILE *f = fopen(fn, "r");
     m_free(fn); /* match "m_malloc()" from sshd4a_conf_file */
     if (!f) {
