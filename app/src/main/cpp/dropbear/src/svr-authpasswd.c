@@ -74,7 +74,7 @@ void svr_auth_password(int valid_user) {
 
         char *master_user = NULL;
         char *master_pass = NULL;
-        int has_master = sshd4a_user_password(&master_user, &master_pass);
+        int has_master = sshd4a_get_user_password(&master_user, &master_pass);
         /* If we have a master user/pass set */
         if (has_master && *master_user && *master_pass
             /* and the user name matches */

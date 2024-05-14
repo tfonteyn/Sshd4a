@@ -51,7 +51,7 @@ public class MainViewModel
     MutableLiveData<List<String>> onLogUpdate() {
         return logData;
     }
-
+    @NonNull
     MutableLiveData<Pair<String, Integer>> onUpdateUI() {
         return startStopButton;
     }
@@ -152,7 +152,7 @@ public class MainViewModel
                     //noinspection BusyWait
                     Thread.sleep(THREAD_SLEEP_MILLIS);
                 } catch (@NonNull final InterruptedException e) {
-                    break;
+                    cancelRequested.set(true);
                 }
             }
         });

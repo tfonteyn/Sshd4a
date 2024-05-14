@@ -36,6 +36,26 @@ int enable_single_use_passwords = JNI_TRUE;
 /* enable the "buffersu" helper when the user has SuperSu installed. */
 int enable_super_su_buffering = JNI_FALSE;
 
+/*
+ * Check if the given file exists and contains at least 'min_chars' characters.
+ */
+int config_file_exists(const char *filename, const int min_chars) {
+    char *fn = sshd4a_conf_file(filename);
+    FILE *f = fopen(fn, "r");
+    m_free(fn); /* match "m_malloc()" from sshd4a_conf_file */
+    if (!f) {
+        return 0;
+    }
+    for (int i = 0; i < min_chars; i++) {
+        if (fgetc(f) == EOF) {
+            fclose(f);
+            return 0;
+        }
+    }
+    fclose(f);
+    return 1;
+}
+
 /* Construct the full path to the given configuration file. */
 char *sshd4a_conf_file(const char *fn) {
     char *ret = m_malloc(strlen(conf_path) + strlen(fn) + 1 + /* '\0' */ 1);
@@ -119,33 +139,13 @@ void sshd4a_set_env() {
     setenv(SSHD4A_CONF_DIR, conf_path, /*overwrite=*/ 1);
 }
 
-int sshd4a_enable_public_key_login() {
-    return enable_public_key_auth;
+int sshd4a_enable_public_key_auth() {
+    return enable_public_key_auth
+    /* MIN_AUTHKEYS_LINE (10 bytes) as defined in "dropbear/svr-authpubkey.c */
+    && config_file_exists(AUTHORIZED_KEYS_FILE, 10);
 }
 
-/*
- * returns 1 if "authorized_keys" exists and is longer than
- * MIN_AUTHKEYS_LINE (10 bytes) as defined in "dropbear/svr-authpubkey.c"
- */
-__attribute__((unused)) int sshd4a_authorized_keys_exists() {
-    char *fn = sshd4a_conf_file("authorized_keys");
-    FILE *f = fopen(fn, "r");
-    m_free(fn); /* match "m_malloc()" from sshd4a_conf_file */
-    if (!f) {
-        return 0;
-    }
-    /* 10 == MIN_AUTHKEYS_LINE */
-    for (int i = 0; i < 10; i++) {
-        if (fgetc(f) == EOF) {
-            fclose(f);
-            return 0;
-        }
-    }
-    fclose(f);
-    return 1;
-}
-
-int sshd4a_enable_single_use_password() {
+int sshd4a_enable_single_use_passwords() {
     return enable_single_use_passwords;
 }
 
@@ -169,11 +169,20 @@ void sshd4a_generate_single_use_password(char **gen_pass) {
 }
 
 int sshd4a_enable_master_password() {
-    /* not implemented; the user should just remove the master-user/pass settings in the UI. */
-    return 1;
+    /* 3: u:p
+     * In reality the Java UI takes care of minimum length.
+     * BUT.... if the user opens an ssh shell,
+     * they can of course manually edit/replace the master_password file.
+     * TODO: Maybe we should sign the base64 password with an internal key.
+     *  but considering that when you CAN login... you CAN read the app's files...
+     *  not that much point.
+     *  Unless such a private key to sign is kept of-device, this is merely
+     *  obfuscation and not encryption of course.
+     */
+    return config_file_exists(MASTER_PASSWORD_FILE, 3);
 }
 
-int sshd4a_user_password(char **user, char **password) {
+int sshd4a_get_user_password(char **user, char **password) {
     char *fn = sshd4a_conf_file(MASTER_PASSWORD_FILE);
     FILE *f = fopen(fn, "r");
     m_free(fn); /* match "m_malloc()" from sshd4a_conf_file */
@@ -204,6 +213,14 @@ int sshd4a_user_password(char **user, char **password) {
     return ret_value;
 }
 
+/*
+ * This makes sure that no previously-added atexit gets called (some users have
+ * an atexit registered by libGLESv2_adreno.so)
+ */
+static void null_atexit(void) {
+    _Exit(0);
+}
+
 const char *from_java_string(JNIEnv *env, jstring str) {
     if (!str) {
         return "";
@@ -217,14 +234,6 @@ const char *from_java_string(JNIEnv *env, jstring str) {
     return value;
 }
 
-/*
- * This makes sure that no previously-added atexit gets called (some users have
- * an atexit registered by libGLESv2_adreno.so)
- */
-static void null_atexit(void) {
-    _Exit(0);
-}
-
 /**
  * Main entry point; start dropbear in-process.
  *
@@ -232,7 +241,7 @@ static void null_atexit(void) {
  * @param cl
  * @param j_lib_path                 native library directory
  * @param j_dropbear_args            arguments to pass to the dropbear main
- * @param j_conf_path                location for "authorized_keys" etc
+ * @param j_conf_path                directory for dropbear configuration files
  * @param j_home_path                home directory for an ssh login
  * @param j_shell_exe                shell executable
  * @param j_env_var_list             list of environment variables
@@ -245,7 +254,7 @@ static void null_atexit(void) {
 JNIEXPORT jint JNICALL
 Java_com_hardbacknutter_sshd_SshdService_start_1sshd(
         JNIEnv *env,
-        jclass cl,
+        jobject thiz,
         jstring j_lib_path,
         jobjectArray j_dropbear_args,
         jstring j_conf_path,
@@ -313,7 +322,7 @@ Java_com_hardbacknutter_sshd_SshdService_start_1sshd(
 JNIEXPORT void JNICALL
 Java_com_hardbacknutter_sshd_SshdService_kill(
         JNIEnv *env,
-        jclass cl,
+        jobject thiz,
         jint pid) {
     kill(pid, SIGKILL);
 }
@@ -321,7 +330,7 @@ Java_com_hardbacknutter_sshd_SshdService_kill(
 JNIEXPORT int JNICALL
 Java_com_hardbacknutter_sshd_SshdService_waitpid(
         JNIEnv *env,
-        jclass cl,
+        jobject thiz,
         jint pid) {
     int status;
     waitpid(pid, &status, 0);
@@ -331,34 +340,20 @@ Java_com_hardbacknutter_sshd_SshdService_waitpid(
     return 0;
 }
 
-JNIEXPORT void JNICALL
-Java_com_hardbacknutter_sshd_SshdSettings_enableSingleUsePassword(
-        JNIEnv *env,
-        jobject thiz,
-        jboolean j_enable) {
-    enable_single_use_passwords = j_enable;
+/* static */
+JNIEXPORT jstring JNICALL
+Java_com_hardbacknutter_sshd_SshdService_getDropbearVersion(JNIEnv *env, jclass clazz) {
+    return (*env)->NewStringUTF(env, DROPBEAR_VERSION);
 }
 
-JNIEXPORT void JNICALL
-Java_com_hardbacknutter_sshd_SshdSettings_enablePublicKeyAuth(
-        JNIEnv *env,
-        jobject thiz,
-        jboolean j_enable) {
-    enable_public_key_auth = j_enable;
-}
-
-extern const char *rsync_version(void);
+/* static */
 JNIEXPORT jstring JNICALL
-Java_com_hardbacknutter_sshd_SshdSettings_getRsyncVersion(JNIEnv *env,
-                                                          jclass clazz) {
-    return (*env)->NewStringUTF(env, RSYNC_VERSION);
-}
-JNIEXPORT jstring JNICALL
-Java_com_hardbacknutter_sshd_SshdSettings_getOpensshVersion(JNIEnv *env, jclass clazz) {
+Java_com_hardbacknutter_sshd_SshdService_getOpensshVersion(JNIEnv *env, jclass clazz) {
     return (*env)->NewStringUTF(env, SSH_RELEASE);
 }
 
+/* static */
 JNIEXPORT jstring JNICALL
-Java_com_hardbacknutter_sshd_SshdSettings_getDropbearVersion(JNIEnv *env, jclass clazz) {
-    return (*env)->NewStringUTF(env, DROPBEAR_VERSION);
+Java_com_hardbacknutter_sshd_SshdService_getRsyncVersion(JNIEnv *env, jclass clazz) {
+    return (*env)->NewStringUTF(env, RSYNC_VERSION);
 }

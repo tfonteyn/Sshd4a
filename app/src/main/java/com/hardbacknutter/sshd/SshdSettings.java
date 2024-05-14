@@ -1,7 +1,6 @@
 package com.hardbacknutter.sshd;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -72,16 +71,6 @@ final class SshdSettings {
     }
 
     @NonNull
-    static String getHomePath(@NonNull final Context context,
-                              @NonNull final SharedPreferences pref) {
-        String homePath = pref.getString(Prefs.HOME, null);
-        if (homePath == null || !new File(homePath).exists()) {
-            homePath = context.getFilesDir().getPath();
-        }
-        return homePath;
-    }
-
-    @NonNull
     static File getDropbearDirectory(@NonNull final Context context) {
         final File path = new File(context.getFilesDir(), ".dropbear");
         if (!path.exists()) {
@@ -90,7 +79,6 @@ final class SshdSettings {
         }
         return path;
     }
-
 
     /**
      * Read the master user + hashed password from the dropbear file.
@@ -188,10 +176,4 @@ final class SshdSettings {
         final byte[] digest = md.digest(password.getBytes(StandardCharsets.UTF_8));
         return Base64.getEncoder().encodeToString(digest);
     }
-
-    public static native void enablePublicKeyAuth(boolean enable);
-    public static native void enableSingleUsePassword(boolean enable);
-    public static native String getDropbearVersion();
-    public static native String getOpensshVersion();
-    public static native String getRsyncVersion();
 }

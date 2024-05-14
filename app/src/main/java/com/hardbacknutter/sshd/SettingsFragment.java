@@ -10,7 +10,6 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
@@ -18,6 +17,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 import androidx.preference.SwitchPreference;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
@@ -40,30 +40,55 @@ public class SettingsFragment
     private EditTextPreference pMasterUsername;
     private EditTextPreference pMasterPassword;
 
-    private MainViewModel vm;
-
     private final OnBackPressedCallback backPressedCallback =
             new OnBackPressedCallback(true) {
-                @SuppressWarnings("DataFlowIssue")
                 @Override
                 public void handleOnBackPressed() {
                     try {
+                        //noinspection DataFlowIssue
                         SshdSettings.writeMasterUserAndPassword(getContext(),
                                                                 pMasterUsername.getText(),
                                                                 pMasterPassword.getText());
-                        getParentFragmentManager().popBackStack();
-
                     } catch (@NonNull final IOException | NoSuchAlgorithmException ignore) {
                         // we should never get here... flw
+                        //noinspection DataFlowIssue
                         Snackbar.make(getView(), R.string.err_failed_to_save,
                                       Snackbar.LENGTH_LONG).show();
                         getView().postDelayed(() -> getParentFragmentManager().popBackStack(),
                                               2_000);
                     }
 
+                    if (hasAtLeastOneAuthMethod()) {
+                        getParentFragmentManager().popBackStack();
+                    } else {
+                        new MaterialAlertDialogBuilder(getContext())
+                                .setIcon(R.drawable.ic_baseline_warning_24)
+                                .setTitle(R.string.warning)
+                                .setMessage(R.string.warning_no_auth_methods)
+                                .setCancelable(true)
+                                .setNegativeButton(android.R.string.cancel, (d, which) ->
+                                        d.dismiss())
+                                .setPositiveButton(android.R.string.ok, (d, which) ->
+                                        getParentFragmentManager().popBackStack())
+                                .create()
+                                .show();
+                    }
                 }
             };
     private boolean hasPreviousPassword;
+
+    private boolean hasAtLeastOneAuthMethod() {
+        final Context context = getContext();
+        //noinspection DataFlowIssue
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        final String[] userAndPassword = SshdSettings.readMasterUserAndPassword(context);
+
+        return prefs.getBoolean(Prefs.ENABLE_SINGLE_USE_PASSWORDS, true)
+               || prefs.getBoolean(Prefs.ENABLE_PUBLIC_KEY_LOGIN, true)
+               || (userAndPassword != null && userAndPassword.length == 2
+                   && userAndPassword[0] != null && !userAndPassword[0].isBlank()
+                   && userAndPassword[1] != null && !userAndPassword[1].isBlank());
+    }
 
     @SuppressWarnings("DataFlowIssue")
     @Override
@@ -148,10 +173,7 @@ public class SettingsFragment
             toolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24);
         }
 
-        vm = new ViewModelProvider(this).get(MainViewModel.class);
-        //noinspection ConstantConditions
-        vm.init(getContext());
-
+        //noinspection DataFlowIssue
         final String[] previous = SshdSettings.readMasterUserAndPassword(getContext());
         if (previous != null && previous.length == 2) {
             pMasterUsername.setText(previous[0]);
@@ -198,18 +220,6 @@ public class SettingsFragment
                     pPort.setText(Prefs.DEFAULT_PORT);
                     //noinspection ConstantConditions
                     Snackbar.make(getView(), R.string.err_port_number, Snackbar.LENGTH_LONG).show();
-                }
-                break;
-            }
-            case Prefs.ENABLE_PUBLIC_KEY_LOGIN:{
-                if (SshdService.isRunning()) {
-                    SshdSettings.enablePublicKeyAuth(prefs.getBoolean(key, true));
-                }
-                break;
-            }
-            case Prefs.ENABLE_SINGLE_USE_PASSWORDS:{
-                if (SshdService.isRunning()) {
-                    SshdSettings.enableSingleUsePassword(prefs.getBoolean(key, true));
                 }
                 break;
             }

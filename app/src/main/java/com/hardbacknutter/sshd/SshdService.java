@@ -102,20 +102,22 @@ public class SshdService
 
     private static final Object lock = new Object();
     /**
-     * There is only ever one sshd (dropbear) process active.
-     * As the service instance is controlled by the OS,
-     * we simply use statics here.
+     * Singleton.
      */
+    @Nullable
     @GuardedBy("lock")
-    private static int sshdPid;
-    @GuardedBy("lock")
-    private static long sshdStartTime;
-    @GuardedBy("lock")
-    private static long sshdDuration;
+    private static SshdService sInstance;
 
     static {
         System.loadLibrary("jni-dropbear");
     }
+
+    @GuardedBy("lock")
+    private int sshdPid;
+    @GuardedBy("lock")
+    private long sshdStartTime;
+    @GuardedBy("lock")
+    private long sshdDuration;
 
     /**
      * Running in foreground is presumed to be always true UNLESS deliberately switched off.
@@ -131,7 +133,12 @@ public class SshdService
      * @return flag
      */
     static boolean isRunning() {
-        return sshdPid > 0;
+        synchronized (lock) {
+            if (sInstance == null) {
+                return false;
+            }
+            return sInstance.sshdPid > 0;
+        }
     }
 
     /**
@@ -157,29 +164,24 @@ public class SshdService
                 final boolean runInForeground = PreferenceManager
                         .getDefaultSharedPreferences(context)
                         .getBoolean(Prefs.RUN_IN_FOREGROUND, true);
-                return startService(context, runInForeground);
+
+                final Intent intent = new Intent(context, SshdService.class);
+                if (runInForeground) {
+                    // Will keep running even if the App goes to the background
+                    return context.getApplicationContext().startForegroundService(intent);
+                } else {
+                    // The system will kill the service if the App goes to the background
+                    return context.getApplicationContext().startService(intent);
+                }
             }
             case OnBoot: {
-                // force foreground as required by latest Android version
-                return startService(context, true);
+                // Always foreground as required by latest Android version.
+                // Will keep running even if the App goes to the background.
+                final Intent intent = new Intent(context, SshdService.class);
+                return context.getApplicationContext().startForegroundService(intent);
             }
         }
-        // not reachable
-        return null;
-    }
-
-    @Nullable
-    private static ComponentName startService(@NonNull final Context context,
-                                              final boolean runInForeground)
-            throws IllegalStateException {
-        final Intent intent = new Intent(context, SshdService.class);
-        if (runInForeground) {
-            // will keep running even if the App goes to the background
-            return context.getApplicationContext().startForegroundService(intent);
-        } else {
-            // The system will kill the service if the App goes to the background
-            return context.getApplicationContext().startService(intent);
-        }
+        throw new IllegalStateException("started=" + started);
     }
 
     static void stopService(@NonNull final Context context) {
@@ -187,6 +189,20 @@ public class SshdService
         context.stopService(intent);
     }
 
+    public static native String getDropbearVersion();
+
+    public static native String getOpensshVersion();
+
+    public static native String getRsyncVersion();
+
+    @NonNull
+    private String getHomePath(@NonNull final SharedPreferences pref) {
+        String homePath = pref.getString(Prefs.HOME, null);
+        if (homePath == null || !new File(homePath).exists()) {
+            homePath = getFilesDir().getPath();
+        }
+        return homePath;
+    }
 
     private native int start_sshd(@NonNull String lib,
                                   @NonNull String[] dropbearArgs,
@@ -237,7 +253,7 @@ public class SshdService
         // Bind to [address:]port
         argList.add("-p");
         argList.add(bindAddress);
-        // edit dropbear/config.h, line 9:  #define DEBUG_TRACE 5
+        // edit dropbear/config.h, add:  #define DEBUG_TRACE 1
         // before enabling the next line
 //        args.add("-vvvvv");
 
@@ -249,7 +265,7 @@ public class SshdService
         final String[] args = argList.toArray(Z_STRING);
 
         final String confPath = SshdSettings.getDropbearDirectory(this).getPath();
-        final String homePath = SshdSettings.getHomePath(this, pref);
+        final String homePath = getHomePath(pref);
 
         String shellCmd = pref.getString(Prefs.SHELL, null);
         if (shellCmd == null || !new File(shellCmd).exists()) {
@@ -368,6 +384,8 @@ public class SshdService
                 stopSshd();
             }
         }
+
+        sInstance = this;
     }
 
     @Override
@@ -429,6 +447,9 @@ public class SshdService
         if (runInForeground) {
             stopForeground(true);
         }
+
+        sInstance = null;
+
         super.onDestroy();
     }
 
