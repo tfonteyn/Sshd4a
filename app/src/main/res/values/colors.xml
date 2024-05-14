@@ -3,6 +3,8 @@
     <color name="black">#ff000000</color>
     <color name="white">#ffffffff</color>
 
+    <color name="ic_app_background">#7DBDBC</color>
+
     <!-- Green -->
     <color name="green_50">#E8F5E9</color>
     <color name="green_100">#C8E6C9</color>

@@ -11,4 +11,9 @@
         <item>1</item>
         <item>2</item>
     </string-array>
+
+    <string name="lbl_github"
+            translatable="false">GitHub</string>
+    <string name="github_project_url"
+            translatable="false">https://github.com/tfonteyn/Sshd4a</string>
 </resources>

@@ -9,7 +9,7 @@
     <string name="msg_request_files_management" tools:ignore="TypographyQuotes">This application needs special permission to access your files in order to be able to use \"rsync\". Without this permission the functionality of this app will be severely limited.\n\n After tapping ‘OK’ you will be asked to enable this permission.\n Scroll down in the list of applications and enable Sshd4a.</string>
 
     <string name="lbl_about">About</string>
-    <string name="about_versions">Version %1$s\n\ndropbear %2$s\nrsync %3$s\nsftp-server from %4$s</string>
+    <string name="about_versions">Services provided by:\n\nDropbear %1$s\nRsync %2$s\nSftp-server from %3$s</string>
     <string name="info_listening_on_ip_port">Sshd4a is listening on %1$s:%2$s</string>
 
     <string name="err_service_failed_to_start">The service failed to start. Try again and check the log.</string>
@@ -102,5 +102,8 @@
     <string name="pt_public_key_login">Public key login</string>
     <!-- Preference option -->
     <string name="pt_public_key_login_info">Allow logins using a public key.</string>
+    <!-- About dialog button -->
+    <string name="lbl_github_project">Github project</string>
+    <string name="about_title">Sshd4a %s</string>
 
 </resources>

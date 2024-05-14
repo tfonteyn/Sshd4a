@@ -39,6 +39,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
 
+import com.hardbacknutter.sshd.databinding.DialogAboutBinding;
 import com.hardbacknutter.sshd.databinding.FragmentMainBinding;
 
 public class MainFragment
@@ -218,14 +219,20 @@ public class MainFragment
             version = getString(R.string.err_no_version);
         }
 
-        new MaterialAlertDialogBuilder(context)
-                .setIcon(R.drawable.ic_baseline_info_24)
-                .setTitle(R.string.app_name)
-                .setMessage(getString(R.string.about_versions, version,
+        final DialogAboutBinding dvb = DialogAboutBinding.inflate(getLayoutInflater());
+        dvb.version.setText(getString(R.string.about_versions,
                                       SshdService.getDropbearVersion(),
                                       SshdService.getRsyncVersion(),
-                                      SshdService.getOpensshVersion()))
+                                      SshdService.getOpensshVersion()));
+
+        new MaterialAlertDialogBuilder(context)
+                .setIcon(R.drawable.ic_baseline_info_24)
+                .setTitle(getString(R.string.about_title, version))
+                .setView(dvb.getRoot())
                 .setCancelable(true)
+                .setNeutralButton(R.string.lbl_github_project, (d, which) -> startActivity(
+                        new Intent(Intent.ACTION_VIEW,
+                                   Uri.parse(getString(R.string.github_project_url)))))
                 .setPositiveButton(android.R.string.ok, (d, which) -> d.dismiss())
                 .create()
                 .show();
