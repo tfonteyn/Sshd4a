@@ -51,6 +51,7 @@ if accessing the app embedded "files" directory is enough for your needs.
 <img src="metadata/en-US/images/phoneScreenshots/02.png" alt="All files access - app list" style="width:200px;"/>
 <img src="metadata/en-US/images/phoneScreenshots/03.png" alt="All files access - allow for Sshd4a" style="width:200px;"/>
 </p>
+
 More info on MANAGE_EXTERNAL_STORAGE can be found in this
 [Android doc article](https://developer.android.com/training/data-storage#permissions)
 and in this
