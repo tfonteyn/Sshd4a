@@ -53,8 +53,6 @@ and in this
 [Google article](https://support.google.com/googleplay/android-developer/answer/9888170?hl=en) 
 in the section "All Files Access Permission"
 
----
-
 ## Thanks
 
 Inspired by, and uses parts of the native C code from
