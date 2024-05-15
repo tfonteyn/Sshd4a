@@ -30,7 +30,7 @@ final class SshdSettings {
     static final String AUTHORIZED_KEYS = "authorized_keys";
     /** Filename used in native code. Stored in {@link SshdSettings#getDropbearDirectory}. */
     @VisibleForTesting
-    static final String MASTER_PASSWORD = "master_password";
+    private static final String MASTER_PASSWORD = "master_password";
 
     private SshdSettings() {
     }

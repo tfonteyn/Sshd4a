@@ -267,6 +267,7 @@ Java_com_hardbacknutter_sshd_SshdService_start_1sshd(
 
     pid_t pid = fork();
     if (pid == 0) {
+        /* child */
         atexit(null_atexit);
 
         lib_path = from_java_string(env, j_lib_path);
@@ -311,8 +312,10 @@ Java_com_hardbacknutter_sshd_SshdService_start_1sshd(
         dropbear_main(argc, (char **) argv, NULL);
         /* not reachable */
         exit(0);
+    }
 
-    } else if (pid == -1) {
+    /* parent */
+    if (pid == -1) {
         fprintf(stderr, "Failed to start dropbear errno=%u\n", errno);
     }
 

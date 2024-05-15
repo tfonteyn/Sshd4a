@@ -255,7 +255,7 @@ public class SshdService
         argList.add(bindAddress);
         // edit dropbear/config.h, add:  #define DEBUG_TRACE 1
         // before enabling the next line
-//        args.add("-vvvvv");
+//        args.add("-v");
 
         final Matcher matcher = CMD_OPTIONS_PATTERN.matcher(
                 pref.getString(Prefs.DROPBEAR_CMDLINE_OPTIONS, ""));
