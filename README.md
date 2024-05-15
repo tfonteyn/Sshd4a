@@ -47,9 +47,9 @@ the device settings and manually give this permission. The app can only prompt y
 and you **must** do this **manually**. You can of course deny/ignore this request
 if accessing the app embedded "files" directory is enough for your needs.
 
-![Permission request](metadata/en-US/images/phoneScreenshots/01.png "Permission request")
-![All files access - app list](metadata/en-US/images/phoneScreenshots/02.png "All files access - app list")
-![All files access - allow Sshd4a](metadata/en-US/images/phoneScreenshots/03.png "All files access - allow for Sshd4a")
+<img src="metadata/en-US/images/phoneScreenshots/01.png" alt="Permission request" style="width:200px;"/>
+<img src="metadata/en-US/images/phoneScreenshots/02.png" alt="All files access - app list" style="width:200px;"/>
+<img src="metadata/en-US/images/phoneScreenshots/03.png" alt="All files access - allow for Sshd4a" style="width:200px;"/>
 
 More info on MANAGE_EXTERNAL_STORAGE can be found in this
 [Android doc article](https://developer.android.com/training/data-storage#permissions)
