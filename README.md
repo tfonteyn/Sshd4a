@@ -2,6 +2,8 @@
 
 Provides an 'sshd' server with shell access, rsync and scp/sftp services.
 
+Some documentation can be found on the [wiki](https://github.com/tfonteyn/Sshd4a/wiki)
+
 ## Services:
 
 Services are provided by:
