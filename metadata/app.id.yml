@@ -19,7 +19,7 @@ IssueTracker: https://github.com/tfonteyn/Sshd4a/issues
 
 RepoType: git
 Repo: https://github.com/tfonteyn/Sshd4a.git
-Binaries: https://github.com/tfonteyn/Sshd4a/releases/download/v%v/Sshd4a-%v-arm.apk
+Binaries: https://github.com/tfonteyn/Sshd4a/releases/download/v%v/Sshd4a-%v.apk
 
 Builds:
   - versionName: '1.2.0'
