@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--suppress LongLine -->
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name">Sshd4a</string>
-    <string name="service_name">Sshd4a</string>
+    <string name="app_name" translatable="false">Sshd4a</string>
+    <string name="service_name" translatable="false">Sshd4a</string>
     <string name="service_description">Provides an sshd server with shell access, rsync and scp/sftp services.</string>
 
     <!-- Dialog message/question. -->
