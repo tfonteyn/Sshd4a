@@ -1,8 +1,13 @@
-## Download the latest release: [1.2.0 apk](https://github.com/tfonteyn/Sshd4a/releases/download/v1.2.0/Sshd4a-1.2.0.apk)
-
 Provides an 'sshd' server with shell access, rsync and scp/sftp services.
 
 Some documentation can be found on the [wiki](https://github.com/tfonteyn/Sshd4a/wiki)
+
+### Download the latest release: 1.2.0
+
+<a href="https://github.com/tfonteyn/Sshd4a/releases/download/v1.2.0/Sshd4a-1.2.0.apk">
+<img src="metadata/en-US/images/get-it-on-github.png" alt="Get it on GitHub" style="width:150px;"/></a>
+
+
 
 ## Services:
 
