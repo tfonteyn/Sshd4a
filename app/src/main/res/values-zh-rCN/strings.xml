@@ -6,4 +6,11 @@
 \n在应用程序列表中向下滚动并启用 Sshd4a。</string>
     <string name="service_description">提供一个带shell访问、rsync和scp/sftp服务的 sshd 服务器。</string>
     <string name="lbl_about">关于</string>
+    <string name="err_no_version">未知</string>
+    <string name="lbl_start">开始</string>
+    <string name="lbl_settings">设置</string>
+    <string name="pc_ui">用户界面</string>
+    <string name="pt_ui_theme">主题</string>
+    <string name="pe_ui_theme_dark">深色</string>
+    <string name="pe_ui_theme_light">浅色模式</string>
 </resources>
