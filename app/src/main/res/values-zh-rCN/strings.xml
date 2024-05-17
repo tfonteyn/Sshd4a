@@ -13,4 +13,6 @@
     <string name="pt_ui_theme">主题</string>
     <string name="pe_ui_theme_dark">深色</string>
     <string name="pe_ui_theme_light">浅色模式</string>
+    <string name="warning">警告!</string>
+    <string name="pref_not_set">未设置</string>
 </resources>
