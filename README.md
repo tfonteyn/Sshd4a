@@ -7,7 +7,8 @@ Some documentation can be found on the [wiki](https://github.com/tfonteyn/Sshd4a
 <a href="https://github.com/tfonteyn/Sshd4a/releases/download/v1.2.0/Sshd4a-1.2.0.apk">
 <img src="metadata/en-US/images/get-it-on-github.png" alt="Get it on GitHub" style="width:150px;"/></a>
 
-
+<a href="https://apt.izzysoft.de/fdroid/index/apk/com.hardbacknutter.sshd/">
+<img src="metadata/en-US/images/IzzyOnDroid.png" alt="Get it on IzzySoft" style="width:150px;"/></a>
 
 ## Services:
 
