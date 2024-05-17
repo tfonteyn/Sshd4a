@@ -33,7 +33,7 @@
     <string name="lbl_port">端口：</string>
     <string name="lbl_stop">停止</string>
     <string name="lbl_import_keys" tools:ignore="TypographyQuotes">导入一个 \"authorized_keys\" 文件</string>
-    <string name="lbl_reset_keys">删除全部已认证的公钥（authorized_keys）</string>
+    <string name="lbl_reset_keys">删除全部的 \"authorized_keys\"</string>
     <string name="confirm_reset_keys">删除全部已认证的公钥？
 \n你将只能使用密码登录。</string>
     <string name="pc_startup">自启</string>
