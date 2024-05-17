@@ -1,0 +1,1 @@
+具有shell访问权限、rsync和scp/sftp服务的sshd服务器。
