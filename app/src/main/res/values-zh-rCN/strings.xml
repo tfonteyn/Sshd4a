@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="msg_request_files_management" tools:ignore="TypographyQuotes">此应用程序需要特殊权限才能访问您的文件，以便能够使用“rsync”。不允许的话，应用功能会严重限制。
+\n
+\n点击“确定”后，您将被要求启用此权限。
+\n在应用程序列表中向下滚动并启用 Sshd4a。</string>
+    <string name="service_description">提供一个带shell访问、rsync和scp/sftp服务的 sshd 服务器。</string>
+    <string name="lbl_about">关于</string>
+    <string name="err_no_version">未知</string>
+    <string name="lbl_start">开始</string>
+    <string name="lbl_settings">设置</string>
+    <string name="pc_ui">用户界面</string>
+    <string name="pt_ui_theme">主题</string>
+    <string name="pe_ui_theme_dark">深色</string>
+    <string name="pe_ui_theme_light">浅色</string>
+    <string name="warning">警告</string>
+    <string name="pref_not_set">未设置</string>
+    <string name="app_name" translatable="false">Sshd4a</string>
+    <string name="service_name" translatable="false">Sshd4a</string>
+    <string name="about_versions">服务组件由以下提供：
+\n
+\nDropbear %1$s
+\nRsync %2$s
+\nSftp-server %3$s</string>
+    <string name="info_listening_on_ip_port">Sshd4a 正在监听 %1$s:%2$s</string>
+    <string name="err_service_failed_to_start">服务无法启动。请重试并检查日志。</string>
+    <string name="err_key_import">导入密钥时出现问题。</string>
+    <string name="err_no_ip">啊咧，找不到网络接口？</string>
+    <string name="err_port_number">端口必须在 1024 ~ 32768 之间</string>
+    <string name="err_failed_to_save">无法保存密码</string>
+    <string name="warning_no_auth_methods">您已禁用所有身份验证方式。你确定要这么做吗?</string>
+    <string name="lbl_interface">网络接口：</string>
+    <string name="lbl_port">端口：</string>
+    <string name="lbl_stop">停止</string>
+    <string name="lbl_import_keys" tools:ignore="TypographyQuotes">导入一个 \"authorized_keys\" 文件</string>
+    <string name="lbl_reset_keys">删除全部的 \"authorized_keys\"</string>
+    <string name="confirm_reset_keys">删除全部已认证的公钥？
+\n你将只能使用密码登录。</string>
+    <string name="pc_startup">自启</string>
+    <string name="pt_onboot">开机时启动服务。</string>
+    <string name="pt_onopen">打开应用时启动服务。</string>
+    <string name="pt_foreground">后台服务</string>
+    <string name="ps_foreground_off">仅当该应用程序位于前台时才会运行。</string>
+    <string name="ps_foreground_on">即使该应用程序位于后台，服务也将继续运行。 将显示永久/不引人注目的通知。</string>
+    <string name="pc_dropbear">Dropbear SSH</string>
+    <string name="pt_port">端口号(1024 &lt; 端口 &lt; 32768)</string>
+    <string name="ps_supersu">如果您使用的是 https://supersuroot.org/，请启用此选项</string>
+    <string name="pt_cmdline_options">额外的命令行选项</string>
+    <string name="pt_env" tools:ignore="TypographyQuotes">环境变量。
+\n（每行一个\"键=值\"）</string>
+    <string name="pc_paths">SSH 登录</string>
+    <string name="pt_home">家目录</string>
+    <string name="pt_shell">登录 Shell</string>
+    <string name="pe_ui_theme_day_night">跟随设备主题</string>
+    <string name="pt_master_username">主用户名</string>
+    <string name="pt_master_password">主密码</string>
+    <string name="pt_single_use_password">一次性密码</string>
+    <string name="ps_single_use_password_info">允许使用一次性密码登录，尝试登录时该密码将显示在屏幕上。</string>
+    <string name="pt_public_key_login">公钥登录</string>
+    <string name="pt_public_key_login_info">允许使用公钥登录。</string>
+    <string name="lbl_github_project">GitHub 项目</string>
+    <string name="about_title">Sshd4a %s</string>
+    <string name="pt_rsync_buffer">SuperSU/rsync 缓冲。</string>
+</resources>
