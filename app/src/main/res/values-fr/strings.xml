@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="about_title">Sshd4a %s</string>
+    <string name="about_versions">Services fournis par :\n\nDropbear %1$s\nRsync %2$s\nSftp-server de %3$s</string>
+    <string name="confirm_reset_keys">Supprimer toutes les authorized_keys ?\nVous ne pourrez vous connecter qu’avec des mots de passe à usage unique.</string>
+    <string name="err_failed_to_save">Échec de l’enregistrement du mot de passe</string>
+    <string name="err_key_import">Un problème s’est produit lors de l’importation de vos clés.</string>
+    <string name="err_no_ip">Aucune interface réseau n’a été trouvée ?</string>
+    <string name="err_no_version">Inconnu</string>
+    <string name="err_port_number">Le port doit être compris entre 1024 et 32768.</string>
+    <string name="err_service_failed_to_start">Le service n’a pas réussi à démarrer. Réessayez et vérifiez le journal.</string>
+    <string name="info_listening_on_ip_port">Sshd4a écoute sur %1$s:%2$s</string>
+    <string name="lbl_about">À propos de cette application</string>
+    <string name="lbl_github_project">Projet Github</string>
+    <string name="lbl_import_keys">Importer un fichier « authorized_keys »</string>
+    <string name="lbl_interface">Interface :</string>
+    <string name="lbl_port">Port :</string>
+    <string name="lbl_reset_keys">Supprimer toutes les clés autorisées</string>
+    <string name="lbl_settings">Paramètres</string>
+    <string name="lbl_start">Démarrer</string>
+    <string name="lbl_stop">Arrêter</string>
+    <string name="msg_request_files_management">Cette application a besoin d’une autorisation spéciale pour accéder à vos fichiers afin de pouvoir utiliser « rsync ». Sans cette autorisation, la fonctionnalité de cette application sera fortement limitée.\n\n Après avoir appuyé sur « OK », il vous sera demandé d'activer cette autorisation.\nFaites défiler la liste des applications vers le bas et activez Sshd4a.</string>
+    <string name="pc_paths">Connexion SSH</string>
+    <string name="pc_startup">Démarrage</string>
+    <string name="pc_ui">Interface utilisateur</string>
+    <string name="pe_ui_theme_dark">Noir</string>
+    <string name="pe_ui_theme_day_night">Suivre le thème de l’appareil</string>
+    <string name="pe_ui_theme_light">Clair</string>
+    <string name="pref_not_set">Non défini</string>
+    <string name="ps_foreground_off">Le service ne s’exécutera que lorsque cette application sera au premier plan.</string>
+    <string name="ps_foreground_on">Le service continuera à fonctionner même si l’application est en arrière-plan. Une notification permanente et discrète sera affichée.</string>
+    <string name="ps_single_use_password_info">Autoriser les connexions à l’aide d’un mot de passe à usage unique, qui sera affiché dans le journal à l’écran lors d’une tentative de connexion.</string>
+    <string name="ps_supersu">Activez cette option si vous utilisez https://supersuroot.org/</string>
+    <string name="pt_cmdline_options">Options supplémentaires de la ligne de commande</string>
+    <string name="pt_env">Variables d’environnement. (Un « nom=valeur » par ligne)</string>
+    <string name="pt_foreground">Service d’avant-plan</string>
+    <string name="pt_home">Répertoire d’accueil</string>
+    <string name="pt_master_password">Mot de passe maître</string>
+    <string name="pt_master_username">Nom d’utilisateur du maître</string>
+    <string name="pt_onboot">Démarrer le service lorsque votre appareil est démarré.</string>
+    <string name="pt_onopen">Démarrer le service au lancement de l’application.</string>
+    <string name="pt_port">Numéro de port (1024 &lt; port &lt; 32768)</string>
+    <string name="pt_public_key_login">Clé publique de connexion</string>
+    <string name="pt_public_key_login_info">Autoriser les connexions à l’aide d’une clé publique.</string>
+    <string name="pt_rsync_buffer">Tampon SuperSU/rsync.</string>
+    <string name="pt_shell">Shell de connexion</string>
+    <string name="pt_single_use_password">Mot de passe à usage unique</string>
+    <string name="pt_ui_theme">Thema</string>
+    <string name="service_description">Fournit un serveur sshd avec un accès shell, des services rsync et scp/sftp.</string>
+    <string name="warning">Attention</string>
+    <string name="warning_no_auth_methods">Vous avez désactivé toutes les méthodes d’authentification. Êtes-vous sûr de vouloir faire cela ?</string>
+</resources>

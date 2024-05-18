@@ -57,7 +57,7 @@
     <string name="ps_foreground_off">The service will only run while this app is in the foreground.</string>
 
     <!-- Preference category title -->
-    <string name="pc_dropbear">Dropbear SSH</string>
+    <string name="pc_dropbear" translatable="false">Dropbear SSH</string>
     <!-- Preference option -->
     <string name="pt_port">Port Number (1024 &lt; port &lt; 32768)</string>
     <!-- Preference option -->
@@ -67,7 +67,7 @@
     <!-- Preference option -->
     <string name="pt_cmdline_options">Extra Commandline options</string>
     <!-- Preference option -->
-    <string name="pt_env" tools:ignore="TypographyQuotes">Environment variables.\n(one \"name=value\" per line)</string>
+    <string name="pt_env" tools:ignore="TypographyQuotes">Environment variables.\n(One \"name=value\" per line)</string>
 
     <!-- Preference category title -->
     <string name="pc_paths">SSH Login</string>
@@ -104,6 +104,7 @@
     <string name="pt_public_key_login_info">Allow logins using a public key.</string>
     <!-- About dialog button -->
     <string name="lbl_github_project">Github project</string>
+    <!-- About dialog title: param1: version string -->
     <string name="about_title">Sshd4a %s</string>
 
 </resources>
