@@ -15,8 +15,6 @@
     <string name="pe_ui_theme_light">浅色</string>
     <string name="warning">警告</string>
     <string name="pref_not_set">未设置</string>
-    <string name="app_name" translatable="false">Sshd4a</string>
-    <string name="service_name" translatable="false">Sshd4a</string>
     <string name="about_versions">服务组件由以下提供：
 \n
 \nDropbear %1$s
@@ -33,7 +31,7 @@
     <string name="lbl_port">端口：</string>
     <string name="lbl_stop">停止</string>
     <string name="lbl_import_keys" tools:ignore="TypographyQuotes">导入一个 \"authorized_keys\" 文件</string>
-    <string name="lbl_reset_keys">删除全部的 \"authorized_keys\"</string>
+    <string name="lbl_reset_keys">删除全部的 “authorized_keys”</string>
     <string name="confirm_reset_keys">删除全部已认证的公钥？
 \n你将只能使用密码登录。</string>
     <string name="pc_startup">自启</string>
@@ -42,7 +40,6 @@
     <string name="pt_foreground">后台服务</string>
     <string name="ps_foreground_off">仅当该应用程序位于前台时才会运行。</string>
     <string name="ps_foreground_on">即使该应用程序位于后台，服务也将继续运行。 将显示永久/不引人注目的通知。</string>
-    <string name="pc_dropbear">Dropbear SSH</string>
     <string name="pt_port">端口号(1024 &lt; 端口 &lt; 32768)</string>
     <string name="ps_supersu">如果您使用的是 https://supersuroot.org/，请启用此选项</string>
     <string name="pt_cmdline_options">额外的命令行选项</string>
