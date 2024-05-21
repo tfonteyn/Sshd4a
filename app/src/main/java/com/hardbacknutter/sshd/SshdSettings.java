@@ -30,7 +30,7 @@ final class SshdSettings {
     static final String AUTHORIZED_KEYS = "authorized_keys";
     /** Filename used in native code. Stored in {@link SshdSettings#getDropbearDirectory}. */
     @VisibleForTesting
-    private static final String MASTER_PASSWORD = "master_password";
+    public static final String AUTHORIZED_USERS = "master_password";
 
     private SshdSettings() {
     }
@@ -81,16 +81,16 @@ final class SshdSettings {
     }
 
     /**
-     * Read the master user + hashed password from the dropbear file.
+     * Read the user + hashed password from the dropbear file.
      *
      * @param context Current context
      *
      * @return a String array with [0] the username, and [1] the hashed/base64 password.
      */
     @Nullable
-    static String[] readMasterUserAndPassword(@NonNull final Context context) {
+    static String[] readPasswordFile(@NonNull final Context context) {
         final File path = getDropbearDirectory(context);
-        final File file = new File(path, MASTER_PASSWORD);
+        final File file = new File(path, AUTHORIZED_USERS);
         final List<String> lines;
         try {
             lines = Files.readAllLines(file.toPath());
@@ -103,14 +103,14 @@ final class SshdSettings {
         return null;
     }
 
-    static void writeMasterUserAndPassword(@NonNull final Context context,
-                                           @Nullable final String username,
-                                           @Nullable final String password)
+    static void writePasswordFile(@NonNull final Context context,
+                                  @Nullable final String username,
+                                  @Nullable final String password)
             throws IOException,
                    NoSuchAlgorithmException {
 
         final File path = getDropbearDirectory(context);
-        final File file = new File(path, MASTER_PASSWORD);
+        final File file = new File(path, AUTHORIZED_USERS);
 
         // No username ?
         if (username == null || username.isBlank()) {
@@ -131,7 +131,7 @@ final class SshdSettings {
 
             // We have a username, no password, the file exist.
             // Retrieve the previously encrypted password,
-            final String[] previous = readMasterUserAndPassword(context);
+            final String[] previous = readPasswordFile(context);
             // and rewrite the file using the new username
             // and the retrieved password.
             if (previous != null && previous.length == 2) {

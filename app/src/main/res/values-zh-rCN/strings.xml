@@ -49,9 +49,9 @@
     <string name="pt_home">家目录</string>
     <string name="pt_shell">登录 Shell</string>
     <string name="pe_ui_theme_day_night">跟随设备主题</string>
-    <string name="pt_master_username">主用户名</string>
-    <string name="pt_master_password">主密码</string>
-    <string name="pt_single_use_password">一次性密码</string>
+    <string name="pt_authorized_username">主用户名</string>
+    <string name="pt_authorized_password">主密码</string>
+    <string name="pt_single_use_passwords">一次性密码</string>
     <string name="ps_single_use_password_info">允许使用一次性密码登录，尝试登录时该密码将显示在屏幕上。</string>
     <string name="pt_public_key_login">公钥登录</string>
     <string name="pt_public_key_login_info">允许使用公钥登录。</string>

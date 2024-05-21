@@ -47,7 +47,7 @@
         <SwitchPreference
             android:defaultValue="true"
             android:key="sshd.enable.single.use.password"
-            android:title="@string/pt_single_use_password"
+            android:title="@string/pt_single_use_passwords"
             app:summary="@string/ps_single_use_password_info"
             />
         <SwitchPreference
@@ -59,16 +59,16 @@
         <!-- Not saved to preferences. Handled in code. -->
         <EditTextPreference
             android:defaultValue=""
-            android:key="sshd.master.username"
+            android:key="sshd.authorized.username"
             android:persistent="false"
-            android:title="@string/pt_master_username" />
+            android:title="@string/pt_authorized_username" />
         <!-- Not saved to preferences. Handled in code. -->
         <EditTextPreference
             android:defaultValue=""
-            android:dependency="sshd.master.username"
-            android:key="sshd.master.password"
+            android:dependency="sshd.authorized.username"
+            android:key="sshd.authorized.password"
             android:persistent="false"
-            android:title="@string/pt_master_password" />
+            android:title="@string/pt_authorized_password" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/pc_ui">

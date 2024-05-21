@@ -30,15 +30,15 @@ public class SettingsFragment
 
     public static final String TAG = "SettingsFragment";
     /** Not persisted, written directly to the dropbear directory. */
-    private static final String PK_SSHD_MASTER_USERNAME = "sshd.master.username";
+    private static final String PK_SSHD_AUTH_USERNAME = "sshd.authorized.username";
     /** Not persisted, written directly to the dropbear directory. */
-    private static final String PK_SSHD_MASTER_PASSWORD = "sshd.master.password";
+    private static final String PK_SSHD_AUTH_PASSWORD = "sshd.authorized.password";
 
     private SwitchPreference pRunOnBoot;
     private SwitchPreference pRunInForeground;
     private EditTextPreference pPort;
-    private EditTextPreference pMasterUsername;
-    private EditTextPreference pMasterPassword;
+    private EditTextPreference pAuthUsername;
+    private EditTextPreference pAuthPassword;
 
     private final OnBackPressedCallback backPressedCallback =
             new OnBackPressedCallback(true) {
@@ -46,9 +46,9 @@ public class SettingsFragment
                 public void handleOnBackPressed() {
                     try {
                         //noinspection DataFlowIssue
-                        SshdSettings.writeMasterUserAndPassword(getContext(),
-                                                                pMasterUsername.getText(),
-                                                                pMasterPassword.getText());
+                        SshdSettings.writePasswordFile(getContext(),
+                                                       pAuthUsername.getText(),
+                                                       pAuthPassword.getText());
                     } catch (@NonNull final IOException | NoSuchAlgorithmException ignore) {
                         // we should never get here... flw
                         //noinspection DataFlowIssue
@@ -81,7 +81,7 @@ public class SettingsFragment
         final Context context = getContext();
         //noinspection DataFlowIssue
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        final String[] userAndPassword = SshdSettings.readMasterUserAndPassword(context);
+        final String[] userAndPassword = SshdSettings.readPasswordFile(context);
 
         return prefs.getBoolean(Prefs.ENABLE_SINGLE_USE_PASSWORDS, true)
                || prefs.getBoolean(Prefs.ENABLE_PUBLIC_KEY_LOGIN, true)
@@ -139,16 +139,16 @@ public class SettingsFragment
         findPreference(Prefs.SHELL)
                 .setSummaryProvider(EditTextPreference.SimpleSummaryProvider.getInstance());
 
-        pMasterUsername = findPreference(PK_SSHD_MASTER_USERNAME);
-        pMasterUsername.setSummaryProvider(EditTextPreference.SimpleSummaryProvider.getInstance());
+        pAuthUsername = findPreference(PK_SSHD_AUTH_USERNAME);
+        pAuthUsername.setSummaryProvider(EditTextPreference.SimpleSummaryProvider.getInstance());
 
-        pMasterPassword = findPreference(PK_SSHD_MASTER_PASSWORD);
-        pMasterPassword.setOnBindEditTextListener(editText -> {
+        pAuthPassword = findPreference(PK_SSHD_AUTH_PASSWORD);
+        pAuthPassword.setOnBindEditTextListener(editText -> {
             editText.setInputType(InputType.TYPE_CLASS_TEXT
                                   | InputType.TYPE_TEXT_VARIATION_PASSWORD);
             editText.selectAll();
         });
-        pMasterPassword.setSummaryProvider(preference -> {
+        pAuthPassword.setSummaryProvider(preference -> {
             if (!hasPreviousPassword) {
                 final String value = ((EditTextPreference) preference).getText();
                 if (value == null || value.isEmpty()) {
@@ -174,11 +174,11 @@ public class SettingsFragment
         }
 
         //noinspection DataFlowIssue
-        final String[] previous = SshdSettings.readMasterUserAndPassword(getContext());
+        final String[] previous = SshdSettings.readPasswordFile(getContext());
         if (previous != null && previous.length == 2) {
-            pMasterUsername.setText(previous[0]);
+            pAuthUsername.setText(previous[0]);
             // do NOT set the text, we only have the hashed password.
-            pMasterPassword.setText("");
+            pAuthPassword.setText("");
             hasPreviousPassword = true;
         }
     }

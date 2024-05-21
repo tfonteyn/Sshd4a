@@ -35,8 +35,8 @@
     <string name="pt_env">Umgebungsvariablen.\n(ein „name=wert“ pro Zeile)</string>
     <string name="pt_foreground">Vordergrund-Dienst</string>
     <string name="pt_home">Home Verzeichnis</string>
-    <string name="pt_master_password">Master-Kennwort</string>
-    <string name="pt_master_username">Master-Benutzername</string>
+    <string name="pt_authorized_password">Master-Kennwort</string>
+    <string name="pt_authorized_username">Master-Benutzername</string>
     <string name="pt_onboot">Starten Sie den Dienst, wenn Ihr Gerät hochgefahren wird.</string>
     <string name="pt_onopen">Startet den Dienst, wenn diese Anwendung gestartet wird.</string>
     <string name="pt_port">Port-Nummer (1024 &lt; port &lt; 32768)</string>
@@ -44,7 +44,7 @@
     <string name="pt_public_key_login_info">Anmeldungen mit einem öffentlichen Schlüssel zulassen.</string>
     <string name="pt_rsync_buffer">SuperSU/rsync-Puffer.</string>
     <string name="pt_shell">Anmelde-Shell</string>
-    <string name="pt_single_use_password">Einmaliges Passwort</string>
+    <string name="pt_single_use_passwords">Einmalige Passwörter</string>
     <string name="pt_ui_theme">Farbschema</string>
     <string name="service_description">Bietet einen sshd-Server mit Shell-Zugang, rsync- und scp/sftp-Diensten.</string>
     <string name="warning">Warnung</string>

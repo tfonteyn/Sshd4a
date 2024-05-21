@@ -90,12 +90,12 @@
     <string name="pref_not_set">Not set</string>
 
     <!-- Preference option -->
-    <string name="pt_master_username">Master username</string>
+    <string name="pt_authorized_username">System username</string>
     <!-- Preference option -->
-    <string name="pt_master_password">Master password</string>
+    <string name="pt_authorized_password">System password</string>
 
     <!-- Preference option -->
-    <string name="pt_single_use_password">Single use password</string>
+    <string name="pt_single_use_passwords">Single use passwords</string>
     <!-- Preference summary/info message. -->
     <string name="ps_single_use_password_info">Allow logins using a single-use password, which will be displayed in the log on-screen when a login attempt is made.</string>
     <!-- Preference option -->
