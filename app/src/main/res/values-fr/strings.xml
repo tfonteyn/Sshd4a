@@ -19,7 +19,7 @@
     <string name="lbl_settings">Paramètres</string>
     <string name="lbl_start">Démarrer</string>
     <string name="lbl_stop">Arrêter</string>
-    <string name="msg_request_files_management">Cette application a besoin d’une autorisation spéciale pour accéder à vos fichiers afin de pouvoir utiliser « rsync ». Sans cette autorisation, la fonctionnalité de cette application sera fortement limitée.\n\n Après avoir appuyé sur « OK », il vous sera demandé d'activer cette autorisation.\nFaites défiler la liste des applications vers le bas et activez Sshd4a.</string>
+    <string name="msg_request_files_management">Cette application a besoin d’une autorisation spéciale pour accéder à vos fichiers afin de pouvoir utiliser « rsync ». Sans cette autorisation, la fonctionnalité de cette application sera fortement limitée.\n\n Après avoir appuyé sur « OK », il vous sera demandé d’activer cette autorisation.\nFaites défiler la liste des applications vers le bas et activez Sshd4a.</string>
     <string name="pc_paths">Connexion SSH</string>
     <string name="pc_startup">Démarrage</string>
     <string name="pc_ui">Interface utilisateur</string>
