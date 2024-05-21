@@ -1,4 +1,4 @@
-- Added support for a master user/password
+- Added support for a locally stored user/password
 - Added user-settings to enable/disable individual authentication method.
 - Updated services:
   - Dropbear 2024.85

@@ -812,7 +812,7 @@ add_compile_definitions(
         # Enable the code to support:
         # - public key logins
         # - single-use passwords
-        # - master-user/password
+        # - locally stored user/password
         SSHD4A_EXTEND_AUTHENTICATION
         # Enable the code that allows mismatches between key and signatures in some bad clients.
         # TODO: review if we really want this?
