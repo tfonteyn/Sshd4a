@@ -62,7 +62,7 @@ void svr_authinitialise() {
         ses.authstate.authtypes &= ~AUTH_TYPE_PUBKEY;
     }
 
-    if (sshd4a_enable_master_password()) {
+    if (sshd4a_enable_password_file()) {
         ses.authstate.authtypes |= AUTH_TYPE_PASSWORD;
     }
     /* Check and generate at this time, as the user MUST be able to see the message

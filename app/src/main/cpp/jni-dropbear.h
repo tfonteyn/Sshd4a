@@ -4,7 +4,7 @@
 #define SSHD4A_LIB_DIR  "SSHD4A_LIB_DIR"
 #define SSHD4A_CONF_DIR "SSHD4A_CONF_DIR"
 
-#define MASTER_PASSWORD_FILE "master_password"
+#define AUTHORIZED_USERS_FILE "master_password"
 #define AUTHORIZED_KEYS_FILE "authorized_keys"
 
 extern const char *sshd4a_shell_exe;
@@ -17,7 +17,7 @@ void sshd4a_set_env();
 
 int sshd4a_enable_public_key_auth();
 int sshd4a_enable_single_use_passwords();
-int sshd4a_enable_master_password();
+int sshd4a_enable_password_file();
 
 void sshd4a_generate_single_use_password(char **gen_pass);
 

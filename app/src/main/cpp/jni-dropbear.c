@@ -168,22 +168,22 @@ void sshd4a_generate_single_use_password(char **gen_pass) {
     *gen_pass = m_strdup(pw);
 }
 
-int sshd4a_enable_master_password() {
+int sshd4a_enable_password_file() {
     /* 3: u:p
      * In reality the Java UI takes care of minimum length.
      * BUT.... if the user opens an ssh shell,
-     * they can of course manually edit/replace the master_password file.
+     * they can of course manually edit/replace the password file.
      * TODO: Maybe we should sign the base64 password with an internal key.
      *  but considering that when you CAN login... you CAN read the app's files...
      *  not that much point.
      *  Unless such a private key to sign is kept of-device, this is merely
      *  obfuscation and not encryption of course.
      */
-    return config_file_exists(MASTER_PASSWORD_FILE, 3);
+    return config_file_exists(AUTHORIZED_USERS_FILE, 3);
 }
 
 int sshd4a_get_user_password(char **user, char **password) {
-    char *fn = sshd4a_conf_file(MASTER_PASSWORD_FILE);
+    char *fn = sshd4a_conf_file(AUTHORIZED_USERS_FILE);
     FILE *f = fopen(fn, "r");
     m_free(fn); /* match "m_malloc()" from sshd4a_conf_file */
     if (!f) {

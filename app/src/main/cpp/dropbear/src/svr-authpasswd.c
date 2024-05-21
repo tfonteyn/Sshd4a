@@ -72,15 +72,15 @@ void svr_auth_password(int valid_user) {
 		testcrypt = crypt(password, passwdcrypt);
 #else /* SSHD4A_EXTEND_AUTHENTICATION */
 
-        char *master_user = NULL;
-        char *master_pass = NULL;
-        int has_master = sshd4a_get_user_password(&master_user, &master_pass);
-        /* If we have a master user/pass set */
-        if (has_master && *master_user && *master_pass
+        char *sshd4a_username = NULL;
+        char *sshd4a_password = NULL;
+        int has_password_file = sshd4a_get_user_password(&sshd4a_username, &sshd4a_password);
+        /* If we have an authorized_users user/pass */
+        if (has_password_file && *sshd4a_username && *sshd4a_password
             /* and the user name matches */
-            && strcmp(master_user, ses.authstate.username) == 0) {
-            /* then we will expect to receive the master password. */
-            ses.authstate.pw_passwd = m_strdup(master_pass);
+            && strcmp(sshd4a_username, ses.authstate.username) == 0) {
+            /* then we will expect to receive the that password. */
+            ses.authstate.pw_passwd = m_strdup(sshd4a_password);
             passwdcrypt = ses.authstate.pw_passwd;
 
             size_t pas_len = strlen(password);
@@ -102,7 +102,7 @@ void svr_auth_password(int valid_user) {
                 testcrypt = NULL;
             }
         } else {
-            /* Not the master_user, we'll test for a single use password */
+            /* Not the password from the authorized_users file, we'll test for a single use password */
             passwdcrypt = ses.authstate.pw_passwd;
 
             size_t pas_len = strlen(password);
@@ -115,11 +115,11 @@ void svr_auth_password(int valid_user) {
         }
 
         /* match malloc's from sshd4a_user_password */
-        if (master_user) {
-            m_free(master_user);
+        if (sshd4a_username) {
+            m_free(sshd4a_username);
         }
-        if (master_pass) {
-            m_free(master_pass);
+        if (sshd4a_password) {
+            m_free(sshd4a_password);
         }
 
 #endif /* SSHD4A_EXTEND_AUTHENTICATION */
