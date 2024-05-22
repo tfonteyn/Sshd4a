@@ -41,7 +41,6 @@
     <string name="ps_foreground_off">仅当该应用程序位于前台时才会运行。</string>
     <string name="ps_foreground_on">即使该应用程序位于后台，服务也将继续运行。 将显示永久/不引人注目的通知。</string>
     <string name="pt_port">端口号(1024 &lt; 端口 &lt; 32768)</string>
-    <string name="ps_supersu">如果您使用的是 https://supersuroot.org/，请启用此选项</string>
     <string name="pt_cmdline_options">额外的命令行选项</string>
     <string name="pt_env" tools:ignore="TypographyQuotes">环境变量。
 \n（每行一个\"键=值\"）</string>
@@ -57,5 +56,4 @@
     <string name="pt_public_key_login_info">允许使用公钥登录。</string>
     <string name="lbl_github_project">GitHub 项目</string>
     <string name="about_title">Sshd4a %s</string>
-    <string name="pt_rsync_buffer">SuperSU/rsync 缓冲。</string>
 </resources>

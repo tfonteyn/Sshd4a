@@ -61,10 +61,6 @@
     <!-- Preference option -->
     <string name="pt_port">Port Number (1024 &lt; port &lt; 32768)</string>
     <!-- Preference option -->
-    <string name="pt_rsync_buffer">SuperSU/rsync buffer.</string>
-    <!-- Preference summary/info message. -->
-    <string name="ps_supersu">Enable this option if you are using https://supersuroot.org/</string>
-    <!-- Preference option -->
     <string name="pt_cmdline_options">Extra Commandline options</string>
     <!-- Preference option -->
     <string name="pt_env" tools:ignore="TypographyQuotes">Environment variables.\n(One \"name=value\" per line)</string>

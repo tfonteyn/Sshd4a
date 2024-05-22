@@ -864,7 +864,3 @@ target_include_directories(librsync.so PRIVATE
         ${BASE_SRC_RSYNC}/popt
         ${BASE_SRC_RSYNC}/zlib
         )
-
-# #############################################################################
-# build buffersu executable
-add_executable(libbuffersu.so src/main/cpp/buffersu/buffersu.c)

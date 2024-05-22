@@ -24,11 +24,6 @@
             android:defaultValue="2222"
             android:key="sshd.port"
             android:title="@string/pt_port"/>
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="rsyncbuffer"
-            android:summary="@string/ps_supersu"
-            android:title="@string/pt_rsync_buffer" />
         <EditTextPreference
             android:key="dropbear.options"
             android:title="@string/pt_cmdline_options" />

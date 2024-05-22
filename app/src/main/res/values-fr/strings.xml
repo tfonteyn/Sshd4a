@@ -30,7 +30,6 @@
     <string name="ps_foreground_off">Le service ne s’exécutera que lorsque cette application sera au premier plan.</string>
     <string name="ps_foreground_on">Le service continuera à fonctionner même si l’application est en arrière-plan. Une notification permanente et discrète sera affichée.</string>
     <string name="ps_single_use_password_info">Autoriser les connexions à l’aide d’un mot de passe à usage unique, qui sera affiché dans le journal à l’écran lors d’une tentative de connexion.</string>
-    <string name="ps_supersu">Activez cette option si vous utilisez https://supersuroot.org/</string>
     <string name="pt_cmdline_options">Options supplémentaires de la ligne de commande</string>
     <string name="pt_env">Variables d’environnement. (Un « nom=valeur » par ligne)</string>
     <string name="pt_foreground">Service d’avant-plan</string>
@@ -42,7 +41,6 @@
     <string name="pt_port">Numéro de port (1024 &lt; port &lt; 32768)</string>
     <string name="pt_public_key_login">Clé publique de connexion</string>
     <string name="pt_public_key_login_info">Autoriser les connexions à l’aide d’une clé publique.</string>
-    <string name="pt_rsync_buffer">Tampon SuperSU/rsync.</string>
     <string name="pt_shell">Shell de connexion</string>
     <string name="pt_single_use_passwords">Mots de passe à usage unique</string>
     <string name="pt_ui_theme">Thema</string>

@@ -30,7 +30,6 @@
     <string name="ps_foreground_off">Der Dienst wird nur ausgeführt, wenn sich diese Anwendung im Vordergrund befindet.</string>
     <string name="ps_foreground_on">Der Dienst läuft weiter, auch wenn diese Anwendung im Hintergrund läuft. Es wird eine permanente/unaufdringliche Benachrichtigung angezeigt.</string>
     <string name="ps_single_use_password_info">Anmeldungen mit einem Einmal-Passwort zulassen, das bei einem Anmeldeversuch auf dem Bildschirm angezeigt wird.</string>
-    <string name="ps_supersu">Aktivieren Sie diese Option, wenn Sie https://supersuroot.org/ verwenden.</string>
     <string name="pt_cmdline_options">Zusätzliche Kommandozeilenoptionen</string>
     <string name="pt_env">Umgebungsvariablen.\n(ein „name=wert“ pro Zeile)</string>
     <string name="pt_foreground">Vordergrund-Dienst</string>
@@ -42,7 +41,6 @@
     <string name="pt_port">Port-Nummer (1024 &lt; port &lt; 32768)</string>
     <string name="pt_public_key_login">Anmeldung mit öffentlichem Schlüssel</string>
     <string name="pt_public_key_login_info">Anmeldungen mit einem öffentlichen Schlüssel zulassen.</string>
-    <string name="pt_rsync_buffer">SuperSU/rsync-Puffer.</string>
     <string name="pt_shell">Anmelde-Shell</string>
     <string name="pt_single_use_passwords">Einmalige Passwörter</string>
     <string name="pt_ui_theme">Farbschema</string>

@@ -211,8 +211,7 @@ public class SshdService
                                   @NonNull String shell,
                                   @NonNull String env,
                                   boolean enablePublickeyAuth,
-                                  boolean enableSingleUsePasswords,
-                                  boolean enableSuperSuBuffering);
+                                  boolean enableSingleUsePasswords);
 
     private native void kill(int pid);
 
@@ -278,14 +277,11 @@ public class SshdService
                 pref.getBoolean(Prefs.ENABLE_PUBLIC_KEY_LOGIN, true);
         final boolean enableSingleUsePasswords =
                 pref.getBoolean(Prefs.ENABLE_SINGLE_USE_PASSWORDS, true);
-        final boolean enableSuperSuBuffering =
-                pref.getBoolean(Prefs.ENABLE_SUPER_SU_BUFFERING, false);
 
         final int pid = start_sshd(getApplicationInfo().nativeLibraryDir,
                                    args, confPath, homePath, shellCmd, env,
                                    enablePublickeyLogin,
-                                   enableSingleUsePasswords,
-                                   enableSuperSuBuffering);
+                                   enableSingleUsePasswords);
         if (BuildConfig.DEBUG) {
             Log.d(TAG + "|startSshd", "start_sshd=" + pid);
         }

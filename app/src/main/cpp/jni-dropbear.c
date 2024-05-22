@@ -33,9 +33,6 @@ const char *env_var_list = "";
 int enable_public_key_auth = JNI_TRUE;
 int enable_single_use_passwords = JNI_TRUE;
 
-/* enable the "buffersu" helper when the user has SuperSu installed. */
-int enable_super_su_buffering = JNI_FALSE;
-
 /*
  * Check if the given file exists and contains at least 'min_chars' characters.
  */
@@ -71,14 +68,8 @@ char *sshd4a_exe_to_lib(const char *cmd) {
         return t;
 
     } else if (cmd && !strncmp(cmd, "rsync ", 6)) {
-        char *t;
-        if (enable_super_su_buffering) {
-            t = m_malloc(strlen(lib_path) + 16 + strlen(cmd) - 6 + /* '\0' */ 1);
-            sprintf(t, "%s/libbuffersu.so %s", lib_path, cmd + 6);
-        } else {
-            t = m_malloc(strlen(lib_path) + 13 + strlen(cmd) - 6 + /* '\0' */ 1);
-            sprintf(t, "%s/librsync.so %s", lib_path, cmd + 6);
-        }
+        char *t = m_malloc(strlen(lib_path) + 13 + strlen(cmd) - 6 + /* '\0' */ 1);
+        sprintf(t, "%s/librsync.so %s", lib_path, cmd + 6);
         return t;
 
     } else if (cmd && !strncmp(cmd, "sftp-server", 11)) {
@@ -133,8 +124,6 @@ void sshd4a_set_env() {
         }
     }
 
-    /* make available to buffersu. */
-    setenv(SSHD4A_LIB_DIR, lib_path, /*overwrite=*/ 1);
     /* make available to rsync */
     setenv(SSHD4A_CONF_DIR, conf_path, /*overwrite=*/ 1);
 }
@@ -247,7 +236,6 @@ const char *from_java_string(JNIEnv *env, jstring str) {
  * @param j_env_var_list             list of environment variables
  * @param j_enablePublickeyAuth      enable public key logins
  * @param j_enableSingleUsePasswords enable generating single-use passwords
- * @param j_enableSuperSuBuffering   enable support for "SuperSu" rsync buffering
  *
  * @return On success, the PID of the dropbear process.  On failure, -1.
  */
@@ -262,8 +250,7 @@ Java_com_hardbacknutter_sshd_SshdService_start_1sshd(
         jstring j_shell_exe,
         jstring j_env_var_list,
         jboolean j_enablePublickeyAuth,
-        jboolean j_enableSingleUsePasswords,
-        jboolean j_enableSuperSuBuffering) {
+        jboolean j_enableSingleUsePasswords) {
 
     pid_t pid = fork();
     if (pid == 0) {
@@ -279,7 +266,6 @@ Java_com_hardbacknutter_sshd_SshdService_start_1sshd(
 
         enable_public_key_auth = j_enablePublickeyAuth;
         enable_single_use_passwords = j_enableSingleUsePasswords;
-        enable_super_su_buffering = j_enableSuperSuBuffering;
 
         const jsize argc = (*env)->GetArrayLength(env, j_dropbear_args);
         const char *argv[argc];

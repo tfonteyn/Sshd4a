@@ -19,10 +19,6 @@ final class Prefs {
 
     static final String DROPBEAR_CMDLINE_OPTIONS = "dropbear.options";
 
-    /**
-     * <a href="https://supersuroot.org/">https://supersuroot.org/</a>
-     */
-    static final String ENABLE_SUPER_SU_BUFFERING = "rsyncbuffer";
     static final String UI_THEME = "ui.theme";
     static final String UI_NOTIFICATION_ASK_PERMISSION = "ui.notification.ask_permission";
 
