@@ -4,7 +4,6 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -22,15 +21,34 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * The file names for keys and passwords are also defined in:
+ * <ul>
+ *     <li>"cpp/jni-dropbear.h"</li>
+ *     <li>"res/xml/backup_rules.xml"</li>
+ *     <li>"res/xml/data_extraction_rules.xml"</li>
+ * </ul>
+ */
 final class SshdSettings {
 
-    /** Filename used in native code. Stored in {@link SshdSettings#getDropbearDirectory}. */
-    static final String DROPBEAR_ERR = "dropbear.err";
-    /** Filename used in native code. Stored in {@link SshdSettings#getDropbearDirectory}. */
-    static final String AUTHORIZED_KEYS = "authorized_keys";
-    /** Filename used in native code. Stored in {@link SshdSettings#getDropbearDirectory}. */
-    @VisibleForTesting
+    /**
+     * File with the fixed user/password.
+     * Stored in {@link SshdSettings#getDropbearDirectory}.
+     * <p>
+     * I should have named this "smurf_password" ...
+     */
     public static final String AUTHORIZED_USERS = "master_password";
+    /**
+     * The traditional OpenSSH key file.
+     * Stored in {@link SshdSettings#getDropbearDirectory}.
+     */
+    static final String AUTHORIZED_KEYS = "authorized_keys";
+
+    /**
+     * Logfile for the native code.
+     * Stored in {@link SshdSettings#getDropbearDirectory}.
+     */
+    static final String DROPBEAR_ERR = "dropbear.err";
 
     private SshdSettings() {
     }

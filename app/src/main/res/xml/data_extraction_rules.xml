@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-   Sample data extraction rules file; uncomment and customize as necessary.
-   See https://developer.android.com/about/versions/12/backup-restore#xml-changes
-   for details.
--->
 <data-extraction-rules>
     <cloud-backup>
         <exclude
@@ -15,5 +10,11 @@
         <exclude
             domain="file"
             path="./dropbear/dropbear.err.old" />
+        <exclude
+            domain="file"
+            path="./dropbear/master_password" />
+        <exclude
+            domain="file"
+            path="./dropbear/authorized_keys" />
     </cloud-backup>
 </data-extraction-rules>
