@@ -14,8 +14,6 @@ public class MainActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity);
 
-        NightMode.apply(this);
-
         final Toolbar toolbar = findViewById(R.id.toolbar);
         if (toolbar != null) {
             toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
@@ -29,5 +27,4 @@ public class MainActivity
               .commit();
         }
     }
-
 }
