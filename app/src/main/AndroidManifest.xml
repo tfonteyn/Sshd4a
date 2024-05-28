@@ -27,13 +27,26 @@
         android:theme="@style/Theme.App"
         tools:targetApi="34">
 
+        <!--
+            The app can auto-start (or stop) the service by intent.
+            There is <strong>NO SECURITY</strong> for now... anyone/any-app can send
+            the start/stop Intents.
+        -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTask">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="com.hardbacknutter.sshd.fg.START" />
+            </intent-filter>
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="com.hardbacknutter.sshd.fg.STOP" />
             </intent-filter>
         </activity>
 

@@ -6,11 +6,16 @@
             android:defaultValue="false"
             android:disableDependentsState="true"
             android:key="service.start.onboot"
-            android:title="@string/pt_onboot" />
+            android:title="@string/pt_start_service_on_device_boot" />
         <SwitchPreference
             android:defaultValue="false"
             android:key="service.start.onopen"
-            android:title="@string/pt_onopen" />
+            android:title="@string/pt_start_service_on_app_opening" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="service.start.on.intent.allowed"
+            android:summary="@string/github_project_docs"
+            android:title="@string/pt_start_service_by_intent_in_fg_allowed" />
         <SwitchPreference
             android:defaultValue="true"
             android:dependency="service.start.onboot"

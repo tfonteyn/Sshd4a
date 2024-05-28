@@ -16,4 +16,7 @@
             translatable="false">GitHub</string>
     <string name="github_project_url"
             translatable="false">https://github.com/tfonteyn/Sshd4a</string>
+    <string name="github_project_docs"
+            translatable="false">https://github.com/tfonteyn/Sshd4a/wiki</string>
+
 </resources>

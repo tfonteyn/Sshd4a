@@ -1,5 +1,7 @@
 package com.hardbacknutter.sshd;
 
+import android.app.BackgroundServiceStartNotAllowedException;
+import android.app.ForegroundServiceStartNotAllowedException;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -76,7 +78,10 @@ import java.util.stream.Collectors;
 public class SshdService
         extends Service {
 
-    /** Intent filter name for receiving broadcasts. */
+    /**
+     * Intent filter name for receiving broadcasts.
+     * This service will send the broadcast; the UI should listen for it.
+     */
     static final String SERVICE_UI_REQUEST = "ServiceUIRequest";
 
     private static final String NOTIFICATION_CHANNEL_ID =
@@ -144,36 +149,31 @@ public class SshdService
     /**
      * Start the service.
      *
-     * @param started identifier for the caller
-     * @param context Current context
+     * @param startMode identifier for the caller
+     * @param context   Current context
      *
      * @return the ComponentName, or {@code null} if it failed to start but did not throw.
      *
      * @throws IllegalStateException if starting failed.
-     *                               On API31+ this can also be a
-     *                               ForegroundServiceStartNotAllowedException
-     *                               BackgroundServiceStartNotAllowedException
+     *                               On API31+ this would actually be one of:
+     *                               {@link ForegroundServiceStartNotAllowedException}
+     *                               {@link BackgroundServiceStartNotAllowedException}
      */
     @Nullable
-    static ComponentName startService(@NonNull final Started started,
+    static ComponentName startService(@NonNull final StartMode startMode,
                                       @NonNull final Context context)
             throws IllegalStateException {
 
-        switch (started) {
+        switch (startMode) {
             case ByUser: {
-                final boolean runInForeground = PreferenceManager
-                        .getDefaultSharedPreferences(context)
-                        .getBoolean(Prefs.RUN_IN_FOREGROUND, true);
-
                 final Intent intent = new Intent(context, SshdService.class);
-                if (runInForeground) {
-                    // Will keep running even if the App goes to the background
+                if (Prefs.isUserForeground(context)) {
                     return context.getApplicationContext().startForegroundService(intent);
                 } else {
-                    // The system will kill the service if the App goes to the background
                     return context.getApplicationContext().startService(intent);
                 }
             }
+            case ByIntent:
             case OnBoot: {
                 // Always foreground as required by latest Android version.
                 // Will keep running even if the App goes to the background.
@@ -181,12 +181,12 @@ public class SshdService
                 return context.getApplicationContext().startForegroundService(intent);
             }
         }
-        throw new IllegalStateException("started=" + started);
+        throw new IllegalStateException("started=" + startMode);
     }
 
-    static void stopService(@NonNull final Context context) {
+    static boolean stopService(@NonNull final Context context) {
         final Intent intent = new Intent(context, SshdService.class);
-        context.stopService(intent);
+        return context.stopService(intent);
     }
 
     public static native String getDropbearVersion();
@@ -489,8 +489,9 @@ public class SshdService
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
-    public enum Started {
+    public enum StartMode {
         ByUser,
+        ByIntent,
         OnBoot
     }
 }

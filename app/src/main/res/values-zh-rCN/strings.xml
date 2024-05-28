@@ -35,8 +35,9 @@
     <string name="confirm_reset_keys">删除全部已认证的公钥？
 \n你将只能使用密码登录。</string>
     <string name="pc_startup">自启</string>
-    <string name="pt_onboot">开机时启动服务。</string>
-    <string name="pt_onopen">打开应用时启动服务。</string>
+    <string name="pt_start_service_on_device_boot">开机时启动服务。</string>
+    <string name="pt_start_service_on_app_opening">打开应用时启动服务。</string>
+    <string name="pt_start_service_by_intent_in_fg_allowed">允许通过外部 Intent 启动服务</string>
     <string name="pt_foreground">后台服务</string>
     <string name="ps_foreground_off">仅当该应用程序位于前台时才会运行。</string>
     <string name="ps_foreground_on">即使该应用程序位于后台，服务也将继续运行。 将显示永久/不引人注目的通知。</string>

@@ -2,12 +2,8 @@ package com.hardbacknutter.sshd;
 
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.net.Uri;
 import android.util.Log;
-import android.util.Pair;
 
 import androidx.annotation.AnyThread;
 import androidx.annotation.NonNull;
@@ -15,7 +11,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-import androidx.preference.PreferenceManager;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -30,78 +25,58 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class MainViewModel
+/**
+ * Holds access to the service.
+ */
+public class ServiceViewModel
         extends ViewModel {
 
-    private static final String TAG = "MainViewModel";
+    private static final String TAG = "ServiceViewModel";
 
     private static final int THREAD_SLEEP_MILLIS = 2000;
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
 
     private final AtomicBoolean cancelRequested = new AtomicBoolean();
     private final MutableLiveData<List<String>> logData = new MutableLiveData<>();
-    private final MutableLiveData<Pair<String, Integer>> startStopButton = new MutableLiveData<>();
-    private SharedPreferences pref;
+    private final MutableLiveData<Boolean> serviceStateChanged = new MutableLiveData<>();
 
-    /** text and colorInt */
-    private Pair<String, Integer> startBtn;
-    private Pair<String, Integer> stopBtn;
+    @Nullable
+    private SshdService.StartMode startMode;
 
     @NonNull
     MutableLiveData<List<String>> onLogUpdate() {
         return logData;
     }
-    @NonNull
-    MutableLiveData<Pair<String, Integer>> onUpdateUI() {
-        return startStopButton;
-    }
 
     /**
-     * Pseudo constructor.
+     * Returns the current status of the service.
      *
-     * @param context Current context
+     * @return {@code true} if the service is running
      */
-    void init(@NonNull final Context context) {
-        if (pref == null) {
-            pref = PreferenceManager.getDefaultSharedPreferences(context);
+    @NonNull
+    MutableLiveData<Boolean> onServiceStateChanged() {
+        return serviceStateChanged;
+    }
 
-            //noinspection resource
-            final TypedArray a = context.obtainStyledAttributes(new int[]{R.attr.startButtonColor,
-                                                                          R.attr.stopButtonColor});
-            int startColor;
-            int stopColor;
-            try {
-                startColor = a.getColor(0, 0);
-                stopColor = a.getColor(1, 0);
-                if (startColor == 0 || stopColor == 0) {
-                    throw new Resources.NotFoundException();
-                }
-            } finally {
-                a.recycle();
-            }
-
-            startBtn = new Pair<>(context.getString(R.string.lbl_start), startColor);
-            stopBtn = new Pair<>(context.getString(R.string.lbl_stop), stopColor);
-        }
+    @Nullable
+    public SshdService.StartMode getStartMode() {
+        return startMode;
     }
 
     /**
      * Centralized code to trigger a UI update.
      */
     void updateUI() {
-        startStopButton.setValue(SshdService.isRunning() ? stopBtn : startBtn);
+        serviceStateChanged.setValue(SshdService.isRunning());
     }
 
-    boolean isRunOnOpen() {
-        return pref.getBoolean(Prefs.RUN_ON_OPEN, false);
-    }
 
-    boolean startService(@NonNull final Context context) {
+    boolean startService(@NonNull final Context context,
+                         @NonNull final SshdService.StartMode startMode) {
         cancelUpdateThread();
         ComponentName componentName = null;
         try {
-            componentName = SshdService
-                    .startService(SshdService.Started.ByUser, context);
+            componentName = SshdService.startService(startMode, context);
 
             startUpdateThread(context);
 
@@ -113,18 +88,24 @@ public class MainViewModel
             Log.e(TAG, "", e);
         }
 
-        return componentName != null;
+        final boolean success = componentName != null;
+        if (success) {
+            this.startMode = startMode;
+            updateUI();
+        } else {
+            this.startMode = null;
+        }
+        return success;
     }
 
-    void stopService(@NonNull final Context context) {
+    boolean stopService(@NonNull final Context context) {
         cancelUpdateThread();
-        SshdService.stopService(context);
+
+        final boolean stopped = SshdService.stopService(context);
+        this.startMode = null;
+        return stopped;
     }
 
-    @AnyThread
-    void cancelUpdateThread() {
-        cancelRequested.set(true);
-    }
 
     /**
      * Start a thread to monitor the logfile.
@@ -156,14 +137,22 @@ public class MainViewModel
                 }
             }
         });
+
+        updateUI();
     }
+
+    @AnyThread
+    void cancelUpdateThread() {
+        cancelRequested.set(true);
+    }
+
 
     /**
      * Collect up to {@link BuildConfig#NR_OF_LOG_LINES} lines from the end of the log file.
      *
      * @param file to read
      *
-     * @return  list
+     * @return list
      */
     @WorkerThread
     @NonNull
@@ -226,14 +215,5 @@ public class MainViewModel
     void deleteAuthKeys(@NonNull final Context context) {
         //noinspection ResultOfMethodCallIgnored
         new File(SshdSettings.getDropbearDirectory(context), SshdSettings.AUTHORIZED_KEYS).delete();
-    }
-
-    boolean isAskNotificationPermission() {
-        return pref.getBoolean(Prefs.UI_NOTIFICATION_ASK_PERMISSION, true);
-    }
-
-    void setAskNotificationPermission(
-            @SuppressWarnings("SameParameterValue") final boolean shouldAsk) {
-        pref.edit().putBoolean(Prefs.UI_NOTIFICATION_ASK_PERMISSION, shouldAsk).apply();
     }
 }

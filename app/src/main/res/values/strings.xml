@@ -46,9 +46,12 @@
     <!-- Preference category title -->
     <string name="pc_startup">Startup</string>
     <!-- Preference option -->
-    <string name="pt_onboot">Start the service when your device is booted.</string>
+    <string name="pt_start_service_on_device_boot">Start the service when your device is booted.</string>
     <!-- Preference option -->
-    <string name="pt_onopen">Start the service when this app is launched.</string>
+    <string name="pt_start_service_on_app_opening">Start the service when this app is launched.</string>
+    <!-- Preference option -->
+    <string name="pt_start_service_by_intent_in_fg_allowed">Allow starting the service by an external Intent</string>
+
     <!-- Preference option -->
     <string name="pt_foreground">Foreground Service</string>
     <!-- Preference summary/info message. -->
@@ -102,5 +105,4 @@
     <string name="lbl_github_project">Github project</string>
     <!-- About dialog title: param1: version string -->
     <string name="about_title">Sshd4a %s</string>
-
 </resources>

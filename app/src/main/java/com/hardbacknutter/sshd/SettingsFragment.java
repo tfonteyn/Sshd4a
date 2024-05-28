@@ -3,7 +3,11 @@ package com.hardbacknutter.sshd;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Html;
 import android.text.InputType;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.util.Linkify;
 import android.view.View;
 
 import androidx.activity.OnBackPressedCallback;

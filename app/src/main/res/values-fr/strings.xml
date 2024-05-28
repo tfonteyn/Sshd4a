@@ -36,8 +36,9 @@
     <string name="pt_home">Répertoire d’accueil</string>
     <string name="pt_authorized_password">Mot de passe maître</string>
     <string name="pt_authorized_username">Nom d’utilisateur du maître</string>
-    <string name="pt_onboot">Démarrer le service lorsque votre appareil est démarré.</string>
-    <string name="pt_onopen">Démarrer le service au lancement de l’application.</string>
+    <string name="pt_start_service_on_device_boot">Démarrer le service lorsque votre appareil est démarré.</string>
+    <string name="pt_start_service_on_app_opening">Démarrer le service au lancement de l’application.</string>
+    <string name="pt_start_service_by_intent_in_fg_allowed">Permettre le démarrage du service par une Intent externe</string>
     <string name="pt_port">Numéro de port (1024 &lt; port &lt; 32768)</string>
     <string name="pt_public_key_login">Clé publique de connexion</string>
     <string name="pt_public_key_login_info">Autoriser les connexions à l’aide d’une clé publique.</string>

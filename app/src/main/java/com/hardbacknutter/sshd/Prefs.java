@@ -1,9 +1,15 @@
 package com.hardbacknutter.sshd;
 
+import android.content.Context;
+
+import androidx.annotation.NonNull;
+import androidx.preference.PreferenceManager;
+
 final class Prefs {
 
     static final String RUN_ON_BOOT = "service.start.onboot";
     static final String RUN_ON_OPEN = "service.start.onopen";
+    static final String RUN_ON_INTENT = "service.start.on.intent.allowed";
     static final String RUN_IN_FOREGROUND = "service.start.foreground";
 
     static final String SSHD_PORT = "sshd.port";
@@ -24,4 +30,58 @@ final class Prefs {
 
     private Prefs() {
     }
+
+    /**
+     * Start the service when the device is booted.
+     */
+    static boolean isStartOnBoot(@NonNull final Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                                .getBoolean(RUN_ON_BOOT, false);
+    }
+
+    /**
+     * Whether an external Intent can start app+service and stop the service+app.
+     */
+    static boolean isStartByIntentAllowed(final Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                                .getBoolean(RUN_ON_INTENT, false);
+    }
+
+    /**
+     * Start the service when the app is started.
+     */
+    static boolean isRunOnAppStart(@NonNull final Context context) {
+        return PreferenceManager
+                .getDefaultSharedPreferences(context).getBoolean(RUN_ON_OPEN, false);
+    }
+
+    /**
+     * How the service should be handled by the system when the App goes to the background.
+     *
+     * @param context Current context
+     *
+     * @return {@code true}: the service should keep running
+     *         {@code false}: the system can kill the service
+     */
+    static boolean isUserForeground(@NonNull final Context context) {
+        return PreferenceManager
+                .getDefaultSharedPreferences(context)
+                .getBoolean(RUN_IN_FOREGROUND, true);
+    }
+
+    /**
+     * The user configured port to listen on.
+     *
+     * @param context Current context
+     *
+     * @return port
+     */
+    @NonNull
+    static String getPort(@NonNull final Context context) {
+        return PreferenceManager
+                .getDefaultSharedPreferences(context)
+                .getString(SSHD_PORT, DEFAULT_PORT)
+                .strip();
+    }
+
 }

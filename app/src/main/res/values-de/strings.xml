@@ -36,8 +36,9 @@
     <string name="pt_home">Home Verzeichnis</string>
     <string name="pt_authorized_password">Master-Kennwort</string>
     <string name="pt_authorized_username">Master-Benutzername</string>
-    <string name="pt_onboot">Starten Sie den Dienst, wenn Ihr Gerät hochgefahren wird.</string>
-    <string name="pt_onopen">Startet den Dienst, wenn diese Anwendung gestartet wird.</string>
+    <string name="pt_start_service_on_device_boot">Starten Sie den Dienst, wenn Ihr Gerät hochgefahren wird.</string>
+    <string name="pt_start_service_on_app_opening">Startet den Dienst, wenn diese Anwendung gestartet wird.</string>
+    <string name="pt_start_service_by_intent_in_fg_allowed">Starten des Dienstes durch einen externen Intent zulassen</string>
     <string name="pt_port">Port-Nummer (1024 &lt; port &lt; 32768)</string>
     <string name="pt_public_key_login">Anmeldung mit öffentlichem Schlüssel</string>
     <string name="pt_public_key_login_info">Anmeldungen mit einem öffentlichen Schlüssel zulassen.</string>

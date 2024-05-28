@@ -6,12 +6,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.TypedArray;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,6 +23,8 @@ import android.widget.ScrollView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.AttrRes;
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -46,17 +48,18 @@ public class MainFragment
         extends Fragment {
 
     public static final String TAG = "MainFragment";
-
-    private MainViewModel vm;
-
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(
                     new ActivityResultContracts.RequestPermission(), isGranted -> {
                         if (!isGranted) {
-                            vm.setAskNotificationPermission(false);
+                            setAskPermission(false);
                         }
                     });
-
+    private ServiceViewModel vm;
+    /**
+     * Listen for broadcasts from the service informing us about any changes.
+     * We simply react by updating the UI.
+     */
     private final BroadcastReceiver messageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(@NonNull final Context context,
@@ -64,7 +67,6 @@ public class MainFragment
             vm.updateUI();
         }
     };
-
     private FragmentMainBinding vb;
     private ActivityResultLauncher<String> authKeysImportLauncher;
     private ToolbarMenuProvider toolbarMenuProvider;
@@ -87,16 +89,15 @@ public class MainFragment
         toolbarMenuProvider = new ToolbarMenuProvider();
         toolbar.addMenuProvider(toolbarMenuProvider, getViewLifecycleOwner());
 
-        vm = new ViewModelProvider(this).get(MainViewModel.class);
-        //noinspection ConstantConditions
-        vm.init(getContext());
+        //noinspection DataFlowIssue
+        vm = new ViewModelProvider(getActivity()).get(ServiceViewModel.class);
         vm.onLogUpdate().observe(getViewLifecycleOwner(), output -> {
             // We always replace the WHOLE content. TODO: receive and append updates only
             vb.log.setText(String.join("\n", output));
             vb.logScroller.post(() -> vb.logScroller.fullScroll(ScrollView.FOCUS_DOWN));
         });
-        vm.onUpdateUI().observe(getViewLifecycleOwner(), textAndColor ->
-                toolbarMenuProvider.updateStartButton(textAndColor));
+        vm.onServiceStateChanged().observe(getViewLifecycleOwner(), isRunning ->
+                toolbarMenuProvider.updateStartButton(isRunning));
 
         authKeysImportLauncher = registerForActivityResult(
                 new ActivityResultContracts.GetContent(), this::onImportAuthKeys);
@@ -128,12 +129,13 @@ public class MainFragment
         // This is optional and only needed from Android 13 up
         if (Build.VERSION.SDK_INT >= 33) {
             //noinspection ConstantConditions
-            if (ContextCompat.checkSelfPermission(getContext(),
-                                                  Manifest.permission.POST_NOTIFICATIONS)
-                != PackageManager.PERMISSION_GRANTED
-                && vm.isAskNotificationPermission()) {
+            if (ContextCompat.checkSelfPermission(
+                    getContext(), Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
 
-                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+                if (isAskPermission()) {
+                    requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+                }
             }
         }
 
@@ -145,14 +147,13 @@ public class MainFragment
 
         final boolean isRunning = SshdService.isRunning();
 
-        if (vm.isRunOnOpen() && !isRunning) {
-            vm.startService(getContext());
+        if (Prefs.isRunOnAppStart(getContext())
+            && !isRunning) {
+            vm.startService(getContext(), SshdService.StartMode.ByUser);
 
         } else if (isRunning) {
             vm.startUpdateThread(getContext());
         }
-
-        vm.updateUI();
     }
 
     @Override
@@ -181,11 +182,7 @@ public class MainFragment
         } else {
             vb.ip.setText(String.join("\n", ipList));
             //noinspection ConstantConditions
-            final String port = PreferenceManager
-                    .getDefaultSharedPreferences(getContext())
-                    .getString(Prefs.SSHD_PORT, Prefs.DEFAULT_PORT)
-                    .strip();
-            vb.port.setText(port);
+            vb.port.setText(Prefs.getPort(getContext()));
         }
     }
 
@@ -205,6 +202,22 @@ public class MainFragment
                         .show();
             }
         }
+    }
+
+    private boolean isAskPermission() {
+        //noinspection DataFlowIssue
+        return PreferenceManager.getDefaultSharedPreferences(getContext())
+                                .getBoolean(Prefs.UI_NOTIFICATION_ASK_PERMISSION, true);
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private void setAskPermission(final boolean flag) {
+        //noinspection DataFlowIssue
+        PreferenceManager
+                .getDefaultSharedPreferences(getContext())
+                .edit()
+                .putBoolean(Prefs.UI_NOTIFICATION_ASK_PERMISSION, flag)
+                .apply();
     }
 
     private void showAbout() {
@@ -281,9 +294,26 @@ public class MainFragment
             startButton.setOnClickListener(v -> onMenuItemSelected(menuItem));
         }
 
-        void updateStartButton(@NonNull final Pair<String, Integer> textAndColor) {
-            startButton.setText(textAndColor.first);
-            startButton.setTextColor(textAndColor.second);
+        void updateStartButton(final boolean isRunning) {
+            if (isRunning) {
+                startButton.setText(R.string.lbl_stop);
+                startButton.setTextColor(getTextColor(R.attr.stopButtonColor));
+            } else {
+                startButton.setText(R.string.lbl_start);
+                startButton.setTextColor(getTextColor(R.attr.startButtonColor));
+            }
+        }
+
+        @ColorInt
+        private int getTextColor(@AttrRes final int colorAttrId) {
+            //noinspection DataFlowIssue
+            final TypedArray a = getContext()
+                    .obtainStyledAttributes(new int[]{colorAttrId});
+            try {
+                return a.getColor(0, 0);
+            } finally {
+                a.recycle();
+            }
         }
 
         @Override
@@ -295,7 +325,7 @@ public class MainFragment
                     vm.stopService(getContext());
                 } else {
                     //noinspection ConstantConditions
-                    if (!vm.startService(getContext())) {
+                    if (!vm.startService(getContext(), SshdService.StartMode.ByUser)) {
                         //noinspection ConstantConditions
                         Snackbar.make(getView(), R.string.err_service_failed_to_start,
                                       Snackbar.LENGTH_LONG).show();
