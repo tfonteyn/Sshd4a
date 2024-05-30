@@ -14,7 +14,6 @@
         <SwitchPreference
             android:defaultValue="false"
             android:key="service.start.on.intent.allowed"
-            android:summary="@string/github_project_docs"
             android:title="@string/pt_start_service_by_intent_in_fg_allowed" />
         <SwitchPreference
             android:defaultValue="true"
@@ -28,20 +27,22 @@
         <EditTextPreference
             android:defaultValue="2222"
             android:key="sshd.port"
-            android:title="@string/pt_port"/>
+            android:title="@string/pt_port" />
         <EditTextPreference
             android:key="dropbear.options"
             android:title="@string/pt_cmdline_options" />
         <EditTextPreference
             android:key="sshd.env"
-            android:title="@string/pt_env"/>
+            android:title="@string/pt_env" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pc_paths">
         <EditTextPreference
+            android:icon="@drawable/ic_home"
             android:key="sshd.home"
             android:title="@string/pt_home" />
         <EditTextPreference
             android:defaultValue="/system/bin/sh"
+            android:icon="@drawable/ic_shell"
             android:key="sshd.shell"
             android:title="@string/pt_shell" />
         <SwitchPreference
@@ -52,6 +53,7 @@
             />
         <SwitchPreference
             android:defaultValue="true"
+            android:icon="@drawable/ic_baseline_vpn_key_24"
             android:key="sshd.enable.publickey.login"
             android:title="@string/pt_public_key_login"
             app:summary="@string/pt_public_key_login_info"
@@ -59,6 +61,7 @@
         <!-- Not saved to preferences. Handled in code. -->
         <EditTextPreference
             android:defaultValue=""
+            android:icon="@drawable/ic_baseline_supervisor_account_24"
             android:key="sshd.authorized.username"
             android:persistent="false"
             android:title="@string/pt_authorized_username" />
@@ -66,6 +69,7 @@
         <EditTextPreference
             android:defaultValue=""
             android:dependency="sshd.authorized.username"
+            android:icon="@drawable/ic_baseline_password_24"
             android:key="sshd.authorized.password"
             android:persistent="false"
             android:title="@string/pt_authorized_password" />
