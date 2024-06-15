@@ -1,6 +1,6 @@
 plugins {
-    id("com.android.application") version '8.4.1' apply false
-    id("com.android.library") version '8.4.1' apply false
+    id("com.android.application") version '8.5.0' apply false
+    id("com.android.library") version '8.5.0' apply false
     id("org.jetbrains.kotlin.android") version "1.9.23" apply false
 }
 
@@ -26,8 +26,8 @@ ext {
     androidxAppcompatVersion = '1.7.0'
     androidxConstraintlayoutVersion = "2.1.4"
     androidxCoreVersion = '1.13.1'
-    androidxFragmentVersion = '1.7.1'
-    androidxLifecycleVersion = '2.8.1'
+    androidxFragmentVersion = '1.8.0'
+    androidxLifecycleVersion = '2.8.2'
     androidxPreferenceVersion = "1.2.1"
     androidxTransition = "1.5.0"
 
