@@ -24,7 +24,7 @@
     <string name="pc_startup">Démarrage</string>
     <string name="pc_ui">Interface utilisateur</string>
     <string name="pe_ui_theme_dark">Noir</string>
-    <string name="pe_ui_theme_day_night">Suivre le thème de l’appareil</string>
+    <string name="pe_ui_theme_from_device">Suivre le thème de l’appareil</string>
     <string name="pe_ui_theme_light">Clair</string>
     <string name="pref_not_set">Non défini</string>
     <string name="ps_foreground_off">Le service ne s’exécutera que lorsque cette application sera au premier plan.</string>

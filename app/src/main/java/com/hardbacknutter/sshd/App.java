@@ -2,6 +2,8 @@ package com.hardbacknutter.sshd;
 
 import android.app.Application;
 
+import com.hardbacknutter.sshd.utils.theme.NightMode;
+
 public class App
         extends Application {
 
@@ -9,7 +11,7 @@ public class App
     public void onCreate() {
         super.onCreate();
 
-        NightMode.apply(this);
+        NightMode.init(this);
     }
 
     //TODO: implement a version based migration method similar to how database get upgraded.

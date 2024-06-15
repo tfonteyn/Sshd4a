@@ -25,7 +25,6 @@ final class Prefs {
 
     static final String DROPBEAR_CMDLINE_OPTIONS = "dropbear.options";
 
-    static final String UI_THEME = "ui.theme";
     static final String UI_NOTIFICATION_ASK_PERMISSION = "ui.notification.ask_permission";
 
     private Prefs() {

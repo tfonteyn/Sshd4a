@@ -80,7 +80,7 @@
     <!-- Preference option -->
     <string name="pt_ui_theme">Theme</string>
     <!-- Preference value for "pt_ui_theme" -->
-    <string name="pe_ui_theme_day_night">Follow device theme</string>
+    <string name="pe_ui_theme_from_device">Follow device theme</string>
     <!-- Preference value for "pt_ui_theme" -->
     <string name="pe_ui_theme_dark">Dark</string>
     <!-- Preference value for "pt_ui_theme" -->

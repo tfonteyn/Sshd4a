@@ -28,6 +28,8 @@ import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
+import com.hardbacknutter.sshd.utils.theme.NightMode;
+
 public class SettingsFragment
         extends PreferenceFragmentCompat
         implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -108,7 +110,7 @@ public class SettingsFragment
 
         setPreferencesFromResource(R.xml.preferences, rootKey);
 
-        final Preference pUiTheme = findPreference(Prefs.UI_THEME);
+        final Preference pUiTheme = findPreference(NightMode.PK_UI_THEME_MODE);
         //noinspection ConstantConditions
         pUiTheme.setSummaryProvider(ListPreference.SimpleSummaryProvider.getInstance());
         pUiTheme.setOnPreferenceChangeListener((preference, newValue) -> {

@@ -24,7 +24,7 @@
     <string name="pc_startup">Starten</string>
     <string name="pc_ui">Benutzeroberfläche</string>
     <string name="pe_ui_theme_dark">Dunkel</string>
-    <string name="pe_ui_theme_day_night">Gerätethema folgen</string>
+    <string name="pe_ui_theme_from_device">Gerätethema folgen</string>
     <string name="pe_ui_theme_light">Hell</string>
     <string name="pref_not_set">Nicht gesetzt</string>
     <string name="ps_foreground_off">Der Dienst wird nur ausgeführt, wenn sich diese Anwendung im Vordergrund befindet.</string>

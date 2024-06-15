@@ -48,7 +48,7 @@
     <string name="pc_paths">SSH 登录</string>
     <string name="pt_home">家目录</string>
     <string name="pt_shell">登录 Shell</string>
-    <string name="pe_ui_theme_day_night">跟随设备主题</string>
+    <string name="pe_ui_theme_from_device">跟随设备主题</string>
     <string name="pt_authorized_username">主用户名</string>
     <string name="pt_authorized_password">主密码</string>
     <string name="pt_single_use_passwords">一次性密码</string>
