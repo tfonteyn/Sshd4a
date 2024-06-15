@@ -3,11 +3,7 @@ package com.hardbacknutter.sshd;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.Html;
 import android.text.InputType;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.util.Linkify;
 import android.view.View;
 
 import androidx.activity.OnBackPressedCallback;
@@ -112,7 +108,6 @@ public class SettingsFragment
 
         final Preference pUiTheme = findPreference(NightMode.PK_UI_THEME_MODE);
         //noinspection ConstantConditions
-        pUiTheme.setSummaryProvider(ListPreference.SimpleSummaryProvider.getInstance());
         pUiTheme.setOnPreferenceChangeListener((preference, newValue) -> {
             // we should never have an invalid setting in the prefs... flw
             try {
@@ -130,23 +125,12 @@ public class SettingsFragment
         pRunInForeground = findPreference(Prefs.RUN_IN_FOREGROUND);
 
         pPort = findPreference(Prefs.SSHD_PORT);
-        pPort.setSummaryProvider(EditTextPreference.SimpleSummaryProvider.getInstance());
         pPort.setOnBindEditTextListener(editText -> {
             editText.setInputType(InputType.TYPE_CLASS_NUMBER);
             editText.selectAll();
         });
 
-        findPreference(Prefs.DROPBEAR_CMDLINE_OPTIONS)
-                .setSummaryProvider(EditTextPreference.SimpleSummaryProvider.getInstance());
-        findPreference(Prefs.ENV_VARS)
-                .setSummaryProvider(EditTextPreference.SimpleSummaryProvider.getInstance());
-        findPreference(Prefs.HOME)
-                .setSummaryProvider(EditTextPreference.SimpleSummaryProvider.getInstance());
-        findPreference(Prefs.SHELL)
-                .setSummaryProvider(EditTextPreference.SimpleSummaryProvider.getInstance());
-
         pAuthUsername = findPreference(PK_SSHD_AUTH_USERNAME);
-        pAuthUsername.setSummaryProvider(EditTextPreference.SimpleSummaryProvider.getInstance());
 
         pAuthPassword = findPreference(PK_SSHD_AUTH_PASSWORD);
         pAuthPassword.setOnBindEditTextListener(editText -> {
