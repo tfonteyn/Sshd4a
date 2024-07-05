@@ -20,32 +20,53 @@
     <color name="green_a200">#69F0AE</color>
     <color name="green_a400">#00E676</color>
     <color name="green_a700">#00C853</color>
-    <!-- Green -->    <!-- Red -->
-    <color name="red_50">#FFEBEE</color>
-    <color name="red_100">#FFCDD2</color>
-    <color name="red_200">#EF9A9A</color>
-    <color name="red_300">#E57373</color>
-    <color name="red_400">#EF5350</color>
-    <color name="red_500">#F44336</color>
-    <color name="red_600">#E53935</color>
-    <color name="red_700">#D32F2F</color>
-    <color name="red_800">#C62828</color>
-    <color name="red_900">#B71C1C</color>
-    <color name="red_a100">#FF8A80</color>
-    <color name="red_a200">#FF5252</color>
-    <color name="red_a400">#FF1744</color>
-    <color name="red_a700">#D50000</color>
-    <!-- Red -->
-    <!-- Blue Grey -->
-    <color name="blue_grey_50">#ECEFF1</color>
-    <color name="blue_grey_100">#CFD8DC</color>
-    <color name="blue_grey_200">#B0BEC5</color>
-    <color name="blue_grey_300">#90A4AE</color>
-    <color name="blue_grey_400">#78909C</color>
-    <color name="blue_grey_500">#607D8B</color>
-    <color name="blue_grey_600">#546E7A</color>
-    <color name="blue_grey_700">#455A64</color>
-    <color name="blue_grey_800">#37474F</color>
-    <color name="blue_grey_900">#263238</color>
-    <!-- Blue Grey -->
+    <!-- Green -->
+
+    <color name="m3red_10">#B71C1C</color>
+    <color name="m3red_20">#C62828</color>
+    <color name="m3red_30">#D32F2F</color>
+    <color name="m3red_40">#E53935</color>
+    <color name="m3red_50">#F44336</color>
+    <color name="m3red_60">#EF5350</color>
+    <color name="m3red_70">#E57373</color>
+    <color name="m3red_80">#EF9A9A</color>
+    <color name="m3red_90">#FFCDD2</color>
+    <color name="m3red_95">#FFDDDF</color>
+    <color name="m3red_99">#FFEBEE</color>
+
+    <color name="m3teal_10">#004D40</color>
+    <color name="m3teal_20">#00695C</color>
+    <color name="m3teal_30">#00796B</color>
+    <color name="m3teal_40">#00897B</color>
+    <color name="m3teal_50">#009688</color>
+    <color name="m3teal_60">#26A69A</color>
+    <color name="m3teal_70">#4DB6AC</color>
+    <color name="m3teal_80">#80CBC4</color>
+    <color name="m3teal_90">#B2DFDB</color>
+    <color name="m3teal_95">#C2EFEB</color>
+    <color name="m3teal_99">#E0F2F1</color>
+
+    <color name="m3grey_10">#ff1c1b1f</color>
+    <color name="m3grey_20">#ff313033</color>
+    <color name="m3grey_30">#ff49454f</color>
+    <color name="m3grey_40">#ff79747e</color>
+    <color name="m3grey_50">#ff938f99</color>
+    <color name="m3grey_60">#ffcac4d0</color>
+    <color name="m3grey_70">#ffe6e1e5</color>
+    <color name="m3grey_80">#ffe7e0ec</color>
+    <color name="m3grey_90">#fff0e7f0</color>
+    <color name="m3grey_95">#fff4eff4</color>
+    <color name="m3grey_99">#fffffbfe</color>
+
+    <color name="m3blue_grey_10">#ff212c36</color>
+    <color name="m3blue_grey_20">#ff263540</color>
+    <color name="m3blue_grey_30">#ff2d3e52</color>
+    <color name="m3blue_grey_40">#ff586d83</color>
+    <color name="m3blue_grey_50">#ff556e86</color>
+    <color name="m3blue_grey_60">#ff8597af</color>
+    <color name="m3blue_grey_70">#ff96a5b3</color>
+    <color name="m3blue_grey_80">#ffa9b0c3</color>
+    <color name="m3blue_grey_90">#ffced2db</color>
+    <color name="m3blue_grey_95">#ffdee2eb</color>
+    <color name="m3blue_grey_99">#fff1f0f5</color>
 </resources>

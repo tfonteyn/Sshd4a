@@ -297,10 +297,10 @@ public class MainFragment
         void updateStartButton(final boolean isRunning) {
             if (isRunning) {
                 startButton.setText(R.string.lbl_stop);
-                startButton.setTextColor(getTextColor(R.attr.stopButtonColor));
+                startButton.setTextColor(getTextColor(R.attr.stopButtonTextColor));
             } else {
                 startButton.setText(R.string.lbl_start);
-                startButton.setTextColor(getTextColor(R.attr.startButtonColor));
+                startButton.setTextColor(getTextColor(R.attr.startButtonTextColor));
             }
         }
 

@@ -1,10 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 <style name="Theme.App" parent="Base.Theme.App">
-    <item name="colorPrimary">@color/blue_grey_700</item>
-    <item name="colorSecondary">@color/green_500</item>
+    <item name="colorPrimary">@color/m3grey_30</item>
+    <item name="colorOnPrimary">@color/m3grey_80</item>
+    <item name="colorPrimaryContainer">@color/m3blue_grey_60</item>
+    <item name="colorOnPrimaryContainer">@color/m3blue_grey_95</item>
+    <item name="colorPrimaryInverse">@color/m3grey_20</item>
 
-    <item name="startButtonColor">@color/green_500</item>
-    <item name="stopButtonColor">@color/red_600</item>
+    <item name="colorSecondary">@color/m3teal_50</item>
+    <item name="colorOnSecondary">@color/m3teal_70</item>
+    <item name="colorSecondaryContainer">@color/m3teal_10</item>
+    <item name="colorOnSecondaryContainer">@color/m3teal_99</item>
+
+    <item name="android:colorBackground">@color/m3grey_20</item>
+    <item name="colorOnBackground">@color/m3grey_70</item>
+
+    <item name="colorSurface">@color/m3grey_10</item>
+    <item name="colorOnSurface">@color/m3grey_70</item>
+    <item name="colorSurfaceVariant">@color/m3grey_50</item>
+    <item name="colorOnSurfaceVariant">@color/m3grey_60</item>
+    <item name="colorSurfaceInverse">@color/m3grey_70</item>
+    <item name="colorOnSurfaceInverse">@color/m3grey_20</item>
+
+    <item name="colorOutline">@color/m3grey_50</item>
+
+    <item name="colorError">@color/m3red_70</item>
+    <item name="colorOnError">@color/black</item>
+    <item name="colorErrorContainer">@color/m3red_10</item>
+    <item name="colorOnErrorContainer">@color/m3red_90</item>
+
+    <item name="startButtonTextColor">@color/green_500</item>
+    <item name="stopButtonTextColor">@color/m3red_40</item>
 </style>
 </resources>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <attr name="startButtonColor" format="reference|color" />
-    <attr name="stopButtonColor" format="reference|color" />
+    <attr name="startButtonTextColor" format="reference|color" />
+    <attr name="stopButtonTextColor" format="reference|color" />
 </resources>
