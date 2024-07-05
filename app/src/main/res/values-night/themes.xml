@@ -4,8 +4,6 @@
     <item name="colorPrimary">@color/blue_grey_700</item>
     <item name="colorSecondary">@color/green_500</item>
 
-    <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
-
     <item name="startButtonColor">@color/green_500</item>
     <item name="stopButtonColor">@color/red_600</item>
 </style>
