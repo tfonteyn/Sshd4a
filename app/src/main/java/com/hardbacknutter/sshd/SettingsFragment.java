@@ -64,7 +64,7 @@ public class SettingsFragment
                         getParentFragmentManager().popBackStack();
                     } else {
                         new MaterialAlertDialogBuilder(getContext())
-                                .setIcon(R.drawable.ic_baseline_warning_24)
+                                .setIcon(R.drawable.warning_24px)
                                 .setTitle(R.string.warning)
                                 .setMessage(R.string.warning_no_auth_methods)
                                 .setCancelable(true)
@@ -160,7 +160,7 @@ public class SettingsFragment
 
         final Toolbar toolbar = requireActivity().findViewById(R.id.toolbar);
         if (toolbar != null) {
-            toolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24);
+            toolbar.setNavigationIcon(R.drawable.arrow_back_24px);
         }
 
         //noinspection DataFlowIssue

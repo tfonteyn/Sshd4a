@@ -472,7 +472,7 @@ public class SshdService
                                           PendingIntent.FLAG_IMMUTABLE);
 
         return new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_app)
+                .setSmallIcon(R.drawable.app)
                 .setTicker(getString(R.string.app_name))
                 .setContentText(text)
                 .setContentIntent(pendingIntent)

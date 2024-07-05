@@ -111,7 +111,7 @@ public class MainFragment
         if (!Environment.isExternalStorageManager()) {
             //noinspection ConstantConditions
             new MaterialAlertDialogBuilder(getContext())
-                    .setIcon(R.drawable.ic_baseline_security_24)
+                    .setIcon(R.drawable.security_24px)
                     .setTitle(android.R.string.dialog_alert_title)
                     .setMessage(R.string.msg_request_files_management)
                     .setCancelable(false)
@@ -193,7 +193,7 @@ public class MainFragment
             if (error != null) {
                 // note that the state of the current key file is unknown at this point
                 new MaterialAlertDialogBuilder(getContext())
-                        .setIcon(R.drawable.ic_baseline_error_24)
+                        .setIcon(R.drawable.error_24px)
                         .setTitle(android.R.string.dialog_alert_title)
                         .setMessage(error)
                         .setCancelable(true)
@@ -239,7 +239,7 @@ public class MainFragment
                                       SshdService.getOpensshVersion()));
 
         new MaterialAlertDialogBuilder(context)
-                .setIcon(R.drawable.ic_baseline_info_24)
+                .setIcon(R.drawable.info_24px)
                 .setTitle(getString(R.string.about_title, version))
                 .setView(dvb.getRoot())
                 .setCancelable(true)
@@ -255,7 +255,7 @@ public class MainFragment
         final Context context = getContext();
         //noinspection ConstantConditions
         new MaterialAlertDialogBuilder(context)
-                .setIcon(R.drawable.ic_baseline_warning_24)
+                .setIcon(R.drawable.warning_24px)
                 .setTitle(R.string.lbl_reset_keys)
                 .setMessage(R.string.confirm_reset_keys)
                 .setCancelable(true)

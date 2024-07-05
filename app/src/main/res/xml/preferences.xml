@@ -40,13 +40,13 @@
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pc_paths">
         <EditTextPreference
-            android:icon="@drawable/ic_home"
+            android:icon="@drawable/home_24px"
             android:key="sshd.home"
             android:title="@string/pt_home"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
             android:defaultValue="/system/bin/sh"
-            android:icon="@drawable/ic_shell"
+            android:icon="@drawable/terminal_24px"
             android:key="sshd.shell"
             android:title="@string/pt_shell"
             app:useSimpleSummaryProvider="true" />
@@ -58,7 +58,7 @@
             />
         <SwitchPreference
             android:defaultValue="true"
-            android:icon="@drawable/ic_baseline_vpn_key_24"
+            android:icon="@drawable/vpn_key_24px"
             android:key="sshd.enable.publickey.login"
             android:title="@string/pt_public_key_login"
             app:summary="@string/pt_public_key_login_info"
@@ -66,7 +66,7 @@
         <!-- Not saved to preferences. Handled in code. -->
         <EditTextPreference
             android:defaultValue=""
-            android:icon="@drawable/ic_baseline_supervisor_account_24"
+            android:icon="@drawable/supervisor_account_24px"
             android:key="sshd.authorized.username"
             android:persistent="false"
             android:title="@string/pt_authorized_username"
@@ -75,7 +75,7 @@
         <EditTextPreference
             android:defaultValue=""
             android:dependency="sshd.authorized.username"
-            android:icon="@drawable/ic_baseline_password_24"
+            android:icon="@drawable/password_24px"
             android:key="sshd.authorized.password"
             android:persistent="false"
             android:title="@string/pt_authorized_password" />
@@ -86,7 +86,7 @@
             android:defaultValue="0"
             android:entries="@array/pe_ui_theme_mode"
             android:entryValues="@array/pv_ui_theme_mode"
-            android:icon="@drawable/ic_baseline_settings_brightness_24"
+            android:icon="@drawable/settings_brightness_24px"
             android:key="ui.theme"
             android:title="@string/pt_ui_theme"
             app:useSimpleSummaryProvider="true" />
