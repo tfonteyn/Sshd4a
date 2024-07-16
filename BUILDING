@@ -116,10 +116,10 @@ cd ${SRC_ROOT}/${RSYNC}/app/src/main/cpp/
 
 # ############################################################################
 #  Step 2.2 - OPENSSH - https://github.com/openssh/openssh-portable
-# https://mirror.ox.ac.uk/pub/OpenBSD/OpenSSH/portable/openssh-9.7p1.tar.gz
+# https://mirror.ox.ac.uk/pub/OpenBSD/OpenSSH/portable/openssh-9.8p1.tar.gz
 # ############################################################################
 # replace base filename in the below string after download:
-export OPENSSH_VERSION="openssh-9.7p1"
+export OPENSSH_VERSION="openssh-9.8p1"
 
 cd ${SRC_ROOT}
 7z x -so ${OPENSSH_VERSION}* | tar xf -
@@ -150,6 +150,8 @@ git fetch upstream-openssh
 git merge --allow-unrelated-histories upstream-openssh/dev
 
 #    All changes are (should be) marked with SSHD4A_*
+#      cpp/openssh/openbsd-compat/explicit_bzero.c
+#
 #    Merge and solve conflicts as usual.
 #    Update gradle.build: android.defaultConfig buildConfigField("String", "VERSION_OPENSSL"...
 #    Commit and build...
