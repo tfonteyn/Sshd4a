@@ -22,6 +22,9 @@ The latest release contains:
 - rsync 3.3.0
 - sftp-server from OpenSSH 9.8p1
 
+## User interface:
+Available in Chinese, English, French and German.
+
 ## Device support:
 
 - Requires minimal Android 11 (API 30)
