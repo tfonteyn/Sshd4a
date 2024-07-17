@@ -1,0 +1,5 @@
+- new: UI translations for Chinese, French, German.
+- new: #4: the app/services can now be started by an external intent ("com.hardbacknutter.sshd.fg.START", "com.hardbacknutter.sshd.fg.STOP")
+    This functionality can be enabled/disabled in the settings. Note that when enabled, any other application can send these intents.
+- fix #6: OpenSSH 9.8p1 to fix CVE-2024-6387
+- removed supersu
