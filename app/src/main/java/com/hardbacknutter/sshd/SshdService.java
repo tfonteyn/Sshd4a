@@ -39,6 +39,9 @@ import java.util.stream.Collectors;
  * <p>
  * <p>
  * Windows OS port forwarding from the external listenaddress to the localhost:
+ * - 2222 being the port the sshd service on the emulator is listening on
+ * - 2223 the port on the localhost we'll forward to the emulators 2222 port.
+ * <p>
  * Use "ipconfig" on the windows box to get your current address.
  * <pre>
  *     netsh interface portproxy add v4tov4 listenaddress=<host-ip> listenport=2222 connectaddress=127.0.0.1 connectport=2222
@@ -53,10 +56,10 @@ import java.util.stream.Collectors;
  * <pre>
  *    # optional / might be needed!
  *    adb root
- *    # enable the forward
- *    adb forward tcp:2222 tcp:2222
+ *    # enable a forward from the local port 2223 to the emulator port 2222
+ *    adb forward tcp:2223 tcp:2222
  *    # you can now connect to the sshd server on the emulator with:
- *    ssh -p 2222 localhost
+ *    ssh -p 2223 localhost
  * </pre>
  * <p>
  * Close the firewall:

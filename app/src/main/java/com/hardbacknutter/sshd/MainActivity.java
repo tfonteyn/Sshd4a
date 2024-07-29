@@ -15,11 +15,15 @@ public class MainActivity
         extends AppCompatActivity {
 
     /**
+     * From adb shell: {@code am start -a com.hardbacknutter.sshd.fg.START}.
+     * <p>
      * Failure to start will return a {@link Activity#RESULT_CANCELED}.
      */
     private static final String START = "com.hardbacknutter.sshd.fg.START";
 
     /**
+     * From adb shell: {@code am start -a com.hardbacknutter.sshd.fg.STOP}.
+     * <p>
      * A successful stop will return a  {@link Activity#RESULT_OK}.
      */
     private static final String STOP = "com.hardbacknutter.sshd.fg.STOP";
