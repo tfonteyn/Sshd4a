@@ -66,8 +66,8 @@ public class MainActivity
                     switch (action) {
                         case START: {
                             if (!SshdService.isRunning()) {
-                                final boolean started = vm.startService(this,
-                                                                  SshdService.StartMode.ByIntent);
+                                final boolean started =
+                                        vm.startService(this, SshdService.StartMode.ByIntent);
                                 if (!started) {
                                     setResult(RESULT_CANCELED);
                                     finish();
