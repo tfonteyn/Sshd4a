@@ -9,7 +9,7 @@ export JAVA_HOME=/cygdrive/c/d/jdk/
 export PATH=${JAVA_HOME}/bin:${PATH}
 
 SDK=/cygdrive/c/d/sdk
-NDK=${SDK}/ndk/26.2.11394342
+NDK=${SDK}/ndk/27.0.12077973
 
 export TOOLCHAIN=${NDK}/toolchains/llvm/prebuilt/windows-x86_64
 export PATH=${SDK}/platform-tools:${TOOLCHAIN}/bin:${PATH}
