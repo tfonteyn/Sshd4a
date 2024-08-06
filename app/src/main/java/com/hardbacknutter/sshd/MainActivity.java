@@ -60,31 +60,17 @@ public class MainActivity
 
     private void handeIntentAction(@Nullable final Intent intent) {
         if (intent != null) {
+            // Permission to start/stop by Intent must be explicitly given in the Settings.
             if (Prefs.isStartByIntentAllowed(this)) {
                 final String action = intent.getAction();
                 if (action != null && !action.isBlank()) {
                     switch (action) {
                         case START: {
-                            if (!SshdService.isRunning()) {
-                                final boolean started =
-                                        vm.startService(this, SshdService.StartMode.ByIntent);
-                                if (!started) {
-                                    setResult(RESULT_CANCELED);
-                                    finish();
-                                }
-                            }
+                            startByIntent();
                             break;
                         }
                         case STOP: {
-                            // Only allowed to stop and quit if we were started by Intent
-                            // and if the user not stopped/started the service manually
-                            if (vm.getStartMode() == SshdService.StartMode.ByIntent) {
-                                if (SshdService.isRunning()) {
-                                    vm.stopService(this);
-                                }
-                                setResult(RESULT_OK);
-                                finish();
-                            }
+                            stopByIntent();
                             break;
                         }
                         default:
@@ -92,6 +78,39 @@ public class MainActivity
                     }
                 }
             }
+        }
+    }
+
+    private void startByIntent() {
+        if (SshdService.isRunning()) {
+            // already running, ignore and keep running
+            return;
+        }
+
+        if (vm.startService(this, SshdService.StartMode.ByIntent)) {
+            // We're up and running
+            return;
+        }
+
+        // Unknown failure
+        setResult(RESULT_CANCELED);
+        finishAndRemoveTask();
+    }
+
+    private void stopByIntent() {
+        if (!SshdService.isRunning()) {
+            // we're not running, ignore and quit
+            setResult(RESULT_OK);
+            finishAndRemoveTask();
+            return;
+        }
+
+        // Only allowed to stop and quit if we were started by Intent
+        if (vm.getStartMode() == SshdService.StartMode.ByIntent) {
+            final boolean stopped = vm.stopService(this);
+            setResult(stopped ? RESULT_OK : RESULT_CANCELED);
+            // If the stop-request failed, then removing the task will kill the service.
+            finishAndRemoveTask();
         }
     }
 }
