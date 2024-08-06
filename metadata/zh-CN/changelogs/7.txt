@@ -1,0 +1,1 @@
+「com.hardbacknutter.sshd.fg.STOP」意向現在會正確退出應用程式。

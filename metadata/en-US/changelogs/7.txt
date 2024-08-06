@@ -1,0 +1,1 @@
+"com.hardbacknutter.sshd.fg.STOP" intent will now properly quit the app.
