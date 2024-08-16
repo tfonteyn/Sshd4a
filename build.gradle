@@ -38,6 +38,6 @@ ext {
     // https://developer.android.com/jetpack/androidx/releases/test
     androidxArchCoreTestingVersion = "2.2.0"
     androidxTestCoreVersion = '1.6.1'
-    androidxTestRunnerVersion = '1.6.1'
+    androidxTestRunnerVersion = '1.6.2'
     androidxTestRulesVersion = '1.6.1'
 }
