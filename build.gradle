@@ -1,7 +1,7 @@
 plugins {
-    id("com.android.application") version '8.6.0-rc01' apply false
-    id("com.android.library") version '8.6.0-rc01' apply false
-    id("org.jetbrains.kotlin.android") version "2.0.10" apply false
+    id("com.android.application") version '8.6.0' apply false
+    id("com.android.library") version '8.6.0' apply false
+    id("org.jetbrains.kotlin.android") version "2.0.20" apply false
 }
 
 tasks.register("clean", Delete) {
@@ -18,16 +18,16 @@ ext {
     compileSdkVersion = 34
 
     // https://github.com/google/desugar_jdk_libs
-    desugarVersion = '2.0.4'
+    desugarVersion = '2.1.2'
 
     // https://developer.android.com/jetpack/androidx/versions
 
-    androidxActivityVersion = '1.9.1'
+    androidxActivityVersion = '1.9.2'
     androidxAppcompatVersion = '1.7.0'
     androidxConstraintlayoutVersion = "2.1.4"
     androidxCoreVersion = '1.13.1'
-    androidxFragmentVersion = '1.8.2'
-    androidxLifecycleVersion = '2.8.4'
+    androidxFragmentVersion = '1.8.3'
+    androidxLifecycleVersion = '2.8.5'
     androidxPreferenceVersion = "1.2.1"
     androidxTransition = '1.5.1'
 
