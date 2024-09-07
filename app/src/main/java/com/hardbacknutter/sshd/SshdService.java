@@ -132,8 +132,8 @@ public class SshdService
      */
     private boolean runInForeground = true;
     private SharedPreferences pref;
-    private boolean channelCreated;
-    private String bindAddress;
+    private boolean notificationChannelCreated;
+    private String sshdPort;
 
     /**
      * Check if the native process is running.
@@ -254,7 +254,7 @@ public class SshdService
         argList.add("-F");
         // Bind to [address:]port
         argList.add("-p");
-        argList.add(bindAddress);
+        argList.add(sshdPort);
         // edit dropbear/config.h, add:  #define DEBUG_TRACE 1
         // before enabling the next line
 //        args.add("-v");
@@ -410,7 +410,7 @@ public class SshdService
         }
 
         runInForeground = pref.getBoolean(Prefs.RUN_IN_FOREGROUND, true);
-        bindAddress = pref.getString(Prefs.SSHD_PORT, Prefs.DEFAULT_PORT).strip();
+        sshdPort = pref.getString(Prefs.SSHD_PORT, Prefs.DEFAULT_PORT).strip();
 
         startSshd();
 
@@ -429,7 +429,7 @@ public class SshdService
             }
 
             startForeground(ONGOING_NOTIFICATION_ID, createNotification(
-                    getString(R.string.info_listening_on_ip_port, s, bindAddress)));
+                    getString(R.string.info_listening_on_ip_port, s, sshdPort)));
         }
 
         // If we (i.e. this service, which is != this sshd process) get killed,
@@ -458,7 +458,7 @@ public class SshdService
      * "android.Manifest.permission.FOREGROUND_SERVICE" in order to use this API.
      */
     private Notification createNotification(@NonNull final CharSequence text) {
-        if (!channelCreated) {
+        if (!notificationChannelCreated) {
             final NotificationManager notificationManager =
                     (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             final NotificationChannel nc = new NotificationChannel(
@@ -466,7 +466,7 @@ public class SshdService
                     getString(R.string.app_name),
                     NotificationManager.IMPORTANCE_DEFAULT);
             notificationManager.createNotificationChannel(nc);
-            channelCreated = true;
+            notificationChannelCreated = true;
         }
 
         final PendingIntent pendingIntent =
