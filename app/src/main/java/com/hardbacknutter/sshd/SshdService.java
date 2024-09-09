@@ -40,31 +40,42 @@ import java.util.stream.Collectors;
  * <p>
  * Windows OS port forwarding from the external listenaddress to the localhost:
  * - 2222 being the port the sshd service on the emulator is listening on
- * - 2223 the port on the localhost we'll forward to the emulators 2222 port.
+ * - 2223 the port on the windows-localhost we'll forward to the emulators 2222 port.
  * <p>
- * Use "ipconfig" on the windows box to get your current address.
+ * Use "ipconfig" on the windows box to get your current address; for example: 192.168.0.56
+ *
+ * Proxy the host interface 192.168.0.56:2223 to the localhost:2222
  * <pre>
- *     netsh interface portproxy add v4tov4 listenaddress=<host-ip> listenport=2222 connectaddress=127.0.0.1 connectport=2222
+ *     netsh interface portproxy add v4tov4 listenaddress=192.168.0.56 listenport=2223 connectaddress=127.0.0.1 connectport=2222
  * </pre>
  * <p>
- * Open the firewall:
+ * Open the firewall for port 2223 (i.e. the windows host)
  * <pre>
- *     netsh advfirewall firewall add rule name="ALLOW TCP PORT 2222" dir=in action=allow protocol=TCP localport=2222
+ *     netsh advfirewall firewall add rule name="ALLOW TCP PORT 2223" dir=in action=allow protocol=TCP localport=2223
  * </pre>
  * <p>
  * To access the emulator from a shell on the emulator hosting machine, run:
  * <pre>
  *    # optional / might be needed!
  *    adb root
- *    # enable a forward from the local port 2223 to the emulator port 2222
+ *    # enable a forward from the local port (i.e. 127.0.0.1) 2223 to the emulator port 2222
  *    adb forward tcp:2223 tcp:2222
  *    # you can now connect to the sshd server on the emulator with:
  *    ssh -p 2223 localhost
  * </pre>
  * <p>
+ * Delete the proxy rule:
+ * <pre>
+ *     netsh interface portproxy delete v4tov4 listenport=2223 listenaddress=192.168.0.56
+ * </pre>
+ *
  * Close the firewall:
  * <pre>
- *     netsh advfirewall firewall delete rule name="ALLOW TCP PORT 2222"
+ *     netsh advfirewall firewall delete rule name="ALLOW TCP PORT 2223"
+ * </pre>
+ * Remove forwards:
+ * <pre>
+ *     adb forward --remove-all
  * </pre>
  *
  * <a href="https://developer.android.com/about/versions/oreo/background#services">
