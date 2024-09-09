@@ -1,8 +1,0 @@
-Android 15:
-
-https://developer.android.com/about/versions/15/behavior-changes-15#fgs-boot-completed
-probably fine
-
-https://developer.android.com/about/versions/15/behavior-changes-all#16-kb
-
-https://developer.android.com/guide/practices/page-sizes#compile-r27-higher

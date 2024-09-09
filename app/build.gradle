@@ -30,7 +30,7 @@ android {
     compileSdk = rootProject.ext.compileSdkVersion
 
     // https://developer.android.com/studio/projects/configure-agp-ndk
-    ndkVersion '27.0.12077973'
+    ndkVersion '27.1.12297006'
 
     externalNativeBuild {
         cmake {
@@ -60,6 +60,9 @@ android {
             cmake {
                 cFlags '-Wall -O'
                 cppFlags ''
+                // Passes optional arguments to CMake.
+                // https://developer.android.com/guide/practices/page-sizes#compile-r27-higher
+                arguments "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
             }
         }
 
