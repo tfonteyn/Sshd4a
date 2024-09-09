@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,8 +32,14 @@ public class MainActivity
     private ServiceViewModel vm;
 
     public void onCreate(@Nullable final Bundle savedInstanceState) {
+        // All insets rely on android:fitsSystemWindows="true"
+        // as set on the top CoordinatorLayout.
+        // The status-bar will be transparent.
+        // Not the "best" look, but more then good enough for this app
+        EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity);
+        getWindow().setNavigationBarContrastEnforced(false);
 
         vm = new ViewModelProvider(this).get(ServiceViewModel.class);
 
