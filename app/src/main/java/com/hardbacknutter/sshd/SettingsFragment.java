@@ -23,7 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
-import com.hardbacknutter.sshd.utils.theme.NightMode;
+import com.hardbacknutter.util.theme.NightMode;
 
 public class SettingsFragment
         extends PreferenceFragmentCompat

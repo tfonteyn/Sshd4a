@@ -2,7 +2,7 @@ package com.hardbacknutter.sshd;
 
 import android.app.Application;
 
-import com.hardbacknutter.sshd.utils.theme.NightMode;
+import com.hardbacknutter.util.theme.NightMode;
 
 public class App
         extends Application {
