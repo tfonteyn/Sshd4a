@@ -112,11 +112,11 @@ public class MainFragment
             //noinspection ConstantConditions
             new MaterialAlertDialogBuilder(getContext())
                     .setIcon(R.drawable.security_24px)
-                    .setTitle(android.R.string.dialog_alert_title)
+                    .setTitle(R.string.dialog_alert_title)
                     .setMessage(R.string.msg_request_files_management)
                     .setCancelable(false)
-                    .setNegativeButton(android.R.string.cancel, (d, which) -> d.dismiss())
-                    .setPositiveButton(android.R.string.ok, (d, which) -> {
+                    .setNegativeButton(R.string.cancel, (d, which) -> d.dismiss())
+                    .setPositiveButton(R.string.ok, (d, which) -> {
                         // TODO: the dialog does not dismiss first time??
                         d.dismiss();
                         startActivity(new Intent(
@@ -194,10 +194,10 @@ public class MainFragment
                 // note that the state of the current key file is unknown at this point
                 new MaterialAlertDialogBuilder(getContext())
                         .setIcon(R.drawable.error_24px)
-                        .setTitle(android.R.string.dialog_alert_title)
+                        .setTitle(R.string.dialog_alert_title)
                         .setMessage(error)
                         .setCancelable(true)
-                        .setPositiveButton(android.R.string.ok, (d, which) -> d.dismiss())
+                        .setPositiveButton(R.string.ok, (d, which) -> d.dismiss())
                         .create()
                         .show();
             }
@@ -246,7 +246,7 @@ public class MainFragment
                 .setNeutralButton(R.string.lbl_github_project, (d, which) -> startActivity(
                         new Intent(Intent.ACTION_VIEW,
                                    Uri.parse(getString(R.string.github_project_url)))))
-                .setPositiveButton(android.R.string.ok, (d, which) -> d.dismiss())
+                .setPositiveButton(R.string.ok, (d, which) -> d.dismiss())
                 .create()
                 .show();
     }
@@ -259,8 +259,8 @@ public class MainFragment
                 .setTitle(R.string.lbl_reset_keys)
                 .setMessage(R.string.confirm_reset_keys)
                 .setCancelable(true)
-                .setNegativeButton(android.R.string.cancel, (d, which) -> d.dismiss())
-                .setPositiveButton(android.R.string.ok, (d, which) -> vm.deleteAuthKeys(context))
+                .setNegativeButton(R.string.cancel, (d, which) -> d.dismiss())
+                .setPositiveButton(R.string.ok, (d, which) -> vm.deleteAuthKeys(context))
                 .create()
                 .show();
     }

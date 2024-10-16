@@ -105,4 +105,10 @@
     <string name="lbl_github_project">Github project</string>
     <!-- About dialog title: param1: version string -->
     <string name="about_title">Sshd4a %s</string>
+    <!-- [VERIFIED] -->
+    <string name="ok">OK</string>
+    <!-- [VERIFIED] -->
+    <string name="cancel">Cancel</string>
+    <!-- [VERIFIED] -->
+    <string name="dialog_alert_title">Attention</string>
 </resources>

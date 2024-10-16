@@ -48,4 +48,7 @@
     <string name="service_description">Fournit un serveur sshd avec un accès shell, des services rsync et scp/sftp.</string>
     <string name="warning">Attention</string>
     <string name="warning_no_auth_methods">Vous avez désactivé toutes les méthodes d’authentification. Êtes-vous sûr de vouloir faire cela ?</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Annuler</string>
+    <string name="dialog_alert_title">Attention</string>
 </resources>

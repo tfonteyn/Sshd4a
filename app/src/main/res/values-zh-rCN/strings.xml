@@ -57,4 +57,7 @@
     <string name="pt_public_key_login_info">允许使用公钥登录。</string>
     <string name="lbl_github_project">GitHub 项目</string>
     <string name="about_title">Sshd4a %s</string>
+    <string name="ok">确定</string>
+    <string name="cancel">取消</string>
+    <string name="dialog_alert_title">注意</string>
 </resources>

@@ -48,4 +48,7 @@
     <string name="service_description">Bietet einen sshd-Server mit Shell-Zugang, rsync- und scp/sftp-Diensten.</string>
     <string name="warning">Warnung</string>
     <string name="warning_no_auth_methods">Sie haben alle Authentifizierungsmethoden deaktiviert. Sind Sie sicher, dass Sie dies tun wollen?</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="dialog_alert_title">Achtung</string>
 </resources>

@@ -67,9 +67,9 @@ public class SettingsFragment
                                 .setTitle(R.string.warning)
                                 .setMessage(R.string.warning_no_auth_methods)
                                 .setCancelable(true)
-                                .setNegativeButton(android.R.string.cancel, (d, which) ->
+                                .setNegativeButton(R.string.cancel, (d, which) ->
                                         d.dismiss())
-                                .setPositiveButton(android.R.string.ok, (d, which) ->
+                                .setPositiveButton(R.string.ok, (d, which) ->
                                         getParentFragmentManager().popBackStack())
                                 .create()
                                 .show();
