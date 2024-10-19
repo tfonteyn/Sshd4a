@@ -30,12 +30,12 @@ android {
     compileSdk = rootProject.ext.compileSdkVersion
 
     // https://developer.android.com/studio/projects/configure-agp-ndk
-    ndkVersion '27.1.12297006'
+    ndkVersion '27.2.12479018'
 
     externalNativeBuild {
         cmake {
             path file('CMakeLists.txt')
-            version '3.22.1'
+            version '3.30.5'
         }
     }
 
