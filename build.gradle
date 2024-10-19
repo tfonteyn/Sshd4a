@@ -22,7 +22,7 @@ ext {
 
     // https://developer.android.com/jetpack/androidx/versions
 
-    androidxActivityVersion = '1.9.2'
+    androidxActivityVersion = '1.9.3'
     androidxAppcompatVersion = '1.7.0'
     androidxConstraintlayoutVersion = "2.1.4"
     androidxCoreVersion = '1.13.1'
