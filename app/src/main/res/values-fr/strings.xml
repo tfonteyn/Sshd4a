@@ -13,14 +13,14 @@
     <string name="info_listening_on_ip_port">Sshd4a écoute sur %1$s:%2$s</string>
     <string name="lbl_about">À propos de cette application</string>
     <string name="lbl_github_project">Projet Github</string>
-    <string name="lbl_import_keys">Importer un fichier « authorized_keys »</string>
+    <string name="lbl_import_keys">Importer un fichier « authorized_keys »</string>
     <string name="lbl_interface">Interface :</string>
     <string name="lbl_port">Port :</string>
     <string name="lbl_reset_keys">Supprimer toutes les clés autorisées</string>
     <string name="lbl_settings">Paramètres</string>
     <string name="lbl_start">Démarrer</string>
     <string name="lbl_stop">Arrêter</string>
-    <string name="msg_request_files_management">Cette application a besoin d’une autorisation spéciale pour accéder à vos fichiers afin de pouvoir utiliser « rsync ». Sans cette autorisation, la fonctionnalité de cette application sera fortement limitée.\n\n Après avoir appuyé sur « OK », il vous sera demandé d’activer cette autorisation.\nFaites défiler la liste des applications vers le bas et activez Sshd4a.</string>
+    <string name="msg_request_files_management">Cette application a besoin d’une autorisation spéciale pour accéder à vos fichiers afin de pouvoir utiliser « rsync ». Sans cette autorisation, la fonctionnalité de cette application sera fortement limitée.\n\n Après avoir appuyé sur « OK », il vous sera demandé d’activer cette autorisation.\nFaites défiler la liste des applications vers le bas et activez Sshd4a.</string>
     <string name="pc_paths">Connexion SSH</string>
     <string name="pc_startup">Démarrage</string>
     <string name="pc_ui">Interface utilisateur</string>
@@ -32,7 +32,7 @@
     <string name="ps_foreground_on">Le service continuera à fonctionner même si l’application est en arrière-plan. Une notification permanente et discrète sera affichée.</string>
     <string name="ps_single_use_password_info">Autoriser les connexions à l’aide d’un mot de passe à usage unique, qui sera affiché dans le journal à l’écran lors d’une tentative de connexion.</string>
     <string name="pt_cmdline_options">Options supplémentaires de la ligne de commande</string>
-    <string name="pt_env">Variables d’environnement.\n(Un « nom=valeur » par ligne)</string>
+    <string name="pt_env">Variables d’environnement.\n(Un « nom=valeur » par ligne)</string>
     <string name="pt_foreground">Service d’avant-plan</string>
     <string name="pt_home">Répertoire d’accueil</string>
     <string name="pt_authorized_password">Mot de passe maître</string>
