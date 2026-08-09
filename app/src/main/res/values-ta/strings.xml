@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--suppress LongLine -->
-<resources>
+<!--suppress LongLine --><resources>
     <string name="pt_env">சுற்றுச்சூழல் மாறிகள்.\n (ஒரு வரிக்கு ஒரு “பெயர் = மதிப்பு”)</string>
     <string name="service_description">செல் அணுகல், RSYNC மற்றும் SCP/SFTP சேவைகளுடன் SSHD சேவையகத்தை வழங்குகிறது.</string>
     <string name="msg_request_files_management">“RSYNC” ஐப் பயன்படுத்த உங்கள் கோப்புகளை அணுக இந்த பயன்பாட்டிற்கு சிறப்பு இசைவு தேவை. இந்த அனுமதியின்றி இந்த பயன்பாட்டின் செயல்பாடு கடுமையாக மட்டுப்படுத்தப்படும்.\n\n “சரி” என்பதைத் தட்டிய பிறகு இந்த அனுமதியை இயக்குமாறு கேட்கப்படுவீர்கள்.\n பயன்பாடுகளின் பட்டியலில் கீழே உருட்டி SSHD4A ஐ இயக்கவும்.</string>
