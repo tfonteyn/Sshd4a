@@ -212,7 +212,7 @@ public class SshdService
         if (pidFile.exists()) {
             try (BufferedReader r = new BufferedReader(new FileReader(pidFile))) {
                 pid = Integer.parseInt(r.readLine());
-            } catch (@NonNull final IOException ignore) {
+            } catch (@NonNull final NumberFormatException | IOException ignore) {
                 // ignore
             }
         }
