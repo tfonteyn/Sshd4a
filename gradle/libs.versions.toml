@@ -11,7 +11,7 @@ compileSdk = "36"
 javaToolchain = "25"
 
 # https://developer.android.com/studio/projects/configure-agp-ndk
-ndk = "30.0.14904198"
+ndk = "30.0.16248370"
 # don't forget to update CMakeLists.txt cmake_minimum_required
 cmakeVersion = "4.1.2"
 
