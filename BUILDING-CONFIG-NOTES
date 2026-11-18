@@ -19,14 +19,14 @@ as the config.h files should be untouched.
   #define SIZEOF_TIME_T 8           <==> 4
 
 ------------------------------------------------------------------------------
-# ${SRC_ROOT}/${RSYNC}/app/src/main/cpp/dropbear/config.h
+# ${SRC_ROOT}/${DROPBEAR}/app/src/main/cpp/dropbear/config.h
 ------------------------------------------------------------------------------
 - aarch64 and x86_64 were identical
 - armv7: extra "#define _FILE_OFFSET_BITS 64"
   which can be added to the 64 bit versions without any issue. Done.
 
 ------------------------------------------------------------------------------
-# ${SRC_ROOT}/${RSYNC}/app/src/main/cpp/openssh/config.h
+# ${SRC_ROOT}/${OPENSSH}/app/src/main/cpp/openssh/config.h
 ------------------------------------------------------------------------------
 - aarch64 and x86_64 were identical
 - armv7: extra "#define _FILE_OFFSET_BITS 64"
