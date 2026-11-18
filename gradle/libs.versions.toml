@@ -15,20 +15,20 @@ ndk = "30.0.14904198"
 # don't forget to update CMakeLists.txt cmake_minimum_required
 cmakeVersion = "4.1.2"
 
-androidGradlePlugin = "9.3.2"
+androidGradlePlugin = "9.5.1"
 
 # https://developer.android.com/jetpack/androidx/versions
 
 androidxActivity = "1.13.0"
-androidxAnnotation = "1.10.0"
+androidxAnnotation = "1.11.0"
 androidxAppcompat = "1.8.0"
 androidxConstraintlayout = "2.2.2"
 # stuck on 1.18.0 until we can update targetSdk to 37
 androidxCore = "1.18.0"
-androidxFragment = "1.9.0"
+androidxFragment = "1.9.1"
 androidxLifecycle = "2.11.0"
 androidxLocalbroadcastmanager = "1.1.0"
-androidxTransition = "1.7.0"
+androidxTransition = "1.7.2"
 
 # https://developer.android.com/jetpack/androidx/releases/test
 androidxTestCore = '1.7.0'
