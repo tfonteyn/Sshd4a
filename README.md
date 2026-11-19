@@ -5,7 +5,7 @@ Some documentation can be found on the [wiki](https://github.com/tfonteyn/Sshd4a
 Please do **NOT** request implementing some sort of root access. 
 Such requests **will be closed** immediately.
 
-### Download the latest release: 1.13.2
+### Download the latest release: 1.14.0
 
 <a href="https://github.com/tfonteyn/Sshd4a/releases">
 <img src="metadata/en-US/images/get-it-on-github.png" alt="Get it on GitHub" style="width:150px;"/></a>
@@ -38,8 +38,8 @@ Services are provided by:
 
 The latest release contains:
 - Dropbear 2026.94
-- rsync 3.4.4
-- sftp-server from OpenSSH 10.4p1
+- rsync 3.5.2
+- sftp-server from OpenSSH 10.6p2
 
 ## Rsync support:
 
