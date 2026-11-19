@@ -204,7 +204,7 @@ git merge --allow-unrelated-histories upstream-rsync/dev
 #     cpp/rsync/config.h
 #     cpp/rsync/syscall.c
 #
-# Once done, run
+#    Once done, commit the merge:
 git merge --continue
 
 
@@ -244,8 +244,12 @@ cd ${SRC_ROOT}
 cd ${SRC_ROOT}/${OPENSSH}/app/src/main/cpp/openssh
 # autoreconf is normally in /usr/bin
 autoreconf
-./configure --host ${ANDROID_TARGET} --disable-lastlog --disable-utmp --disable-wtmp \
-            --enable-largefile --without-openssl
+./configure --host ${ANDROID_TARGET} \
+            --disable-lastlog \
+            --disable-utmp \
+            --disable-wtmp \
+            --enable-largefile \
+            --without-openssl
 
 # Switching to the project for merging.
 cd ${PROJECT_ROOT}
@@ -264,8 +268,10 @@ git merge --allow-unrelated-histories upstream-openssh/dev
 #    2025-05-29: files modified:
 #      cpp/openssh/openbsd-compat/explicit_bzero.c
 #
-#    Commit and build...
-# Typically there are no issues whatsoever
+#    Typically there are no issues whatsoever
+#
+#    Once done, commit the merge:
+git merge --continue
 
 # ############################################################################
 # Step 2.3 - DROPBEAR
@@ -292,9 +298,13 @@ cd ${SRC_ROOT}
 
 # Configure
 cd ${SRC_ROOT}/${DROPBEAR}/app/src/main/cpp/dropbear
-./configure --host ${ANDROID_TARGET} --disable-syslog --disable-lastlog \
-            --disable-utmp --disable-wtmp \
-            --enable-bundled-libtom --enable-largefile
+./configure --host ${ANDROID_TARGET} \
+            --disable-syslog \
+            --disable-lastlog \
+            --disable-utmp \
+            --disable-wtmp \
+            --enable-bundled-libtom \
+            --enable-largefile
 
 # Switching to the project for merging.
 cd ${PROJECT_ROOT}
