@@ -16,6 +16,6 @@ tasks.withType(Test).configureEach {
 
 ext {
     applicationId = "com.hardbacknutter.sshd"
-    applicationVersionCode = 24
-    applicationVersionName = "1.14.0"
+    applicationVersionCode = 25
+    applicationVersionName = "1.14.1"
 }
