@@ -203,6 +203,10 @@ git merge --allow-unrelated-histories upstream-rsync/dev
 #     cpp/rsync/clientserver.c
 #     cpp/rsync/config.h
 #     cpp/rsync/syscall.c
+#
+# Once done, run
+git merge --continue
+
 
 cd ${PROJECT_ROOT}/app/src/main/cpp/
 ./prebuild-rsyn.sh
