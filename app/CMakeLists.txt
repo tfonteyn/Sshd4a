@@ -9,11 +9,56 @@ project(Sshd4a)
 # - dropbear, openssh, rsync only(?) lists the files we actually need.
 # TODO: prune unneeded files
 
+get_filename_component(REPO_ROOT ".." ABSOLUTE)
+message(STATUS "REPO_ROOT = ${REPO_ROOT}")
+
+set(BASE_SRC_ZSTD "${REPO_ROOT}/third_party/zstd/lib")
+set(BASE_SRC_LZ4 "${REPO_ROOT}/third_party/lz4/lib")
+
+
 set(BASE_SRC_TOM_MATH    src/main/cpp/dropbear/libtommath)
 set(BASE_SRC_TOM_CRYPT   src/main/cpp/dropbear/libtomcrypt/src)
 set(BASE_SRC_DROPBEAR    src/main/cpp/dropbear/src)
 set(BASE_SRC_RSYNC       src/main/cpp/rsync)
 set(BASE_SRC_SFTP_SERVER src/main/cpp/openssh)
+
+set(SRC_LZ4
+        ${BASE_SRC_LZ4}/lz4.c
+        ${BASE_SRC_LZ4}/lz4frame.c
+        ${BASE_SRC_LZ4}/lz4hc.c
+        ${BASE_SRC_LZ4}/xxhash.c
+)
+
+set(SRC_ZSTD
+        ${BASE_SRC_ZSTD}/common/debug.c
+        ${BASE_SRC_ZSTD}/common/entropy_common.c
+        ${BASE_SRC_ZSTD}/common/error_private.c
+        ${BASE_SRC_ZSTD}/common/fse_decompress.c
+        ${BASE_SRC_ZSTD}/common/pool.c
+        ${BASE_SRC_ZSTD}/common/threading.c
+        ${BASE_SRC_ZSTD}/common/xxhash.c
+        ${BASE_SRC_ZSTD}/common/zstd_common.c
+
+        ${BASE_SRC_ZSTD}/compress/fse_compress.c
+        ${BASE_SRC_ZSTD}/compress/hist.c
+        ${BASE_SRC_ZSTD}/compress/huf_compress.c
+        ${BASE_SRC_ZSTD}/compress/zstd_compress.c
+        ${BASE_SRC_ZSTD}/compress/zstd_compress_literals.c
+        ${BASE_SRC_ZSTD}/compress/zstd_compress_sequences.c
+        ${BASE_SRC_ZSTD}/compress/zstd_compress_superblock.c
+        ${BASE_SRC_ZSTD}/compress/zstd_double_fast.c
+        ${BASE_SRC_ZSTD}/compress/zstd_fast.c
+        ${BASE_SRC_ZSTD}/compress/zstd_lazy.c
+        ${BASE_SRC_ZSTD}/compress/zstd_ldm.c
+        ${BASE_SRC_ZSTD}/compress/zstd_opt.c
+        ${BASE_SRC_ZSTD}/compress/zstd_preSplit.c
+        ${BASE_SRC_ZSTD}/compress/zstdmt_compress.c
+
+        ${BASE_SRC_ZSTD}/decompress/huf_decompress.c
+        ${BASE_SRC_ZSTD}/decompress/zstd_ddict.c
+        ${BASE_SRC_ZSTD}/decompress/zstd_decompress.c
+        ${BASE_SRC_ZSTD}/decompress/zstd_decompress_block.c
+)
 
 set(DROPBEAR_INCLUDES
         src/main/cpp/dropbear
@@ -822,11 +867,26 @@ add_compile_options("-fno-ident")
 # strip build-id
 add_link_options("-Wl,--build-id=none")
 
-# Code modifications are flagged with
-#   SSHD4A_REQUIRED_CHANGE
-# Used in comments to indicate code changes which are unconditional.
-# and the below
-#   SSHD4A_EXTEND_AUTHENTICATION
+# #############################################################################
+# The third party modules:
+
+add_library(zstd_lib STATIC ${SRC_ZSTD})
+target_include_directories(zstd_lib PRIVATE
+        ${BASE_SRC_ZSTD}
+        ${BASE_SRC_ZSTD}/common
+)
+target_compile_definitions(zstd_lib PRIVATE
+        ZSTD_DISABLE_ASM
+)
+
+add_library(lz4_lib STATIC ${SRC_LZ4})
+target_include_directories(lz4_lib PRIVATE
+        ${BASE_SRC_LZ4}
+)
+
+# #############################################################################
+
+# build dropbear
 add_compile_definitions(
         # Indicate that "options.h" MUST read the "localoptions.h"
         LOCALOPTIONS_H_EXISTS
@@ -874,12 +934,20 @@ target_include_directories(libsftp-server.so PRIVATE
 
 # #############################################################################
 # build rsync executable
-# use internal zlib; see app/src/main/cpp/rsync/zlib/README.rsync
 add_executable(librsync.so ${SRC_RSYNC})
 # needed for popt
 target_compile_definitions(librsync.so PRIVATE HAVE_CONFIG_H)
+# Uses rsync internal zlib; see app/src/main/cpp/rsync/zlib/README.rsync
+# zstd and lz4 added as third-party libs
 target_include_directories(librsync.so PRIVATE
         ${BASE_SRC_RSYNC}
         ${BASE_SRC_RSYNC}/popt
         ${BASE_SRC_RSYNC}/zlib
+        ${BASE_SRC_ZSTD}
+        ${BASE_SRC_ZSTD}/common
+        ${BASE_SRC_LZ4}
         )
+target_link_libraries(librsync.so PRIVATE
+        zstd_lib
+        lz4_lib
+)

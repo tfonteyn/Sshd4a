@@ -220,6 +220,9 @@
 /* Have attribute nonnull */
 #define HAVE_ATTRIBUTE__NONNULL__ 1
 
+/* compiler supports nonstring attribute */
+#define HAVE_ATTRIBUTE__NONSTRING__ 1
+
 /* OpenBSD's gcc has sentinel */
 /* #undef HAVE_ATTRIBUTE__SENTINEL__ */
 
@@ -366,6 +369,10 @@
 /* Define to 1 if you have the declaration of 'howmany', and to 0 if you
    don't. */
 #define HAVE_DECL_HOWMANY 1
+
+/* Define to 1 if you have the declaration of 'htobe32', and to 0 if you
+   don't. */
+#define HAVE_DECL_HTOBE32 1
 
 /* Define to 1 if you have the declaration of 'htole64', and to 0 if you
    don't. */
@@ -1050,6 +1057,9 @@
 /* Define if you have an old version of PAM which takes only one argument to
    pam_strerror */
 /* #undef HAVE_OLD_PAM */
+
+/* Define to 1 if you have the 'openat' function. */
+#define HAVE_OPENAT 1
 
 /* Define to 1 if you have the 'openlog_r' function. */
 /* #undef HAVE_OPENLOG_R */
@@ -2086,6 +2096,7 @@
 #define _PATH_PASSWD_PROG "/usr/bin/passwd"
 
 /* Specify location of ssh.pid */
+/* #define _PATH_SSH_PIDDIR "/usr/local/etc" */
 #define _PATH_SSH_PIDDIR "/var/run"
 
 /* Number of bits in time_t, on hosts where this is settable. */
