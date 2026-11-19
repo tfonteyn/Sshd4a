@@ -7,7 +7,14 @@
 # Prerequisites: see BUILDING and "build.sh"
 # It is assumed you already have git setup for your user.
 
-# If you don't have the autoconf command, install it with:
+# Code modifications are flagged with
+#   SSHD4A_REQUIRED_CHANGE
+# Used in comments to indicate code changes which are unconditional.
+# Added specially as a flag in the code + the CMakeLists.txt:
+#   SSHD4A_EXTEND_AUTHENTICATION
+
+
+# If you don't have autoconf commands, install them with:
 sudo apt install autoconf
 
 # #############################################################################
@@ -204,19 +211,17 @@ git merge --allow-unrelated-histories upstream-rsync/dev
 #     cpp/rsync/config.h
 #     cpp/rsync/syscall.c
 #
-#    Once done, commit the merge:
-git merge --continue
-
-
-cd ${PROJECT_ROOT}/app/src/main/cpp/
-./prebuild-rsyn.sh
-
-#    Commit and build...
-#
 # Typical issues:
 # - new .c files which need to be added to CMakeLists.txt
 # - compare/edit config.h in OUR source with the NEW one.
 #   Do not simply overwrite ours, as it contains tweaks at the end of the file!
+#
+#    Once done, commit the merge:
+git merge --continue
+
+# run the prebuild script
+cd ${PROJECT_ROOT}/app/src/main/cpp/
+./prebuild-rsyn.sh
 
 # ############################################################################
 #  Step 2.2 - OPENSSH
@@ -334,13 +339,14 @@ git merge --allow-unrelated-histories upstream-dropbear/dev
 #         svr-chansession.c
 #         svr-main.c
 #
-#    Merge and solve conflicts as usual.
-
-cd ${PROJECT_ROOT}/app/src/main/cpp
-./prebuild-dropbear.sh
-
-#    Commit and build...
 # Typical issues:
 # - new .c files which need to be added to CMakeLists.txt
 # - compare/edit config.h in OUR source with the NEW one.
 #   Do not simply overwrite ours, as it contains tweaks at the end of the file!
+#
+#    Once done, commit the merge:
+git merge --continue
+
+# run the prebuild script
+cd ${PROJECT_ROOT}/app/src/main/cpp
+./prebuild-dropbear.sh
