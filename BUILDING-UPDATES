@@ -11,7 +11,7 @@
 sudo apt install autoconf
 
 # #############################################################################
-# Define the versions for the external project code; update the urls if needed
+# Define the versions for the external project code
 # #############################################################################
 
 # RSYNC    - https://rsync.samba.org/
@@ -21,13 +21,15 @@ sudo apt install autoconf
 #            Note we use the mirror at https://dropbear.nl due to asn.au
 #            giving consistent TLS issues
 
-export RSYNC_VERSION="rsync-3.4.4"
-export OPENSSH_VERSION="openssh-10.4p1"
-export DROPBEAR_VERSION="dropbear-2026.94"
+export RSYNC_VERSION="3.5.2"
+export OPENSSH_VERSION="10.6p2"
+export DROPBEAR_VERSION="2026.94"
 
-export RSYNC_DOWNLOAD="https://download.samba.org/pub/rsync/src/${RSYNC_VERSION}.tar.gz"
-export OPENSSH_DOWNLOAD="https://mirror.ox.ac.uk/pub/OpenBSD/OpenSSH/portable/${OPENSSH_VERSION}.tar.gz"
-export DROPBEAR_DOWNLOAD="https://dropbear.nl/mirror/releases/${DROPBEAR_VERSION}.tar.bz2"
+# update the urls if needed
+
+export RSYNC_DOWNLOAD="https://download.samba.org/pub/rsync/src/rsync-${RSYNC_VERSION}.tar.gz"
+export OPENSSH_DOWNLOAD="https://mirror.ox.ac.uk/pub/OpenBSD/OpenSSH/portable/openssh-${OPENSSH_VERSION}.tar.gz"
+export DROPBEAR_DOWNLOAD="https://dropbear.nl/mirror/releases/dropbear-${DROPBEAR_VERSION}.tar.bz2"
 
 # #############################################################################
 # Java must be version 21 or higher
@@ -145,24 +147,24 @@ cd ${SRC_ROOT}
 export RSYNC="upstream-rsync"
 
 wget "${RSYNC_DOWNLOAD}" || { echo "Download failed. Exiting."; exit 1; }
-tar -xzf ${RSYNC_VERSION}.tar.gz
+tar -xzf rsync-${RSYNC_VERSION}.tar.gz
 
 # remove broken and/or unneeded rsync symlink
-rm ${RSYNC_VERSION}/md2man
+rm rsync-${RSYNC_VERSION}/md2man
 
 # rename the directory so we don't need to change the git remote names
 mkdir -p ${RSYNC}/app/src/main/cpp/
-mv ${RSYNC_VERSION} ${RSYNC}/app/src/main/cpp/rsync
+mv rsync-${RSYNC_VERSION} ${RSYNC}/app/src/main/cpp/rsync
 
 # Prepare a new repo
 cd ${RSYNC}
 printf "%b" "${GATRR}" > .gitattributes
 git init -b dev .
 git add * .gitattributes
-git commit -a -m "${RSYNC_VERSION}"
+git commit -a -m "rsync-${RSYNC_VERSION}"
 cd ${SRC_ROOT}
 
-# Configure rsync
+# Configure
 cd ${SRC_ROOT}/${RSYNC}/app/src/main/cpp/rsync
 ./configure --host ${ANDROID_TARGET} \
             --disable-openssl \
@@ -212,21 +214,21 @@ cd ${SRC_ROOT}
 export OPENSSH="upstream-openssh"
 
 wget "${OPENSSH_DOWNLOAD}" || { echo "Download failed. Exiting."; exit 1; }
-tar -xzf ${OPENSSH_VERSION}.tar.gz
+tar -xzf openssh-${OPENSSH_VERSION}.tar.gz
 
 # rename the directory so we don't need to change the git remote names
 mkdir -p ${OPENSSH}/app/src/main/cpp/
-mv ${OPENSSH_VERSION} ${OPENSSH}/app/src/main/cpp/openssh
+mv openssh-${OPENSSH_VERSION} ${OPENSSH}/app/src/main/cpp/openssh
 
 # Prepare a new repo
 cd ${OPENSSH}
 printf "%b" "${GATRR}" > .gitattributes
 git init -b dev .
 git add * .gitattributes
-git commit -a -m "${OPENSSH_VERSION}"
+git commit -a -m "openssh-${OPENSSH_VERSION}"
 cd ${SRC_ROOT}
 
-# Configure openssh
+# Configure
 cd ${SRC_ROOT}/${OPENSSH}/app/src/main/cpp/openssh
 # autoreconf is normally in /usr/bin
 autoreconf
@@ -261,11 +263,11 @@ cd ${SRC_ROOT}
 export DROPBEAR="upstream-dropbear"
 
 wget "${DROPBEAR_DOWNLOAD}" || { echo "Download failed. Exiting."; exit 1; }
-tar xf ${DROPBEAR_VERSION}.tar.bz2
+tar xf dropbear-${DROPBEAR_VERSION}.tar.bz2
 
 # rename the directory so we don't need to change the git remote names
 mkdir -p ${DROPBEAR}/app/src/main/cpp/
-mv ${DROPBEAR_VERSION} ${DROPBEAR}/app/src/main/cpp/dropbear
+mv dropbear-${DROPBEAR_VERSION} ${DROPBEAR}/app/src/main/cpp/dropbear
 
 # Prepare a new repo
 cd ${DROPBEAR}
@@ -273,10 +275,10 @@ printf "%b" "${GATRR}" > .gitattributes
 git init -b dev .
 # ignore warnings about txt files in "rsa-testvectors"
 git add * .gitattributes
-git commit -a -m "${DROPBEAR_VERSION}"
+git commit -a -m "dropbear-${DROPBEAR_VERSION}"
 cd ${SRC_ROOT}
 
-# Configure dropbear
+# Configure
 cd ${SRC_ROOT}/${DROPBEAR}/app/src/main/cpp/dropbear
 ./configure --host ${ANDROID_TARGET} --disable-syslog --disable-lastlog \
             --disable-utmp --disable-wtmp \
