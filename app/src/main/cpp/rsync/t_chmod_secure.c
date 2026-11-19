@@ -30,12 +30,28 @@ short info_levels[COUNT_INFO], debug_levels[COUNT_DEBUG];
 
 static int errs = 0;
 
+
+/* Does do_chmod_at()'s leaf handling refuse to follow a symlink at the final
+ * component? Yes wherever AT_SYMLINK_NOFOLLOW exists; otherwise the wrapper
+ * falls back to a following fchmodat() (documented limitation). Mirrors the
+ * #ifdef ladder in do_fchmodat_nofollow. */
+static int leaf_chmod_nofollow_supported(void)
+{
+#if defined AT_SYMLINK_NOFOLLOW
+	return 1;
+#else
+	return 0;
+#endif
+}
+
 static void check(const char *label, int actual_rc, int expect_ok,
 		  const char *path, mode_t expected_mode)
 {
 	struct stat st;
 	int got_ok = (actual_rc == 0);
-	if (got_ok != expect_ok) {
+	/* expect_ok < 0: rc is platform-dependent, don't assert it (leaf-symlink
+	 * scenario); only the target-mode check below is portable. */
+	if (expect_ok >= 0 && got_ok != expect_ok) {
 		fprintf(stderr, "FAIL [%s]: rc=%d errno=%d (%s), expected %s\n",
 			label, actual_rc, errno, strerror(errno),
 			expect_ok ? "success" : "rejection");
@@ -87,9 +103,17 @@ int main(int argc, char **argv)
 	 * files to mode 0600 so we have a clean baseline to compare.
 	 */
 
-	/* Scenario A: legitimate parent dir-symlink, chmod must succeed. */
+	/* Scenario A: legitimate parent dir-symlink within the tree.
+	 *
+	 * The within-tree symlink is followed and the chmod must succeed on
+	 * every platform: the kernel RESOLVE_BENEATH paths (Linux 5.6+ openat2,
+	 * FreeBSD 13+ / macOS 15+ O_RESOLVE_BENEATH) and, since the #715/-K
+	 * fallback fix, the per-component O_NOFOLLOW walk too (OpenBSD, NetBSD,
+	 * Solaris, older Cygwin, HPE NonStop, pre-5.6 Linux) -- which now follows
+	 * an in-tree directory symlink whose target is relative and ".."-free.
+	 * Escapes are still rejected on both paths (Scenario B). */
 	int rc = do_chmod_at("inside_link/sentinel", 0640);
-	check("A: legit dir-symlink within tree",
+	check("A: legit dir-symlink within tree (followed)",
 	      rc, 1, "realdir/sentinel", 0640);
 
 	/* Scenario B: parent symlink escapes the tree -- chmod must be
@@ -110,6 +134,21 @@ int main(int argc, char **argv)
 	rc = do_chmod_at("topfile", 0640);
 	check("D: top-level file, no parent component",
 	      rc, 1, "topfile", 0640);
+
+	/* Scenario E: the LEAF component is an escaping symlink -- the chmod-
+	 * specific TOCTOU, distinct from the parent races A/B. realdir is a real
+	 * directory, isolating the O_NOFOLLOW leaf guard. rc is platform-dependent
+	 * (refused on Linux, lchmod-the-symlink on *BSD/macOS), so assert only that
+	 * the outside target's mode is unchanged. */
+	if (leaf_chmod_nofollow_supported()) {
+		rc = do_chmod_at("realdir/leaflink", 0666);
+		check("E: leaf component is an escaping symlink (must not be followed)",
+		      rc, -1, "../trap/sentinel", 0600);
+	} else {
+		fprintf(stderr, "INFO: leaf-nofollow chmod unsupported here; "
+			"do_chmod_at follows a leaf symlink (documented limitation), "
+			"skipping scenario E\n");
+	}
 
 	if (errs)
 		fprintf(stderr, "%d failure(s)\n", errs);

@@ -93,6 +93,15 @@ details.
 [3]: https://rsync.samba.org/lists.html
 
 
+DISCORD
+-------
+
+There is also an rsync [Discord server][d] for real-time chat about rsync
+and its development.
+
+[d]: https://discord.gg/Avfvy9zhdp
+
+
 BUG REPORTS
 -----------
 
@@ -135,6 +144,8 @@ COPYRIGHT
 
 Rsync was originally written by Andrew Tridgell and Paul Mackerras.  Many
 people from around the world have helped to maintain and improve it.
+
+Special thanks go to Wayne Davison, who maintained rsync from 2004 to 2024.
 
 Rsync may be used, modified and redistributed only under the terms of
 the GNU General Public License, found in the file [COPYING][9] in this

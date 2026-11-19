@@ -5,7 +5,7 @@ AC_INIT([rsync],[ ],[https://rsync.samba.org/bug-tracking.html])
 AC_C_BIGENDIAN
 AC_HEADER_DIRENT
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS(sys/fcntl.h sys/select.h fcntl.h sys/time.h sys/unistd.h \
+AC_CHECK_HEADERS(poll.h sys/fcntl.h sys/select.h fcntl.h sys/time.h sys/unistd.h \
     unistd.h utime.h compat.h sys/param.h ctype.h sys/wait.h sys/stat.h \
     sys/ioctl.h sys/filio.h string.h stdlib.h sys/socket.h sys/mode.h grp.h \
     sys/un.h sys/attr.h arpa/inet.h arpa/nameser.h locale.h sys/types.h \
@@ -13,7 +13,7 @@ AC_CHECK_HEADERS(sys/fcntl.h sys/select.h fcntl.h sys/time.h sys/unistd.h \
     sys/acl.h acl/libacl.h attr/xattr.h sys/xattr.h sys/extattr.h dl.h \
     popt.h popt/popt.h linux/falloc.h netinet/in_systm.h netgroup.h \
     zlib.h xxhash.h openssl/md4.h openssl/md5.h zstd.h lz4.h sys/file.h \
-    bsd/string.h)
+    sys/resource.h bsd/string.h idn2.h wchar.h linux/ioprio.h sys/syscall.h)
 AC_CHECK_HEADERS([netinet/ip.h], [], [], [[#include <netinet/in.h>]])
 AC_HEADER_MAJOR_FIXED
 
@@ -59,6 +59,7 @@ AC_PROG_CXX
 AC_PROG_AWK
 AC_PROG_EGREP
 AC_PROG_INSTALL
+AC_CHECK_TOOL([STRIP], [strip], [strip])
 AC_PROG_MKDIR_P
 AC_SUBST(SHELL)
 AC_PATH_PROG([PERL], [perl])
@@ -81,6 +82,28 @@ AC_ARG_ENABLE(profile,
 if test x"$enable_profile" = x"yes"; then
 	CFLAGS="$CFLAGS -pg"
 fi
+
+dnl Coverage build (gcov) for `make coverage`. NOTE: --enable-profile above is
+dnl gprof (-pg) and is NOT coverage. -O0 keeps branch coverage meaningful;
+dnl -fprofile-update=atomic keeps the shared .gcda counters correct while the
+dnl suite runs many rsync processes in parallel.
+AC_ARG_ENABLE(coverage,
+	AS_HELP_STRING([--enable-coverage],[build with gcov instrumentation for `make coverage`]))
+if test x"$enable_coverage" = x"yes"; then
+	CFLAGS="$CFLAGS --coverage -fprofile-update=atomic -O0"
+	CXXFLAGS="$CXXFLAGS --coverage -fprofile-update=atomic -O0"
+	LDFLAGS="$LDFLAGS --coverage"
+	AC_DEFINE([GCOV_COVERAGE], 1,
+		[Flush gcov counters at exit_cleanup: rsync's children exit via _exit(), which bypasses the gcov atexit handler, so without this no .gcda is written for the receiver/generator/daemon-worker processes.])
+fi
+
+dnl openat2(RESOLVE_BENEATH) is used on Linux 5.6+ for the secure resolver.
+dnl --disable-openat2 forces the portable per-component O_NOFOLLOW fallback to
+dnl run as the primary resolver on ordinary Linux, so that tier is exercised
+dnl (and coverage-counted) without needing a pre-5.6 kernel. Behaviour-neutral
+dnl by default (the knob only REMOVES a tier when explicitly disabled).
+AC_ARG_ENABLE(openat2,
+	AS_HELP_STRING([--disable-openat2],[do not use Linux openat2(RESOLVE_BENEATH); force the portable resolver (for exercising the fallback tier)]))
 
 AC_MSG_CHECKING([if md2man can create manpages])
 if test x"$ac_cv_path_PYTHON3" = x; then
@@ -241,6 +264,13 @@ AC_DEFINE_UNQUOTED(NOBODY_GROUP, "$NOBODY_GROUP", [unprivileged group for unpriv
 # rolling-checksum SIMD optimizations
 ROLL_SIMD=
 
+# Autoconf reports x86-64 as amd64 on FreeBSD, while the object-variable
+# suffixes in Makefile.in use x86_64 on every platform.
+asm_cpu="$host_cpu"
+if test x"$asm_cpu" = x"amd64"; then
+    asm_cpu=x86_64
+fi
+
 AC_MSG_CHECKING([whether to enable rolling-checksum SIMD optimizations])
 AC_ARG_ENABLE(roll-simd,
     AS_HELP_STRING([--enable-roll-simd],[enable/disable to control rolling-checksum SIMD optimizations (requires c++)]))
@@ -292,7 +322,7 @@ if test x"$enable_roll_simd" != x"no"; then
 	AC_LANG(C)
 	if test x"$CXX_OK" = x"yes"; then
 	    # AC_MSG_RESULT() is called below.
-	    ROLL_SIMD="$host_cpu"
+	    ROLL_SIMD="$asm_cpu"
 	elif test x"$enable_roll_simd" = x"yes"; then
 	    AC_MSG_RESULT(error)
 	    AC_MSG_ERROR(The rolling-checksum SIMD compilation test failed.
@@ -331,10 +361,8 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[ ]], [[return 0;]])],
 CFLAGS="$OLD_CFLAGS"
 AC_SUBST(NOEXECSTACK)
 
-dnl Only define HAVE_OPENAT2 when both the <linux/openat2.h> header and the
-dnl SYS_openat2 syscall number are present.  syscall.c uses openat2(RESOLVE_BENEATH)
-dnl for the secure resolver on Linux 5.6+; defining it unconditionally broke the
-dnl build on older kernels/headers that lack the header (#924, #905, #900).
+dnl We need both the SYS_openat2 syscall number and <linux/openat2.h> (for
+dnl struct open_how / RESOLVE_BENEATH); some setups have one without the other.
 AC_CACHE_CHECK([for openat2],rsync_cv_HAVE_OPENAT2,[
     AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
@@ -348,9 +376,11 @@ return SYS_openat2 + (int)how.resolve;
     ],
     [rsync_cv_HAVE_OPENAT2=yes], [rsync_cv_HAVE_OPENAT2=no])
 ])
-if test x"$rsync_cv_HAVE_OPENAT2" = x"yes"; then
-  AC_DEFINE([HAVE_OPENAT2], 1,
-    [Define to use Linux openat2(RESOLVE_BENEATH) in secure_relative_open where available.])
+if test x"$enable_openat2" != x"no"; then
+    if test x"$rsync_cv_HAVE_OPENAT2" = x"yes"; then
+      AC_DEFINE([HAVE_OPENAT2], 1,
+        [Define to use Linux openat2(RESOLVE_BENEATH) in secure_relative_open where available.])
+    fi
 fi
 
 # arrgh. libc in some old debian version screwed up the largefile
@@ -410,21 +440,17 @@ AS_HELP_STRING([--disable-ipv6],[disable to omit ipv6 support]),
 	;;
   esac ],
 
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[ /* AF_INET6 availability check */
-#include <stdlib.h>
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <sys/types.h>
 #include <sys/socket.h>
-int main()
-{
-   if (socket(AF_INET6, SOCK_STREAM, 0) < 0)
-     exit(1);
-   else
-     exit(0);
-}
+#include <netinet/in.h>
+]], [[
+struct sockaddr_in6 sa6;
+(void)sa6;
+(void)AF_INET6;
 ]])],
   [AC_MSG_RESULT(yes)
-  AC_DEFINE(INET6, 1, true if you have IPv6)],
-  [AC_MSG_RESULT(no)],
+  AC_DEFINE(INET6, 1, [true if you have IPv6])],
   [AC_MSG_RESULT(no)]
 ))
 
@@ -506,7 +532,7 @@ fi
 
 if test x"$enable_md5_asm" != x"no"; then
     if test x"$host_cpu" = x"x86_64" || test x"$host_cpu" = x"amd64"; then
-	MD5_ASM="$host_cpu"
+	MD5_ASM="$asm_cpu"
     elif test x"$enable_md5_asm" = x"yes"; then
         AC_MSG_RESULT(unavailable)
         AC_MSG_ERROR(The ASM optimizations are currently x86_64|amd64 only.
@@ -535,7 +561,7 @@ if test x"$ROLL_SIMD" = x""; then
 fi
 
 if test x"$enable_roll_asm" = x"yes"; then
-    ROLL_ASM="$host_cpu"
+    ROLL_ASM="$asm_cpu"
     AC_MSG_RESULT([yes ($ROLL_ASM)])
     AC_DEFINE(USE_ROLL_ASM, 1, [Define to 1 to enable rolling-checksum ASM optimizations (requires --enable-roll-simd)])
     ROLL_ASM='$(ROLL_ASM_'"$ROLL_ASM)"
@@ -603,6 +629,27 @@ if test x"$enable_lz4" != x"no"; then
 	AC_MSG_RESULT(no)
 	err_msg="$err_msg$nl- Failed to find lz4.h for lz4 compression support."
 	no_lib="$no_lib lz4"
+    fi
+else
+    AC_MSG_RESULT(no)
+fi
+
+AC_MSG_CHECKING([whether to enable IDN support])
+AC_ARG_ENABLE([idn],
+        AS_HELP_STRING([--disable-idn], [disable to omit IDN (Internationalized Domain Name) support]))
+AH_TEMPLATE([SUPPORT_IDN],
+[Undefine if you do not want IDN support.  By default this is defined.])
+if test x"$enable_idn" != x"no"; then
+    if test x"$ac_cv_header_idn2_h" = x"yes"; then
+	AC_MSG_RESULT(yes)
+	AC_SEARCH_LIBS(idn2_lookup_ul, idn2,
+	    [AC_DEFINE(SUPPORT_IDN)],
+	    [err_msg="$err_msg$nl- Failed to find idn2_lookup_ul function in idn2 lib.";
+	     no_lib="$no_lib idn"])
+    else
+	AC_MSG_RESULT(no)
+	err_msg="$err_msg$nl- Failed to find idn2.h for IDN support."
+	no_lib="$no_lib idn"
     fi
 else
     AC_MSG_RESULT(no)
@@ -891,6 +938,19 @@ AC_HAVE_TYPE([struct stat64], [#include <stdio.h>
 
 # if we can't find strcasecmp, look in -lresolv (for Unixware at least)
 #
+dnl rsync's I/O readiness loops use poll() rather than select() so that a
+dnl file descriptor at or above FD_SETSIZE cannot overflow an fd_set (which
+dnl is undefined behaviour and could hang the transfer).  poll() is in
+dnl POSIX.1-2001; fail early and clearly if this target lacks it.
+dnl
+dnl io.c and socket.c include <poll.h> unconditionally, so the HEADER has to
+dnl be required too: a system that exposes poll() through some other header
+dnl would otherwise pass configure and then fail to compile.
+AC_CHECK_FUNCS([poll], , [AC_MSG_ERROR([rsync requires poll(); please report the platform to the rsync developers])])
+if test x"$ac_cv_header_poll_h" != x"yes"; then
+    AC_MSG_ERROR([rsync requires <poll.h>; please report the platform to the rsync developers])
+fi
+
 AC_CHECK_FUNCS(strcasecmp)
 if test x"$ac_cv_func_strcasecmp" = x"no"; then
     AC_CHECK_LIB(resolv, strcasecmp)
@@ -908,7 +968,8 @@ dnl AC_FUNC_MEMCMP
 
 AC_FUNC_UTIME_NULL
 AC_FUNC_ALLOCA
-AC_CHECK_FUNCS(waitpid wait4 getcwd chown chmod lchmod mknod mkfifo \
+AC_CHECK_FUNCS(waitpid wait4 getcwd chown chmod lchmod mknod mkfifo fdopendir \
+    getrlimit setrlimit \
     fchmod fstat ftruncate strchr readlink link utime utimes lutimes strftime \
     chflags getattrlist mktime innetgr linkat mknodat mkfifoat \
     memmove lchown vsnprintf snprintf vasprintf asprintf setsid strpbrk \
@@ -916,8 +977,20 @@ AC_CHECK_FUNCS(waitpid wait4 getcwd chown chmod lchmod mknod mkfifo \
     setlocale setmode open64 lseek64 mkstemp64 mtrace va_copy __va_copy \
     seteuid strerror putenv iconv_open locale_charset nl_langinfo getxattr \
     extattr_get_link sigaction sigprocmask setattrlist getgrouplist \
-    initgroups utimensat posix_fallocate attropen setvbuf nanosleep usleep \
-    setenv unsetenv)
+    initgroups utimensat futimens posix_fallocate attropen setvbuf nanosleep usleep \
+    setenv unsetenv mbrtowc setpriority)
+
+dnl dirfd() is a macro or static inline on several systems (the BSDs), so the
+dnl default AC_CHECK_FUNCS link probe -- which declares `char dirfd(void);` and
+dnl links against a bare symbol -- gives a false negative there.  Probe it with a
+dnl real compile+link that includes <dirent.h> and actually calls dirfd().
+AC_CACHE_CHECK([for dirfd], rsync_cv_HAVE_DIRFD,
+  [AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <dirent.h>]],
+    [[DIR *d = opendir("."); return d ? dirfd(d) < -1 : 0;]])],
+    [rsync_cv_HAVE_DIRFD=yes], [rsync_cv_HAVE_DIRFD=no])])
+if test x"$rsync_cv_HAVE_DIRFD" = x"yes"; then
+    AC_DEFINE([HAVE_DIRFD], 1, [Define to 1 if you have a working dirfd() (function or macro).])
+fi
 
 dnl cygwin iconv.h defines iconv_open as libiconv_open
 if test x"$ac_cv_func_iconv_open" != x"yes"; then
@@ -1240,37 +1313,14 @@ if test x"$rsync_cv_HAVE_SECURE_MKSTEMP" = x"yes"; then
 fi
 
 
-AC_CACHE_CHECK([if mknod creates FIFOs],rsync_cv_MKNOD_CREATES_FIFOS,[
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <stdio.h>
-#include <sys/stat.h>
-#include <errno.h>
-#if HAVE_UNISTD_H
-# include <unistd.h>
-#endif
-int main(void) { int rc, ec; char *fn = "fifo-test";
-unlink(fn); rc = mknod(fn,S_IFIFO,0600); ec = errno; unlink(fn);
-if (rc) {printf("(%d %d) ",rc,ec); return ec;}
-return 0;}]])],[rsync_cv_MKNOD_CREATES_FIFOS=yes],[rsync_cv_MKNOD_CREATES_FIFOS=no],[rsync_cv_MKNOD_CREATES_FIFOS=cross])])
-if test x"$rsync_cv_MKNOD_CREATES_FIFOS" = x"yes"; then
-    AC_DEFINE(MKNOD_CREATES_FIFOS, 1, [Define to 1 if mknod() can create FIFOs.])
-fi
-
-AC_CACHE_CHECK([if mknod creates sockets],rsync_cv_MKNOD_CREATES_SOCKETS,[
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <stdio.h>
-#include <sys/stat.h>
-#include <errno.h>
-#if HAVE_UNISTD_H
-# include <unistd.h>
-#endif
-int main(void) { int rc, ec; char *fn = "sock-test";
-unlink(fn); rc = mknod(fn,S_IFSOCK,0600); ec = errno; unlink(fn);
-if (rc) {printf("(%d %d) ",rc,ec); return ec;}
-return 0;}]])],[rsync_cv_MKNOD_CREATES_SOCKETS=yes],[rsync_cv_MKNOD_CREATES_SOCKETS=no],[rsync_cv_MKNOD_CREATES_SOCKETS=cross])])
-if test x"$rsync_cv_MKNOD_CREATES_SOCKETS" = x"yes"; then
-    AC_DEFINE(MKNOD_CREATES_SOCKETS, 1, [Define to 1 if mknod() can create sockets.])
-fi
+# Whether mknod()/mknodat() can create a FIFO or a unix-domain socket is a
+# property of the target filesystem, not a build-time constant -- e.g. mknod
+# makes sockets on Linux but not the BSDs/macOS/Solaris, and a single transfer
+# can write to filesystems with different capabilities.  So rsync no longer
+# probes this at configure time (a run-test that also misfired when cross-
+# compiling); do_mknod*() just try mknod[at]() and, on failure, fall back to
+# mkfifo[at]()/socket+bind() per call.  We only need the libc symbols, checked
+# above via AC_CHECK_FUNCS (mknod mknodat mkfifo mkfifoat) -- all link tests.
 
 #
 # The following test was mostly taken from the tcl/tk plus patches
@@ -1439,6 +1489,66 @@ else
 	    AC_MSG_ERROR(Failed to find extended attribute support)
 	else
 	    AC_MSG_RESULT(No extended attribute support found)
+	fi
+	;;
+    esac
+fi
+
+#################################################
+# On Linux, POSIX ACLs are stored as the "system.posix_acl_{access,default}"
+# xattrs, so we can get/set them through a held O_NOFOLLOW fd (fsetxattr) or a
+# dirfd+leaf (setxattrat, AT_SYMLINK_NOFOLLOW) instead of the path-based libacl
+# acl_*_file() calls -- making the operation safe against a parent-symlink race.
+# This needs POSIX ACLs and the f/at xattr syscalls, which on Linux are
+# available whenever <sys/xattr.h> (or <attr/xattr.h>) is -- independent of the
+# -X feature (--disable-xattr-support), so we gate on the header, not
+# enable_xattr_support.
+AH_TEMPLATE([SUPPORT_ACL_FD],
+[Define to 1 to do POSIX ACL ops via fd/at xattr syscalls (lib/acl.c)])
+AH_TEMPLATE([HAVE_XATTRAT_SYSCALLS],
+[Define to 1 if the setxattrat/getxattrat/removexattrat syscalls are available])
+if test x"$samba_cv_HAVE_POSIX_ACLS" = x"yes" \
+   && { test x"$ac_cv_header_sys_xattr_h" = x"yes" || test x"$ac_cv_header_attr_xattr_h" = x"yes"; }; then
+    case "$host_os" in
+    *linux*)
+	AC_DEFINE(SUPPORT_ACL_FD, 1)
+	AC_CACHE_CHECK([for SYS_setxattrat],rsync_cv_have_sys_setxattrat,[
+	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/syscall.h>
+#include <stdint.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+struct xattr_args { uint64_t value; uint32_t size; uint32_t flags; };]],
+	[[struct xattr_args a; a.value = 0; a.size = 0; a.flags = 0;
+	  syscall(SYS_setxattrat, 0, ".", 0, "n", &a, sizeof a);
+	  syscall(SYS_getxattrat, 0, ".", 0, "n", &a, sizeof a);
+	  syscall(SYS_removexattrat, 0, ".", 0, "n");]])],[rsync_cv_have_sys_setxattrat=yes],[rsync_cv_have_sys_setxattrat=no])])
+	if test x"$rsync_cv_have_sys_setxattrat" = x"yes"; then
+	    AC_DEFINE(HAVE_XATTRAT_SYSCALLS, 1)
+	fi
+	;;
+    esac
+fi
+
+#################################################
+# Detect a patched libacl providing the race-safe
+# *_at ACL entry points (acl_get_file_at/acl_set_file_at/acl_delete_def_file_at,
+# ACL_1.3, unreleased upstream).  When present we route the race-safe ACL get/
+# set/delete through them on Linux -- race-safe on every kernel (6.13+ uses
+# *xattrat; older uses libacl's /proc/self/fd compat).  A stock -lacl lacks these
+# symbols, so this stays undefined and the build falls back to lib/acl.c;
+# detection must therefore run against the patched lib (CPPFLAGS/LDFLAGS).
+AH_TEMPLATE([HAVE_LIBACL_AT],
+[Define to 1 if libacl provides acl_get_file_at/acl_set_file_at/acl_delete_def_file_at])
+if test x"$samba_cv_HAVE_POSIX_ACLS" = x"yes"; then
+    case "$host_os" in
+    *linux*)
+	AC_CHECK_LIB(acl, acl_get_file_at, [rsync_have_libacl_at=yes], [rsync_have_libacl_at=no])
+	if test x"$rsync_have_libacl_at" = x"yes"; then
+	    AC_CHECK_FUNCS([acl_set_file_at acl_delete_def_file_at], [], [rsync_have_libacl_at=no])
+	fi
+	if test x"$rsync_have_libacl_at" = x"yes"; then
+	    AC_DEFINE(HAVE_LIBACL_AT, 1)
 	fi
 	;;
     esac
