@@ -1,0 +1,9 @@
+NEW:
+
+- rsync 3.5.2
+- openssh 10.6p2
+- GitHub #37: rsync now supports lz4/zstd compression
+
+FIXES:
+
+- GitHub #35: prevent a corrupted pidfile from breaking our startup
