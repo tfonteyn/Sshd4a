@@ -9,13 +9,13 @@
 #
 # The actual project build should be done with "build.sh"
 
-# 2. BUILDING-CONFIG-NOTES
-#    Notes taken when this app was first build. Information only.
-
-# 3. BUILDING-SIGNING
+# 2. BUILDING-SIGNING
 #    How to set up signing the APK.
 
-# 4. BUILDING-UPDATES
+# 3. third_party/BUILDING-CONFIG-NOTES
+#    Notes taken when this app was first build. Information only.
+
+# 4. third_party/BUILDING-UPDATES
 #    Describes how to upgrade the external packages which is a complex task.
 #    To be honest: it's terrible... I hope to clean it up one day.
 #    It's a living doc, and may/will contain errors!

@@ -43,46 +43,67 @@ export PATH=${JAVA_HOME}/bin:${PATH}
 # Define the physical locations.
 # #############################################################################
 
+# Android SDK location
+export ANDROID_HOME=/c/d/sdk
+
 # The root directory of the Ssh4d project (i.e. where the projects .git is)
 export PROJECT_ROOT=/c/Data/AndroidStudioProjects/Sshd4a
 
 # The temp working directory where the tarballs will be downloaded and git remotes will be setup.
 export SRC_ROOT=/c/tmp/sshd4a-tarballs
 
-# Android SDK location
-export ANDROID_HOME=/c/d/sdk
-
 # #############################################################################
-# SDK and NDK versions
+# SDK and NDK versions - upgrade as needed/wanted
 # #############################################################################
 
-# Android NDK location/version; upgrade as needed/wanted
-# This must also be updated in gradle/libs.versions.toml
+# Android NDK version
+# This must match the version set in gradle/libs.versions.toml
 export ANDROID_NDK=${ANDROID_HOME}/ndk/30.0.16248370
 
-# Android minSdkVersion. The minimal version, upgrade as needed/wanted
+# Android minSdkVersion.
 export ANDROID_MIN_SDK=30
 
 # #############################################################################
-# Build platform
+# Build platform - Only choose ONE of each, depending on your platform/device.
 # #############################################################################
 
-# Only choose ONE of these, depending on your device.
+# The platform running the build
+export HOST_ARCH=windows-x86_64
+# export HOST_ARCH=linux-x86_64
+
+# The android architecture
 # The first, "aarch64", is most likely the one you want.
 export ANDROID_TARGET=aarch64-linux-android
 # export ANDROID_TARGET=armv7a-linux-androideabi
 # export ANDROID_TARGET=i686-linux-android
 # export ANDROID_TARGET=x86_64-linux-android
 
-# The native platform
-# export TOOLCHAIN=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64
-export TOOLCHAIN=${ANDROID_NDK}/toolchains/llvm/prebuilt/windows-x86_64
-
 # #############################################################################
 # Below this point, no configuration changes needed
 # #############################################################################
 
+export TOOLCHAIN=${ANDROID_NDK}/toolchains/llvm/prebuilt/${HOST_ARCH}
+export AR=${TOOLCHAIN}/bin/llvm-ar
+export CC=${TOOLCHAIN}/bin/${ANDROID_TARGET}${ANDROID_MIN_SDK}-clang
+export AS=${CC}
+export CXX=${TOOLCHAIN}/bin/${ANDROID_TARGET}${ANDROID_MIN_SDK}-clang++
+export LD=${TOOLCHAIN}/bin/ld
+export RANLIB=${TOOLCHAIN}/bin/llvm-ranlib
+export STRIP=${TOOLCHAIN}/bin/llvm-strip
+
+# Used by Windows tar for symlinks.
+export MSYS=winsymlinks:nativestrict
+
+# content for ".gitattributes"
+export GATRR="* text eol=lf\n*.txt text\n*.png binary\n*.jar binary\n"
+
+# add the tools to the path
+export PATH=${ANDROID_HOME}/platform-tools:${TOOLCHAIN}/bin:${ANDROID_NDK}/prebuilt/${HOST_ARCH}/bin:${PATH}
+
+# #############################################################################
 # Sanity checks.
+# #############################################################################
+
 if ! command -v java >/dev/null 2>&1; then
     echo "Error: 'java' not found in your PATH."
     exit 1
@@ -92,35 +113,21 @@ fi
 JAVA_VER=$(java --version | head -n 1 | awk '{print $2}' | cut -d. -f1)
 if [ -z "$JAVA_VER" ] || [ "$JAVA_VER" -lt 21 ]; then
     echo "Error: Java 21 is required. Found version: ${JAVA_VER:-unknown}"
-    exit 1
+    return 1 2>/dev/null || exit 1
 fi
 
 if [ -z "${ANDROID_NDK}" ]; then
     echo "ANDROID_NDK is not set or is empty."
-    exit 1
+    return 1 2>/dev/null || exit 1
 fi
 if [ ! -d "${ANDROID_NDK}" ]; then
     echo "${ANDROID_NDK} does not exist."
-    exit 1
+    return 1 2>/dev/null || exit 1
 fi
 if [ -z "${TOOLCHAIN}" ]; then
     echo "TOOLCHAIN is not set or is empty."
-    exit 1
+    return 1 2>/dev/null || exit 1
 fi
-
-export AR=${TOOLCHAIN}/bin/llvm-ar
-export CC=${TOOLCHAIN}/bin/${ANDROID_TARGET}${ANDROID_MIN_SDK}-clang
-export AS=${CC}
-export CXX=${TOOLCHAIN}/bin/${ANDROID_TARGET}${ANDROID_MIN_SDK}-clang++
-export LD=${TOOLCHAIN}/bin/ld
-export RANLIB=${TOOLCHAIN}/bin/llvm-ranlib
-export STRIP=${TOOLCHAIN}/bin/llvm-strip
-
-# content for ".gitattributes"
-export GATRR="* text eol=lf\n*.txt text\n*.png binary\n*.jar binary\n"
-
-# add the tools to the path
-export PATH=${ANDROID_HOME}/platform-tools:${TOOLCHAIN}/bin:${PATH}
 
 # #############################################################################
 # Configuration dump
@@ -146,11 +153,8 @@ echo SRC_ROOT=${SRC_ROOT}
 cd ${SRC_ROOT}
 export RSYNC="upstream-rsync"
 
-wget "${RSYNC_DOWNLOAD}" || { echo "Download failed. Exiting."; exit 1; }
+wget "${RSYNC_DOWNLOAD}" || { echo "Download failed. Exiting."; return 1 2>/dev/null || exit 1; }
 tar -xzf rsync-${RSYNC_VERSION}.tar.gz
-
-# remove broken and/or unneeded rsync symlink
-rm rsync-${RSYNC_VERSION}/md2man
 
 # rename the directory so we don't need to change the git remote names
 mkdir -p ${RSYNC}/app/src/main/cpp/
@@ -166,11 +170,15 @@ cd ${SRC_ROOT}
 
 # Configure
 cd ${SRC_ROOT}/${RSYNC}/app/src/main/cpp/rsync
+
+export THIRD_PARTY_PREFIX="${PROJECT_ROOT}/build/third_party_prefix"
+
 ./configure --host ${ANDROID_TARGET} \
+            CPPFLAGS="$CPPFLAGS -I${THIRD_PARTY_PREFIX}/include/" \
+            LDFLAGS="$LDFLAGS -L${THIRD_PARTY_PREFIX}/lib/" \
             --disable-openssl \
             --disable-xxhash \
-            --disable-zstd \
-            --disable-lz4 \
+            --disable-idn \
             --disable-md2man \
             --disable-roll-simd \
             --disable-md5-asm \
