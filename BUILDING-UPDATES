@@ -34,7 +34,7 @@ export DROPBEAR_DOWNLOAD="https://dropbear.nl/mirror/releases/${DROPBEAR_VERSION
 # This can be skipped if the java 21 bin directory is already in your path.
 # #############################################################################
 
-export JAVA_HOME=/cygdrive/c/d/jdk/
+export JAVA_HOME=/c/d/jdk/
 export PATH=${JAVA_HOME}/bin:${PATH}
 
 # #############################################################################
@@ -42,13 +42,13 @@ export PATH=${JAVA_HOME}/bin:${PATH}
 # #############################################################################
 
 # The root directory of the Ssh4d project (i.e. where the projects .git is)
-export PROJECT_ROOT=~/Sshd4a
+export PROJECT_ROOT=/c/Data/AndroidStudioProjects/Sshd4a
 
 # The temp working directory where the tarballs will be downloaded and git remotes will be setup.
-export SRC_ROOT=~/tmp/sshd4a-tarballs
+export SRC_ROOT=/c/tmp/sshd4a-tarballs
 
 # Android SDK location
-export ANDROID_HOME=~/android-sdk
+export ANDROID_HOME=/c/d/sdk
 
 # #############################################################################
 # SDK and NDK versions
@@ -56,7 +56,7 @@ export ANDROID_HOME=~/android-sdk
 
 # Android NDK location/version; upgrade as needed/wanted
 # This must also be updated in gradle/libs.versions.toml
-export ANDROID_NDK=${ANDROID_HOME}/ndk/30.0.14904198
+export ANDROID_NDK=${ANDROID_HOME}/ndk/30.0.16248370
 
 # Android minSdkVersion. The minimal version, upgrade as needed/wanted
 export ANDROID_MIN_SDK=30
@@ -73,8 +73,8 @@ export ANDROID_TARGET=aarch64-linux-android
 # export ANDROID_TARGET=x86_64-linux-android
 
 # The native platform
-export TOOLCHAIN=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64
-# export TOOLCHAIN=${ANDROID_NDK}/toolchains/llvm/prebuilt/windows-x86_64
+# export TOOLCHAIN=${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64
+export TOOLCHAIN=${ANDROID_NDK}/toolchains/llvm/prebuilt/windows-x86_64
 
 # #############################################################################
 # Below this point, no configuration changes needed
@@ -123,14 +123,16 @@ export PATH=${ANDROID_HOME}/platform-tools:${TOOLCHAIN}/bin:${PATH}
 # #############################################################################
 # Configuration dump
 # #############################################################################
+echo ""
 echo Tools:
+echo ""
 echo JAVA_HOME=${JAVA_HOME}
 echo ANDROID_HOME=${ANDROID_HOME}
 echo ANDROID_NDK=${ANDROID_NDK}
 echo ANDROID_MIN_SDK=${ANDROID_MIN_SDK}
 echo ANDROID_TARGET=${ANDROID_TARGET}
 echo TOOLCHAIN=${TOOLCHAIN}
-
+echo ""
 echo Project:
 echo PROJECT_ROOT=${PROJECT_ROOT}
 echo SRC_ROOT=${SRC_ROOT}
@@ -162,9 +164,15 @@ cd ${SRC_ROOT}
 
 # Configure rsync
 cd ${SRC_ROOT}/${RSYNC}/app/src/main/cpp/rsync
-./configure --host ${ANDROID_TARGET} --disable-openssl --disable-xxhash --disable-zstd \
+./configure --host ${ANDROID_TARGET} \
+            --disable-openssl \
+            --disable-xxhash \
+            --disable-zstd \
             --disable-lz4 \
-            --disable-md2man --disable-roll-simd --disable-md5-asm --disable-roll-asm \
+            --disable-md2man \
+            --disable-roll-simd \
+            --disable-md5-asm \
+            --disable-roll-asm \
             --enable-largefile
 
 # Switching to the project for merging.
