@@ -38,6 +38,7 @@ fi
 # cmake must be installed manually by sdkmanager
 # TODO: Gradle seems to refuse installing it if there is a global cmake command?
 # Will do nothing if it's already there.
+# TODO: sdkmanager is deprecated; use "android sdk install" command from newer tools version
 sdkmanager "cmake;$CMAKE_VER"
 
 # Add to the path
@@ -46,6 +47,9 @@ export PATH=$PATH:$ANDROID_HOME/cmake/$CMAKE_VER/bin
 # ############################################################################
 # Sshd4a build
 # ############################################################################
+
+# third-party gits
+git submodule update --init --recursive
 
 # run the prebuild scripts
 app/src/main/cpp/prebuild-rsyn.sh
