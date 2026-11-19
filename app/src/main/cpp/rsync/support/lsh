@@ -1,0 +1,108 @@
+#!/usr/bin/env perl
+# This is a "local shell" command that works like a remote shell but only for
+# the local host.  See the usage message for more details.
+
+use strict;
+use warnings;
+use Getopt::Long;
+use English '-no_match_vars';
+
+&Getopt::Long::Configure('bundling');
+&Getopt::Long::Configure('require_order');
+GetOptions(
+    'l=s' => \( my $login_name ),
+    '1|2|4|6|A|a|C|f|g|k|M|N|n|q|s|T|t|V|v|X|x|Y' => sub { }, # Ignore
+    'b|c|D|e|F|i|L|m|O|o|p|R|S|w=s' => sub { }, # Ignore
+    'no-cd' => \( my $no_chdir ),
+    'sudo' => \( my $use_sudo ),
+    'rrsync=s' => \( my $rrsync_dir ),
+    'rropts=s' => \( my $rrsync_opts ),
+) or &usage;
+&usage unless @ARGV > 1;
+
+my $host = shift;
+if ($host =~ s/^([^@]+)\@//) {
+    $login_name = $1;
+}
+if ($host eq 'lh') {
+    $no_chdir = 1;
+} elsif ($host ne 'localhost') {
+    die "lsh: unable to connect to host $host\n";
+}
+
+my ($home_dir, @cmd);
+if ($login_name) {
+    my ($uid, $gid);
+    if ($login_name =~ /\D/) {
+	$uid = getpwnam($login_name);
+	die "Unknown user: $login_name\n" unless defined $uid;
+    } else {
+	$uid = $login_name;
+    }
+    ($login_name, $gid, $home_dir) = (getpwuid($uid))[0,3,7];
+    if ($use_sudo) {
+	unshift @ARGV, "cd '$home_dir' &&" unless $no_chdir;
+	unshift @cmd, qw( sudo -H -u ), $login_name;
+	$no_chdir = 1;
+    } else {
+	my $groups = "$gid $gid";
+	while (my ($grgid, $grmembers) = (getgrent)[2,3]) {
+	    if ($grgid != $gid && $grmembers =~ /(^|\s)\Q$login_name\E(\s|$)/o) {
+		$groups .= " $grgid";
+	    }
+	}
+
+	my ($ruid, $euid) = ($UID, $EUID);
+	$GID = $EGID = $groups;
+	$UID = $EUID = $uid;
+	die "Cannot set ruid: $! (use --sudo?)\n" if $UID == $ruid && $ruid != $uid;
+	die "Cannot set euid: $! (use --sudo?)\n" if $EUID == $euid && $euid != $uid;
+
+	$ENV{USER} = $ENV{USERNAME} = $login_name;
+	$ENV{HOME} = $home_dir;
+    }
+} else {
+    $home_dir = (getpwuid($UID))[7];
+}
+
+unless ($no_chdir) {
+    chdir $home_dir or die "Unable to chdir to $home_dir: $!\n";
+}
+
+if ($rrsync_dir) {
+    $ENV{SSH_ORIGINAL_COMMAND} = join(' ', @ARGV);
+    push @cmd, 'rrsync';
+    if ($rrsync_opts) {
+	foreach my $opt (split(/[ ,]+/, $rrsync_opts)) {
+	    $opt = "-$opt" unless $opt =~ /^-/;
+	    push @cmd, $opt;
+	}
+    }
+    push @cmd, $rrsync_dir;
+} else {
+    push @cmd, '/bin/sh', '-c', "@ARGV";
+}
+exec @cmd;
+die "Failed to exec: $!\n";
+
+sub usage
+{
+    die <<EOT;
+Usage: lsh [OPTIONS] localhost|lh COMMAND [...]
+
+This is a "local shell" command that works like a remote shell but only for the
+local host.  This is useful for rsync testing or for running a local copy where
+the sender and the receiver need to use different options (e.g. --fake-super).
+
+Options:
+
+-l USER        Choose the USER that lsh tries to become.
+--no-cd        Skip the chdir \$HOME (the default with hostname "lh")
+--sudo         Use sudo -H -l USER to become root or the specified USER.
+--rrsync=DIR   Test rrsync restricted copying without using ssh.
+--rropts=STR   The string "munge,no-del,no-lock" would pass 3 options to
+               rrsync (must be combined with --rrsync=DIR).
+
+The script also ignores a bunch of single-letter ssh options.
+EOT
+}

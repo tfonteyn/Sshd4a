@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+
+# This uses the output from "support/git-set-file-times --list" to discern
+# the last-modified year of each *.c & *.h file and updates the copyright
+# year if it isn't set right.
+
+import sys, os, re, argparse, subprocess
+from datetime import datetime
+
+def main():
+    latest_year = '2000'
+    saw_file = False
+
+    proc = subprocess.Popen('support/git-set-file-times --list'.split(), stdout=subprocess.PIPE, encoding='utf-8')
+    for line in proc.stdout:
+        m = re.match(r'^\S\s+(?P<year>\d\d\d\d)\S+\s+\S+\s+(?P<fn>.+)', line)
+        if not m:
+            print("Failed to parse line from git-set-file-times:", line)
+            sys.exit(1)
+        m = argparse.Namespace(**m.groupdict())
+        saw_file = True
+        if m.year > latest_year:
+            latest_year = m.year
+    proc.communicate()
+    if proc.returncode != 0 or not saw_file:
+        print("support/git-set-file-times failed", file=sys.stderr)
+        sys.exit(1)
+
+    fn = 'latest-year.h'
+    with open(fn, 'r', encoding='utf-8') as fh:
+        old_txt = fh.read()
+
+    txt = f'#define LATEST_YEAR "{latest_year}"\n'
+    if txt != old_txt:
+        print(f"Updating {fn} with year {latest_year}")
+        with open(fn, 'w', encoding='utf-8') as fh:
+            fh.write(txt)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Grab the year of the last mod for our c & h files and make sure the LATEST_YEAR value is accurate.")
+    args = parser.parse_args()
+    main()
+
+# vim: sw=4 et

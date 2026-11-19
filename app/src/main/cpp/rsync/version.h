@@ -1,0 +1,2 @@
+#define RSYNC_VERSION "3.5.2"
+#define MAINTAINER_TZ_OFFSET 11.0
