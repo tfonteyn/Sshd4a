@@ -795,6 +795,7 @@ set(SRC_RSYNC
         ${BASE_SRC_RSYNC}/log.c
         ${BASE_SRC_RSYNC}/main.c
         ${BASE_SRC_RSYNC}/match.c
+        ${BASE_SRC_RSYNC}/niceness.c
         ${BASE_SRC_RSYNC}/options.c
         ${BASE_SRC_RSYNC}/params.c
         ${BASE_SRC_RSYNC}/pipe.c
